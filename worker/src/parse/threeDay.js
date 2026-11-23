@@ -4,6 +4,8 @@ import { num, str, findTown, pointSeries, intervalSeries, valueAt } from './seri
 
 export class TownNotFound extends Error {}
 
+const byTime = pts => [...pts].sort((a, b) => a.time - b.time);
+
 // 最後一個時間 <= t 的點（風速等 3 小時一筆的資料，在那 3 小時內都沿用）
 function pointAt(points, t) {
   let v;
@@ -15,12 +17,12 @@ export function parseThreeDay(json, town, now) {
   const loc = findTown(json, town);
   if (!loc) throw new TownNotFound(`找不到鄉鎮：${town}`);
 
-  const temps = pointSeries(loc, THREE_DAY.temperature);
-  const apparent = pointSeries(loc, THREE_DAY.apparent);
-  const humidity = pointSeries(loc, THREE_DAY.humidity);
-  const comfort = pointSeries(loc, THREE_DAY.comfort);
-  const beaufort = pointSeries(loc, THREE_DAY.beaufort);
-  const windDir = pointSeries(loc, THREE_DAY.windDirection);
+  const temps = byTime(pointSeries(loc, THREE_DAY.temperature));
+  const apparent = byTime(pointSeries(loc, THREE_DAY.apparent));
+  const humidity = byTime(pointSeries(loc, THREE_DAY.humidity));
+  const comfort = byTime(pointSeries(loc, THREE_DAY.comfort));
+  const beaufort = byTime(pointSeries(loc, THREE_DAY.beaufort));
+  const windDir = byTime(pointSeries(loc, THREE_DAY.windDirection));
   const pop = intervalSeries(loc, THREE_DAY.pop);
   const weather = intervalSeries(loc, THREE_DAY.weather);
   const weatherCode = intervalSeries(loc, THREE_DAY.weatherCode);

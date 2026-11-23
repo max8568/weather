@@ -50,3 +50,11 @@ test('pop and weather come from the interval containing the hour', () => {
 test('parseThreeDay throws TownNotFound for unknown town', () => {
   assert.throws(() => parseThreeDay(small(), '不存在區', now), TownNotFound);
 });
+
+test('out-of-order temperature array still starts at the slot containing now', () => {
+  const w = small();
+  w.records.Locations[0].Location[0].WeatherElement[0].Time.reverse();
+  const r = parseThreeDay(w, '五股區', now);
+  assert.deepEqual(r.hourly.map(h => h.time.slice(11, 16)), ['09:00', '10:00', '11:00']);
+  assert.equal(r.hourly[0].temperature, 20);
+});

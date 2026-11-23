@@ -50,3 +50,26 @@ test('uvLevelText boundaries', () => {
   assert.equal(uvLevelText(10), '過量級');
   assert.equal(uvLevelText(11), '危險級');
 });
+
+test('out-of-order halves still group and order correctly', () => {
+  const r = parseWeekly(build([...H].reverse(), [['23T06:00', '23T18:00', 5]]), '五股區', new Date('2026-11-23T09:27:00+08:00'));
+  assert.deepEqual(r.days.map(d => d.date), ['2026-11-23', '2026-11-24']);
+  assert.equal(r.days[0].label, '今天');
+  assert.equal(r.uv.label, '紫外線');
+});
+
+test('uv only on day-after-tomorrow gives null', () => {
+  const r = parseWeekly(build(H, [['25T06:00', '25T18:00', 4]]), '五股區', new Date('2026-11-23T09:27:00+08:00'));
+  assert.equal(r.uv, null);
+});
+
+test('uv is chosen before the 7-day cap', () => {
+  const many = Array.from({ length: 16 }, (_, i) => {
+    const d = 23 + Math.floor((i + 1) / 2), h = (i + 1) % 2 ? '18' : '06', e = h === '18' ? '06' : '18';
+    const d2 = h === '18' ? d + 1 : d;
+    return [`${d}T${h}:00`, `${d2}T${e}:00`];
+  });
+  const r = parseWeekly(build(many, [['24T06:00', '24T18:00', 6]]), '五股區', new Date('2026-11-23T19:10:00+08:00'));
+  assert.ok(r.days.length <= 7);
+  assert.equal(r.uv.value, 6);
+});

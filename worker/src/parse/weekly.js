@@ -1,5 +1,5 @@
 import { WEEKLY } from '../fields.js';
-import { isoTaipei, toTaipei, dayLabel } from '../time.js';
+import { isoTaipei, toTaipei, dayLabel, addDays } from '../time.js';
 import { num, str, findTown, intervalSeries, valueAt } from './series.js';
 import { TownNotFound } from './threeDay.js';
 
@@ -19,7 +19,7 @@ export function parseWeekly(json, town, now) {
   const at = (k, t) => valueAt(s[k], t);
 
   const days = [];
-  for (const w of s.weather) {
+  for (const w of [...s.weather].sort((a, b) => a.start - b.start)) {
     const tp = toTaipei(w.start);
     let day = days.find(d => d.date === tp.dateKey);
     if (!day) {
@@ -37,11 +37,10 @@ export function parseWeekly(json, town, now) {
       uv: num(at('uv', t)), uvLevel: str(at('uvLevel', t)),
     };
   }
-  days.splice(7);
-
   let uv = null;
   const todayKey = toTaipei(now).dateKey;
   for (const d of days) {
+    if (d.date !== todayKey && d.date !== addDays(todayKey, 1)) continue;
     if (d.day && d.day.uv !== null) {
       uv = {
         value: d.day.uv,
@@ -51,5 +50,5 @@ export function parseWeekly(json, town, now) {
       break;
     }
   }
-  return { days, uv };
+  return { days: days.slice(0, 7), uv };
 }
