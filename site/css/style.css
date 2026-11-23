@@ -75,7 +75,8 @@ button { color: inherit; }
 .advice-label { font-size: 13px; color: var(--text-2); }
 .advice-temp { margin-top: 6px; font-size: 22px; font-weight: 700; }
 .advice-pop { margin-top: 6px; font-size: 14px; color: var(--text-2); }
-.advice-look img { width: 60px; height: 60px; }
+/* Meteocons 圖示四周有透明留白，80px 時雲實際約 54px；負的上緣間距讓留白和標題列重疊，卡片只高 6px */
+.advice-look img { width: 80px; height: 80px; margin-top: -14px; }
 .advice-comfort { font-size: 14px; }
 /* 一張卡片最多 4 個，固定 4 欄；字不換行，320 寬也放得下「不適合曬衣」。 */
 .advice-items { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
@@ -109,6 +110,7 @@ button { color: inherit; }
   .week-row { grid-template-columns: 56px 64px 1fr; }
   .week-look img { width: 40px; height: 40px; }
   .week-temps { grid-template-columns: 34px 1fr 34px; gap: 6px; }
+  .advice-look img { width: 64px; height: 64px; margin-top: 0; }
 }
 
 .sun-card { padding: 18px 20px 8px; }
