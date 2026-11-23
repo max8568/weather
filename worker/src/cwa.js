@@ -25,8 +25,14 @@ export function createCwaClient({ apiKey, fetchImpl = fetch, cache = moduleCache
         throw new Error(`${datasetId} 連線失敗或逾時`);
       }
       if (res.status !== 200) throw new Error(`${datasetId} HTTP ${res.status}`);
-      const data = await res.json();
-      if (data?.success !== 'true') throw new Error(`${datasetId} 回應 success 不是 true`);
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(`${datasetId} HTTP ${res.status} 回應不是有效的 JSON`);
+      }
+      if (data?.success !== 'true') throw new Error(`${datasetId} HTTP ${res.status} success 不是 true`);
+      for (const [k, v] of cache) if (v.expiresAt <= nowMs()) cache.delete(k);
       cache.set(key, { data, expiresAt: nowMs() + ttlSeconds * 1000 });
       return data;
     },

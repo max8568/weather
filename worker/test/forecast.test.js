@@ -45,3 +45,19 @@ test('all sources failing gives 502', async () => {
   const cwa = fixtureCwa('morning', { fail: ['F-C0032-001', d.threeDay, d.weekly, 'O-A0001-001', 'A-B0062-001'] });
   await assert.rejects(buildForecast(args(cwa)), e => e instanceof HttpError && e.status === 502);
 });
+
+test('weekly missing the town only nulls weekly, not a 400', async () => {
+  const base = fixtureCwa('morning');
+  const weeklyId = DATASETS['新北市'].weekly;
+  const cwa = {
+    async get(id, p, ttl) {
+      const j = await base.get(id, p, ttl);
+      if (id === weeklyId) j.records.Locations[0].Location = [];
+      return j;
+    },
+  };
+  const r = await buildForecast(args(cwa));
+  assert.equal(r.weekly, null);
+  assert.equal(r.sources.weekly.ok, false);
+  for (const k of ['county36h', 'threeDay', 'observation', 'sun']) assert.notEqual(r[k], null, k);
+});

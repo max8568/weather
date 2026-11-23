@@ -45,3 +45,31 @@ test('success !== "true" throws without url', async () => {
   const c = createCwaClient({ apiKey: 'SECRET', fetchImpl: f, cache: new Map() });
   await assert.rejects(c.get('X-1', '', 60), err => !err.message.includes('SECRET') && !err.message.includes('http'));
 });
+
+test('malformed JSON error does not leak response text and has id and status', async () => {
+  const f = async () => ({ ok: true, status: 200, json: async () => { throw new SyntaxError('Unexpected token SENTINEL in JSON'); } });
+  const c = createCwaClient({ apiKey: 'K', fetchImpl: f, cache: new Map() });
+  await assert.rejects(c.get('X-1', '', 60), err => {
+    assert.ok(!err.message.includes('SENTINEL'));
+    assert.ok(err.message.includes('X-1') && err.message.includes('200'));
+    return true;
+  });
+});
+
+test('success false message includes dataset id and HTTP 200', async () => {
+  const f = async () => ({ ok: true, status: 200, json: async () => ({ success: 'false' }) });
+  const c = createCwaClient({ apiKey: 'K', fetchImpl: f, cache: new Map() });
+  await assert.rejects(c.get('X-1', '', 60), err => err.message.includes('X-1') && err.message.includes('200'));
+});
+
+test('expired entry of a different key is evicted on a later store', async () => {
+  const { f } = counting();
+  const cache = new Map();
+  let t = 0;
+  const c = createCwaClient({ apiKey: 'K', fetchImpl: f, cache, nowMs: () => t });
+  await c.get('OLD-1', 'd=1', 60);
+  t = 61_000;
+  await c.get('NEW-1', 'd=2', 60);
+  assert.equal(cache.size, 1);
+  assert.ok([...cache.keys()][0].startsWith('NEW-1'));
+});

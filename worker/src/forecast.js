@@ -33,19 +33,19 @@ export async function buildForecast({ county, town, now, cwa }) {
     out[name] = null;
     sources[name] = { ok: false };
   };
-  const section = (name, result, parse) => {
+  const section = (name, result, parse, townIs400 = false) => {
     if (result.status === 'rejected') return fail(name, result.reason);
     try {
       out[name] = parse(result.value);
       sources[name] = { ok: true };
     } catch (err) {
-      if (err instanceof TownNotFound) throw new HttpError(400, '未知的鄉鎮');
+      if (townIs400 && err instanceof TownNotFound) throw new HttpError(400, '未知的鄉鎮');
       fail(name, err);
     }
   };
 
   section('county36h', r36, j => parseCounty36h(j, county, now));
-  section('threeDay', r3, j => parseThreeDay(j, town, now));
+  section('threeDay', r3, j => parseThreeDay(j, town, now), true);
   section('weekly', rw, j => parseWeekly(j, town, now));
   const { lat, lon } = out.threeDay ?? { lat: null, lon: null };
   section('observation', ro, j => pickObservations(j, { lat, lon, county, town }));
