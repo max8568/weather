@@ -125,8 +125,8 @@ export function renderHourly(el, data, { onDetail }) {
 }
 
 const ADVICE_ICONS = {
-  'short-sleeve': ui.shortSleeve, 'light-long-sleeve': ui.lightLongSleeve, jacket: ui.jacket,
-  'heavy-coat': ui.heavyCoat, umbrella: ui.umbrella, laundry: ui.laundry,
+  'short-sleeve': ui.shortSleeve, 'long-sleeve': ui.longSleeve, 'heavy-coat': ui.heavyCoat,
+  'light-jacket': ui.lightJacket, umbrella: ui.umbrella, laundry: ui.laundry, 'no-laundry': ui.noLaundry,
 };
 
 export function renderAdvice(el, data) {
@@ -147,7 +147,7 @@ export function renderAdvice(el, data) {
     top.append(info, look);
     const card = h('div', 'advice-card');
     card.append(top);
-    const items = adviceItems(p);
+    const items = adviceItems({ ...p, night: isNight(p.start) });
     if (items.length) {
       const list = h('div', 'advice-items');
       for (const it of items) {

@@ -2,24 +2,30 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { adviceItems } from '../../site/js/logic/advice.js';
 
+const L = a => adviceItems(a).map(i => i.label);
+test('ref 0002 daytime card', () => assert.deepEqual(L({maxT:26, minT:18, pop:20, weather:'多雲時晴', night:false}), ['短袖', '適合曬衣']));
+test('ref 0010 evening card', () => assert.deepEqual(L({maxT:22, minT:20, pop:70, weather:'短暫陣雨', night:true}), ['短袖', '薄外套', '帶雨傘', '不適合曬衣']));
+test('ref 0010 tomorrow card', () => assert.deepEqual(L({maxT:20, minT:18, pop:100, weather:'陣雨', night:false}), ['長袖', '帶雨傘', '不適合曬衣']));
 test('clothing boundaries', () => {
-  const k = t => adviceItems({maxT:t, pop:30, weather:'多雲'}).map(i => i.label);
-  assert.deepEqual(k(26), ['短袖']); assert.deepEqual(k(25), ['薄長袖']); assert.deepEqual(k(20), ['薄長袖']);
-  assert.deepEqual(k(19), ['外套']); assert.deepEqual(k(15), ['外套']); assert.deepEqual(k(14), ['厚外套']);
-  assert.deepEqual(k(null), []);
+  const c = t => L({maxT:t, minT:null, pop:null, weather:'多雲', night:false});
+  assert.deepEqual(c(22), ['短袖']); assert.deepEqual(c(21), ['長袖']); assert.deepEqual(c(16), ['長袖']);
+  assert.deepEqual(c(15), ['厚外套']); assert.deepEqual(c(null), []);
 });
-test('clothing keys', () => {
-  const k = t => adviceItems({maxT:t, pop:30, weather:'多雲'})[0].key;
-  assert.deepEqual([26, 22, 17, 10].map(k), ['short-sleeve', 'light-long-sleeve', 'jacket', 'heavy-coat']);
+test('light jacket boundaries', () => {
+  const j = (minT, night) => L({maxT:24, minT, pop:null, weather:'多雲', night}).includes('薄外套');
+  assert.equal(j(20, true), true); assert.equal(j(21, true), false);
+  assert.equal(j(16, false), true); assert.equal(j(17, false), false);
+  assert.equal(j(null, true), false);
 });
+test('no light jacket with heavy coat', () => assert.deepEqual(L({maxT:12, minT:8, pop:null, weather:'陰', night:true}), ['厚外套']));
 test('umbrella at 50%', () => {
-  const has = p => adviceItems({maxT:null, pop:p, weather:'多雲'}).some(i => i.key === 'umbrella' && i.label === '帶傘');
-  assert.equal(has(50), true); assert.equal(has(49), false);
+  const u = pop => L({maxT:null, minT:null, pop, weather:'多雲', night:false}).includes('帶雨傘');
+  assert.equal(u(50), true); assert.equal(u(49), false);
 });
-test('laundry only when pop <= 20 and no rain', () => {
-  const has = (p, w) => adviceItems({maxT:null, pop:p, weather:w}).some(i => i.key === 'laundry' && i.label === '適合曬衣');
-  assert.equal(has(20, '多雲'), true); assert.equal(has(20, '多雲短暫雨'), false); assert.equal(has(21, '多雲'), false);
+test('laundry vs no-laundry', () => {
+  const w = (pop, weather) => L({maxT:null, minT:null, pop, weather, night:false});
+  assert.deepEqual(w(20, '多雲'), ['適合曬衣']); assert.deepEqual(w(21, '多雲'), ['不適合曬衣']);
+  assert.deepEqual(w(20, '多雲短暫雨'), ['不適合曬衣']);
 });
-test('null pop gives neither umbrella nor laundry', () => {
-  assert.deepEqual(adviceItems({maxT:27, pop:null, weather:'晴'}).map(i => i.key), ['short-sleeve']);
-});
+test('null pop gives no umbrella and no laundry item', () => assert.deepEqual(L({maxT:null, minT:null, pop:null, weather:'雨', night:false}), []));
+test('keys', () => assert.deepEqual(adviceItems({maxT:22, minT:20, pop:70, weather:'雨', night:true}).map(i => i.key), ['short-sleeve', 'light-jacket', 'umbrella', 'no-laundry']));
