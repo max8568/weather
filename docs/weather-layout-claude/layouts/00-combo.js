@@ -11,8 +11,9 @@
   };
   const advise = (a) => `${a.items.map((it) => DO[it.key]).join('，')}。`;
 
+  // 標題放在卡片外面、卡片上方；卡片裡只放內容
   const card = (cls, title, sub, body) =>
-    `<section class="card ${cls}"><h2>${title}${sub ? `<span>${sub}</span>` : ''}</h2>${body}</section>`;
+    `<section class="sec ${cls}"><h2>${title}${sub ? `<span>${sub}</span>` : ''}</h2><div class="card">${body}</div></section>`;
 
   function render(w) {
     const lo = Math.min(...w.week.map((d) => d.min)), hi = Math.max(...w.week.map((d) => d.max));

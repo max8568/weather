@@ -113,3 +113,10 @@ test('combo cards use the overview card style: grey, 1px border, 6px corners', (
   for (const p of [/background: var\(--bg\);/, /border: 1px solid var\(--line\);/, /border-radius: 6px;/]) assert.match(rule('.v-combo .stats'), p);
   assert.match(rule('.v-combo'), /--card: #f6f7f9;[^]*--line: #e2e5ea;/);
 });
+
+test('combo section titles sit above their cards, not inside them', () => {
+  const html = byKey('combo');
+  for (const title of ['逐小時預報', '7 日預報', '生活建議', '目前觀測', '日出日落']) {
+    assert.match(html, new RegExp(`<h2>${title}(<span>[^<]*</span>)?</h2>\s*<div class="card">`), title);
+  }
+});

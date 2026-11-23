@@ -1,8 +1,10 @@
-/* 組合版：卡片照「即時總覽」原型的樣式：淺灰底、1px 灰框、6px 圓角、18px 標題，副標題靠右 */
-.v-combo { --card: #f6f7f9; --line: #e2e5ea; display: grid; gap: 13px; padding: 13px; }
+/* 組合版：卡片照「即時總覽」原型的樣式：淺灰底、1px 灰框、6px 圓角。
+   每一區的標題（18px，副標題靠右）放在卡片外面、卡片上方。 */
+.v-combo { --card: #f6f7f9; --line: #e2e5ea; display: grid; gap: 20px; padding: 13px; }
+.v-combo .sec { min-width: 0; }
 .v-combo .card { min-width: 0; padding: 15px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
-.v-combo .card h2 { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 12px; font-size: 18px; line-height: 1.35; }
-.v-combo .card h2 span { font-size: 13px; font-weight: 400; color: var(--text-2); }
+.v-combo .sec > h2 { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin: 0 2px 8px; font-size: 18px; line-height: 1.35; }
+.v-combo .sec > h2 span { font-size: 13px; font-weight: 400; color: var(--text-2); }
 
 /* 最上面：溫度卡片和下面一排三格，兩塊之間只隔 8px */
 .v-combo .lead { display: grid; gap: 8px; min-width: 0; }
