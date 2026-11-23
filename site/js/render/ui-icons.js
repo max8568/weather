@@ -12,3 +12,5 @@ export const jacket = svg(`${longSleeve}M12 6v14M9.5 14h1M13.5 14h1`);
 export const heavyCoat = svg(`${longSleeve}M12 6v14M8 11.5h8M8 15.5h8`);
 export const umbrella = svg('M12 3a9 9 0 0 1 9 9H3a9 9 0 0 1 9-9zM12 12v6a2 2 0 0 1-4 0');
 export const laundry = svg('M3 5h18M5.5 5v11h5V5M13.5 5v8h5V5M8 3.5v3M16 3.5v3');
+export const wind = svg('M3 9h10.5a2.5 2.5 0 1 0-2.5-2.5M3 13h15.5a2.5 2.5 0 1 1-2.5 2.5M3 17h8');
+export const heart = svg('M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z');

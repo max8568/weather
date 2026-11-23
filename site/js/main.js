@@ -3,6 +3,8 @@ import { resolveLocation, isTownList } from './logic/location.js';
 import { openPicker } from './render/picker.js';
 import { renderHero, setupCompactHeader } from './render/hero.js';
 import { renderDataTime, renderNowTiles, renderHourly, renderAdvice, renderWeekly, renderObsTiles, renderSun } from './render/sections.js';
+import { open72hPanel } from './render/panel72h.js';
+import { open7dPanel } from './render/panel7d.js';
 
 const KEY = 'weather.location';
 let towns = [];
@@ -19,7 +21,6 @@ const hero = document.getElementById('hero');
 const compact = document.getElementById('compact');
 const $ = (id) => document.getElementById(id);
 const sections = ['data-time', 'now', 'hourly', 'advice', 'weekly', 'obs', 'sun'].map($);
-const onDetail = () => {}; // Task 9 接上面板
 
 function openLocationPicker() {
   openPicker(towns, current, (loc) => { current = loc; save(loc); load(true); });
@@ -30,9 +31,9 @@ function render(data) {
   setupCompactHeader(hero, compact, data);
   renderDataTime($('data-time'), data);
   renderNowTiles($('now'), data);
-  renderHourly($('hourly'), data, { onDetail });
+  renderHourly($('hourly'), data, { onDetail: () => open72hPanel(data) });
   renderAdvice($('advice'), data);
-  renderWeekly($('weekly'), data, { onDetail });
+  renderWeekly($('weekly'), data, { onDetail: () => open7dPanel(data) });
   renderObsTiles($('obs'), data);
   renderSun($('sun'), data);
 }

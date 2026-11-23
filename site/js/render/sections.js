@@ -1,6 +1,6 @@
 import { iconKey, isNight, iconUrl } from '../logic/icons.js';
 import { adviceItems } from '../logic/advice.js';
-import { tempBar, daylightFraction, dayRow, hourLabel, hhmm, SHOW_WEEK_POP_AT } from '../logic/format.js';
+import { tempBar, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, SHOW_WEEK_POP_AT } from '../logic/format.js';
 import * as ui from './ui-icons.js';
 
 export function h(tag, className, text) {
@@ -15,6 +15,29 @@ export function img(src, alt, className) {
   e.src = src;
   e.alt = alt;
   return e;
+}
+
+// 一排只能選一個的按鈕（面板的分頁、日期列）。items 是每顆按鈕的內容，選中的那顆 aria-pressed="true"。
+export function choiceRow(className, items, onPick) {
+  const row = h('div', className);
+  const buttons = items.map((content, i) => {
+    const b = h('button');
+    b.type = 'button';
+    b.append(...[].concat(content));
+    b.addEventListener('click', () => onPick(i));
+    return b;
+  });
+  row.append(...buttons);
+  const select = (i) => buttons.forEach((b, j) => b.setAttribute('aria-pressed', String(i === j)));
+  return { row, buttons, select };
+}
+
+// 面板上方的日期列：上面是星期（或「今天」），下面是幾號。
+export function dateRow(items, onPick) {
+  const md = (date) => `${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日`;
+  const c = choiceRow('date-row', items.map(({ date, top }) => [h('span', 'dow', top), h('span', 'dnum', String(Number(date.slice(8, 10))))]), onPick);
+  c.buttons.forEach((b, i) => b.setAttribute('aria-label', `${md(items[i].date)} 星期${weekdayChar(items[i].date)}`));
+  return c;
 }
 
 // 缺值一律顯示 --，不拿別的數字補。

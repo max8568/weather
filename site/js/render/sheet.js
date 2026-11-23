@@ -45,7 +45,7 @@ export function openSheet({ title, content, onClose }) {
   function onKey(e) {
     if (e.key === 'Escape') { close(); return; }
     if (e.key !== 'Tab') return;
-    const items = [...sheet.querySelectorAll('button')];
+    const items = [...sheet.querySelectorAll('button, [tabindex="0"]')];
     const i = items.indexOf(document.activeElement);
     if (!items.length) return;
     if (e.shiftKey && i <= 0) { e.preventDefault(); items[items.length - 1].focus(); }

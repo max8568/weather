@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, SHOW_WEEK_POP_AT } from '../../site/js/logic/format.js';
+import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, SHOW_WEEK_POP_AT } from '../../site/js/logic/format.js';
 
 const half = (o) => ({ weather: '多雲', maxT: null, minT: null, maxAT: null, minAT: null, pop: null, humidity: null, uv: null, ...o });
 
@@ -39,3 +39,7 @@ test('hourLabel and hhmm', () => {
   assert.equal(hhmm('2026-11-23T09:27:00+08:00'), '09:27');
 });
 test('SHOW_WEEK_POP_AT', () => assert.equal(SHOW_WEEK_POP_AT, 30));
+test('weekdayChar reads the weekday from the date string', () => {
+  assert.equal(weekdayChar('2026-11-23'), '一'); assert.equal(weekdayChar('2026-11-29'), '日');
+  assert.equal(weekdayChar('2026-11-28'), '六'); assert.equal(weekdayChar('2026-12-01T00:00:00+08:00'), '二');
+});

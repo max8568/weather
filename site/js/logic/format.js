@@ -55,3 +55,9 @@ export function hhmm(iso) {
 export function hourLabel(iso, index) {
   return index === 0 ? '現在' : `${iso.slice(11, 13)}時`;
 }
+
+// 日期字串（或台北時間 ISO 的前 10 碼）是星期幾，用 UTC 算，不受瀏覽器時區影響。
+export function weekdayChar(date) {
+  const day = new Date(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10)))).getUTCDay();
+  return '日一二三四五六'[day];
+}

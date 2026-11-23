@@ -115,3 +115,79 @@ button { color: inherit; }
 .pick-item.selected { color: var(--pop); font-weight: 600; }
 .pick-back { color: var(--pop); }
 .pick-county { font-size: 20px; font-weight: 600; padding: 8px 4px; }
+
+/* 72 小時、7 日面板共用：日期列和分頁 */
+.date-row { display: grid; grid-template-columns: repeat(7, 1fr); margin: 0 -8px; }
+.date-row button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 0; border: 0; background: none; font: inherit; color: var(--muted); cursor: pointer; }
+.date-row .dow { font-size: 15px; }
+.date-row .dnum { width: 34px; height: 34px; line-height: 34px; border-radius: 50%; font-size: 17px; font-weight: 700; }
+.date-row [aria-pressed="true"] { color: var(--text); }
+.date-row [aria-pressed="true"] .dow { font-weight: 700; }
+.date-row [aria-pressed="true"] .dnum { background: #a8daf6; }
+.seg { display: flex; padding: 3px; border-radius: 999px; background: #ebebed; }
+.seg button { flex: 1; padding: 7px 0; border: 0; border-radius: 999px; background: none; font: inherit; font-size: 15px; color: var(--text-2); cursor: pointer; }
+.seg [aria-pressed="true"] { background: #d2d2d6; color: var(--text); font-weight: 700; }
+.seg.light [aria-pressed="true"] { background: #fff; box-shadow: inset 0 0 0 2px #dcdce0; }
+.dot { display: inline-block; flex: none; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; vertical-align: middle; }
+.dot.max { background: var(--max); }
+.dot.min { background: var(--min); }
+.dot.uv { background: #f5c142; }
+
+/* 72 小時面板 */
+.p72 { padding-top: 4px; }
+.p72-date { margin-bottom: 10px; padding: 12px 0 10px; border-bottom: 1px solid var(--line); text-align: center; font-size: 17px; }
+.p72-now { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding-left: 6px; }
+.p72-value { font-size: 40px; font-weight: 700; line-height: 1; }
+.p72-icon { width: 44px; height: 44px; }
+.p72-range { margin-top: 8px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.p72-range span + span { margin-left: 8px; }
+/* 兩張圖共用的橫向捲動容器。y 軸刻度那一欄固定在右邊，「降雨機率」標題固定在左邊 */
+.chart-scroll { margin-top: 8px; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { .chart-scroll { scroll-behavior: auto; } }
+.chart { display: flex; width: max-content; user-select: none; -webkit-user-select: none; }
+.chart svg { display: block; flex: none; cursor: pointer; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .grid.dash { stroke-dasharray: 3 3; }
+.chart .x-label { font-size: 12px; fill: var(--muted); }
+.chart-y { position: sticky; right: 0; flex: none; width: 44px; background: var(--bg); }
+.chart-y span { position: absolute; left: 6px; transform: translateY(-50%); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.pop-head { position: sticky; left: 0; display: flex; justify-content: space-between; margin: 12px 0 4px; font-size: 15px; font-weight: 700; }
+.pop-value { color: var(--pop); }
+.p72-extras { display: grid; grid-template-columns: 1fr 1fr; margin-top: 16px; padding: 0 20px; }
+.p72-extra { display: flex; align-items: center; gap: 14px; }
+.p72-extra svg { width: 34px; height: 34px; }
+.extra-label { font-size: 13px; color: var(--muted); }
+.extra-value { margin-top: 2px; font-size: 17px; font-weight: 700; }
+
+/* 7 日面板 */
+/* 兩個分頁內容高度不同；固定最小高度，換分頁時面板才不會上下跳。85vh 是 .sheet 的最大高度，84px 約是標題列加下方留白 */
+.p7 { min-height: calc(85vh - 84px); }
+.p7 .seg { margin-top: 4px; }
+.p7 .date-row { margin-top: 18px; }
+.half { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding: 22px 0; }
+.half + .half { border-top: 1px solid var(--line); }
+.half-name { font-size: 15px; color: var(--text-2); }
+.half-temp { margin-top: 4px; font-size: 22px; font-weight: 700; }
+.half-line { margin-top: 6px; font-size: 14px; color: var(--text-2); }
+.half-look { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; font-size: 14px; }
+.half-look img { width: 56px; height: 56px; }
+.p7-tiles { grid-template-columns: 1fr 1fr; margin-top: 8px; }
+.p7-tiles .tile-value { display: flex; align-items: center; }
+.week-head { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+.week-head h3 { margin: 0; font-size: 16px; }
+.legend { display: flex; align-items: center; font-size: 14px; color: var(--text-2); }
+.legend .dot.min { margin-left: 12px; }
+.week-chart { display: block; width: 100%; height: auto; margin: 8px 0 16px; }
+.week-chart .grid { stroke: var(--line); stroke-width: 1; }
+.week-chart .y-label, .week-chart .x-label { font-size: 13px; fill: var(--muted); }
+.week-chart .x-label.today { fill: var(--text); font-weight: 700; }
+.week-chart .area { fill: rgba(240,138,60,.08); }
+.week-chart path.hi, .week-chart path.lo { fill: none; stroke-width: 2.5; }
+.week-chart path.hi { stroke: var(--max); }
+.week-chart path.lo { stroke: var(--min); }
+.week-chart circle.hi { fill: var(--max); }
+.week-chart circle.lo { fill: var(--min); }
+.week-chart .halo { fill-opacity: .2; }
+.week-chart .mark { font-size: 15px; font-weight: 700; }
+.week-chart .mark.hi { fill: var(--max); }
+.week-chart .mark.lo { fill: var(--min); }
