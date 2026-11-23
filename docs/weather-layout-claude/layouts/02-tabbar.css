@@ -1,0 +1,86 @@
+.v-tabbar { display: flex; flex-direction: column; min-height: calc(100vh - var(--bar)); }
+.v-tabbar .panel { flex: 1; padding: 0 16px 24px; }
+.v-tabbar .panel:not([hidden]) { animation: tab-in .18s ease-out; }
+@keyframes tab-in { from { opacity: 0; } }
+
+/* 分頁列：黏在畫面底部，寬度跟內容欄一樣 */
+.v-tabbar .bar { position: sticky; bottom: 0; z-index: 5; display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, .94); border-top: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.v-tabbar .bar button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0 4px; border: 0; border-radius: 14px;
+  background: none; font-size: 12px; color: var(--muted); cursor: pointer; }
+.v-tabbar .bar svg { width: 24px; height: 24px; }
+.v-tabbar .bar [aria-selected="true"] { color: var(--text); font-weight: 700; }
+.v-tabbar .bar [aria-selected="true"] svg { padding: 2px 14px; box-sizing: content-box; border-radius: 999px; background: var(--sky-1); }
+
+/* 現在：大圖示、大字溫度置中 */
+.v-tabbar .sky { margin: 0 -16px; padding: 18px 16px 26px; text-align: center; background: var(--hero-panel); border-radius: 0 0 32px 32px; }
+.v-tabbar .place { font-size: 15px; color: var(--text-2); }
+.v-tabbar .place strong { font-size: 20px; color: var(--text); }
+.v-tabbar .sky-icon { width: 132px; height: 132px; margin: 4px auto -8px; }
+.v-tabbar .temp { font-size: 96px; font-weight: 700; line-height: 1; letter-spacing: -4px; padding-left: 12px; }
+.v-tabbar .cond { margin-top: 8px; font-size: 20px; }
+.v-tabbar .range { margin-top: 4px; font-size: 14px; color: var(--text-2); }
+.v-tabbar .stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: -18px 4px 0; padding: 14px 4px; border-radius: 20px; background: var(--bg);
+  box-shadow: 0 6px 18px rgba(40, 90, 140, .12); text-align: center; position: relative; }
+.v-tabbar .stats div + div { border-left: 1px solid var(--line); }
+.v-tabbar .stats dt { font-size: 12px; color: var(--text-2); }
+.v-tabbar .stats dd { margin-top: 2px; font-size: 22px; font-weight: 700; white-space: nowrap; }
+.v-tabbar .stats small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
+.v-tabbar .sub { margin: 24px 4px 8px; font-size: 13px; font-weight: 400; color: var(--note); }
+.v-tabbar .obs { border-radius: 16px; background: var(--card); padding: 2px 16px; }
+.v-tabbar .obs div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; }
+.v-tabbar .obs div + div { border-top: 1px solid var(--line); }
+.v-tabbar .obs dt { color: var(--text-2); font-size: 15px; }
+.v-tabbar .obs dd { font-size: 15px; font-weight: 700; }
+.v-tabbar .sun { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.v-tabbar .sun p { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 8px; padding: 10px 14px; border-radius: 16px; background: var(--card); font-size: 13px; color: var(--text-2); }
+.v-tabbar .sun img { grid-row: span 2; width: 40px; height: 40px; }
+.v-tabbar .sun strong { font-size: 20px; color: var(--text); }
+
+.v-tabbar .title { display: flex; align-items: baseline; gap: 8px; padding: 20px 0 8px; font-size: 24px; }
+.v-tabbar .title span { font-size: 14px; font-weight: 400; color: var(--note); }
+
+/* 逐時：照日期分組，日期標題黏在切換列下方 */
+.v-tabbar .day-head { position: sticky; top: var(--bar); z-index: 2; display: flex; gap: 8px; align-items: baseline; margin: 0 -16px; padding: 10px 16px 6px;
+  background: rgba(255, 255, 255, .95); font-size: 16px; }
+.v-tabbar .day-head span { font-size: 13px; font-weight: 400; color: var(--note); }
+.v-tabbar .day ol li { display: grid; grid-template-columns: 46px 32px 1fr 76px 36px; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.v-tabbar .day time { font-size: 14px; color: var(--text-2); }
+.v-tabbar .day img { width: 32px; height: 32px; }
+.v-tabbar .h-wx { min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v-tabbar .h-pop { position: relative; height: 18px; border-radius: 9px; background: var(--card); overflow: hidden; }
+.v-tabbar .h-pop i { position: absolute; inset: 0 auto 0 0; background: rgba(30, 108, 207, .22); }
+.v-tabbar .h-pop b { position: relative; display: block; padding-left: 8px; font-size: 12px; line-height: 18px; font-weight: 400; color: var(--pop); }
+.v-tabbar .day strong { text-align: right; font-size: 16px; }
+
+/* 7 日：溫度條直立，最高在上、最低在下 */
+.v-tabbar .week li { display: grid; grid-template-columns: 52px 48px 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.v-tabbar .w-day strong { display: block; font-size: 17px; }
+.v-tabbar .w-day span { font-size: 13px; color: var(--note); }
+.v-tabbar .week img { width: 48px; height: 48px; }
+.v-tabbar .w-wx span { display: block; font-size: 15px; }
+.v-tabbar .w-wx small { font-size: 13px; color: var(--pop); }
+.v-tabbar .w-temp { display: grid; grid-template-columns: auto 6px; grid-template-rows: auto auto; column-gap: 8px; align-items: center; }
+.v-tabbar .w-temp b { font-size: 16px; text-align: right; }
+.v-tabbar .w-temp .max { grid-area: 1 / 1; color: var(--text); }
+.v-tabbar .w-temp .min { grid-area: 2 / 1; color: var(--text-2); }
+.v-tabbar .w-bar { grid-area: 1 / 2 / 3 / 3; position: relative; height: 44px; border-radius: 3px; background: var(--line); }
+.v-tabbar .w-bar i { position: absolute; left: 0; right: 0; border-radius: 3px; background: linear-gradient(0deg, var(--min), var(--max)); }
+
+/* 生活建議：三張大卡片 */
+.v-tabbar .advice { margin-top: 12px; padding: 16px 18px; border-radius: 20px; background: var(--card); }
+.v-tabbar .advice header { display: flex; justify-content: space-between; align-items: center; }
+.v-tabbar .advice h3 { font-size: 19px; }
+.v-tabbar .advice header p { margin-top: 2px; font-size: 13px; color: var(--text-2); }
+.v-tabbar .advice header img { width: 64px; height: 64px; margin: -8px -6px -8px 0; }
+.v-tabbar .a-nums { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: 8px; font-size: 14px; color: var(--text-2); }
+.v-tabbar .a-nums strong { font-size: 22px; color: var(--text); }
+.v-tabbar .advice ul { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.v-tabbar .advice li { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; text-align: center; white-space: nowrap; }
+.v-tabbar .advice li .ui { width: 30px; height: 30px; }
+/* 320px 寬時四格要放得下「不適合曬衣」五個字 */
+@media (max-width: 359px) {
+  .v-tabbar .advice { padding: 16px 12px; }
+  .v-tabbar .advice ul { gap: 2px; }
+}
