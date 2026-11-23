@@ -14,3 +14,10 @@ export function isTownList(list) {
   return Array.isArray(list) && list.length > 0 && list.every((c) =>
     c && typeof c.county === 'string' && Array.isArray(c.towns) && c.towns.length > 0 && c.towns.every((t) => typeof t === 'string'));
 }
+
+// Worker 的 200 回應至少要有字串 county、town 和物件 sources。
+export function isForecastBody(body) {
+  return !!body && typeof body === 'object' && !Array.isArray(body)
+    && typeof body.county === 'string' && typeof body.town === 'string'
+    && !!body.sources && typeof body.sources === 'object';
+}

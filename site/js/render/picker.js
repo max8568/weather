@@ -40,6 +40,6 @@ export function openPicker(towns, current, onPick) {
   }
 
   showCounties();
-  sheet = openSheet({ title: '選擇地點', content });
+  sheet = openSheet({ title: '選擇地點', content, onClose: () => { picked = true; } });
   return sheet;
 }

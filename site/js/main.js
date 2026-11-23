@@ -22,7 +22,7 @@ function render(data) {
   place.id = 'place';
   place.className = 'place';
   place.textContent = `${data.county} ${data.town}`;
-  place.addEventListener('click', () => openPicker(towns, current, (loc) => { current = loc; save(loc); load(); }));
+  place.addEventListener('click', () => openPicker(towns, current, (loc) => { current = loc; save(loc); load(true); }));
   const temp = document.createElement('div');
   temp.className = 'temp';
   temp.textContent = t == null ? '--' : `${t}°`;
@@ -36,14 +36,15 @@ function renderError(err) {
   const retry = document.createElement('button');
   retry.type = 'button';
   retry.textContent = '重試';
-  retry.addEventListener('click', towns.length && current ? load : init);
+  retry.addEventListener('click', () => (towns.length && current ? load() : init()));
   hero.replaceChildren(msg, retry);
 }
 
-async function load() {
+async function load(refocus = false) {
   hero.textContent = '載入中…';
   try {
     render(await fetchForecast(current.county, current.town));
+    if (refocus) document.getElementById('place')?.focus();
   } catch (err) {
     renderError(err);
   }

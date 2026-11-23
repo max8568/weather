@@ -36,6 +36,7 @@ export function openSheet({ title, content, onClose }) {
     closed = true;
     document.removeEventListener('keydown', onKey);
     backdrop.classList.add('closing');
+    sheet.inert = true;
     if (page) page.inert = false;
     if (trigger && trigger.isConnected) trigger.focus();
     setTimeout(() => backdrop.remove(), 250);
