@@ -44,7 +44,7 @@
         return `<div class="hour${i && midnight ? ' day-start' : ''}"><time>${midnight ? md(h.time) : hh(h.time)}</time>${icon(h.icon, h.weather)}<b>${deg(h.temp)}</b><span>${pct(h.pop)}</span></div>`;
       }).join('')}</div>`, 'hourly');
 
-    const week = card('week', '7 日預報', '最低溫到最高溫', `<ul>${w.week.map((d) => `<li>
+    const week = card('week', '7 日預報', '', `<ul>${w.week.map((d) => `<li>
         <b class="w-day">${d.label}</b>${icon(d.icon, d.weather)}<span class="w-pop">${pct(d.pop)}</span>
         <span class="w-range"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%;background:${tempGradient(d.min, d.max)}"><b>${deg(d.min)}</b><b>${deg(d.max)}</b></i></span></li>`).join('')}</ul>`, 'weekly');
 

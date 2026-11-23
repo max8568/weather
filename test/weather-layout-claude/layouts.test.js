@@ -129,7 +129,22 @@ test('7-day bars are colored on a fixed scale: blue up to 18°, red above, blend
 test('7-day rows leave room between the rain chance and the lowest temperature', () => {
   const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
   const left = Number(css.match(/[.]v-combo [.]w-range [{][^}]*margin: 0 26px 0 (\d+)px;/)[1]);
-  assert.ok(left >= 40, left);
+  assert.ok(left >= 48, left);
+  // 灰色底線只畫在整週最低溫到最高溫那一段，不再從降雨機率旁邊開始
+  assert.match(css, /[.]v-combo [.]w-range::before [{][^}]*left: 0; right: 0;/);
+});
+
+test('7-day title has no subtitle', () => {
+  assert.match(byKey('combo'), /<section class="sec week"><div class="sec-head"><h2>7 日預報<\/h2>/);
+});
+
+test('7-day bar colors are light: every color on the scale has relative luminance of at least 0.2', () => {
+  const lin = (c) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  for (let t = 0; t <= 40; t++) {
+    const [r, g, b] = [1, 3, 5].map((i) => lin(parseInt(W.P.tempColor(t).slice(i, i + 2), 16)));
+    const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    assert.ok(y >= 0.2, `${t}° ${W.P.tempColor(t)} ${y.toFixed(3)}`);
+  }
 });
 
 test('combo sunrise and sunset card follows the live site: times at both ends, an arc, and the sun at the data time', () => {

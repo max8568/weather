@@ -50,9 +50,9 @@
 .v-combo .w-day { font-size: 15px; }
 .v-combo .week img { width: 32px; height: 32px; }
 .v-combo .w-pop { font-size: 12px; color: var(--pop); text-align: right; }
-/* 左邊留 40px，最低溫的數字跟降雨機率才不會黏在一起 */
-.v-combo .w-range { position: relative; height: 26px; margin: 0 26px 0 40px; }
-.v-combo .w-range::before { content: ""; position: absolute; left: -40px; right: -26px; top: 12px; height: 2px; background: var(--line); }
+/* 左邊留 48px，最低溫的數字跟降雨機率才不會黏在一起。灰色底線只畫整週最低溫到最高溫那一段 */
+.v-combo .w-range { position: relative; height: 26px; margin: 0 26px 0 48px; }
+.v-combo .w-range::before { content: ""; position: absolute; left: 0; right: 0; top: 12px; height: 2px; background: var(--line); }
 .v-combo .w-range i { position: absolute; top: 9px; height: 8px; border-radius: 4px; font-style: normal; }
 /* 溫度條的顏色由 P.tempGradient 照固定色階算出來，寫在每一條的 style 裡 */
 .v-combo .w-range b { position: absolute; top: -5px; font-size: 13px; }
