@@ -45,9 +45,12 @@ export const deg = (v) => (typeof v === 'number' ? `${Math.round(v)}°` : '--°'
 export const pct = (v) => (typeof v === 'number' ? `${v}%` : '--');
 const num = (v) => (typeof v === 'number' ? String(v) : '--');
 
-function sectionHead(title, onDetail) {
+// 區塊標題放在卡片外面；sub 是標題後面的小字副標題，onDetail 有值時右邊加「詳細預報」。
+function sectionHead(title, onDetail, sub) {
   const head = h('div', 'sec-head');
-  head.append(h('h2', '', title));
+  const h2 = h('h2', '', title);
+  if (sub) h2.append(h('span', '', sub));
+  head.append(h2);
   if (onDetail) {
     const more = h('button', 'more', '詳細預報');
     more.type = 'button';
@@ -116,12 +119,13 @@ export function renderHourly(el, data, { onDetail }) {
   if (!td?.hourly?.length) return renderUnavailable(el, '逐小時預報');
   const strip = scroller('hourly-strip', '逐小時預報');
   td.hourly.forEach((p, i) => {
-    const cell = h('div', 'hour');
+    // 午夜那格（不是第一格）左邊畫一條直線，分開兩天
+    const cell = h('div', i && p.time.slice(11, 13) === '00' ? 'hour day-start' : 'hour');
     cell.append(
       h('div', 'hour-time', hourLabel(p.time, i)),
-      img(iconUrl(iconKey(p.weather), { night: isNight(p.time), style: 'line' }), p.weather || '', 'hour-icon'),
-      h('div', 'hour-pop', pct(p.pop)),
+      img(iconUrl(iconKey(p.weather), { night: isNight(p.time) }), p.weather || '', 'hour-icon'),
       h('div', 'hour-temp', deg(p.temperature)),
+      h('div', 'hour-pop', pct(p.pop)),
     );
     strip.append(cell);
   });

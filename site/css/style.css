@@ -61,12 +61,17 @@ button { color: inherit; }
 /* 白底上要到 4.5:1，比 --muted 深一點 */
 .data-time { margin: 0 0 4px; font-size: 13px; color: #6e6e73; }
 .data-time span { white-space: nowrap; }
-.card { background: var(--card); border-radius: var(--card-radius); }
-.sec-head { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 10px; }
-.sec-head h2 { margin: 0; font-size: 15px; font-weight: 400; }
-.more { display: inline-flex; align-items: center; gap: 2px; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer; }
+/* 卡片：淺灰底、1px 灰框、6px 圓角 */
+.card { min-width: 0; padding: 15px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+/* 區塊標題在卡片外面、卡片上方 8px；有「詳細預報」時副標題緊跟在標題後面，沒有時推到右邊 */
+.sec-head { display: flex; align-items: center; gap: 12px; margin: 0 2px 8px; }
+.sec-head h2 { flex: 1; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px;
+  margin: 0; font-size: 18px; font-weight: 700; line-height: 1.35; }
+.sec-head:has(.more) h2 { justify-content: flex-start; }
+.sec-head h2 span { font-size: 13px; font-weight: 400; color: var(--text-2); }
+.more { flex: none; display: inline-flex; align-items: center; gap: 2px; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer; }
 .more svg { width: 18px; height: 18px; stroke-width: 2.4; }
-.unavailable { margin: 0; padding: 20px; border-radius: var(--card-radius); background: var(--card); text-align: center; font-size: 14px; color: var(--muted); }
+.unavailable { margin: 0; padding: 20px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); text-align: center; font-size: 14px; color: var(--muted); }
 .hourly-strip, .advice-row { display: flex; overflow-x: auto; scrollbar-width: none; }
 
 .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -78,13 +83,14 @@ button { color: inherit; }
 .tile-unit { margin-top: 4px; font-size: 13px; color: var(--text-2); }
 .tile-station { margin-top: 6px; font-size: 11px; color: var(--muted); }
 
-.hourly-strip { padding: 14px 4px; }
-.hour { flex: 0 0 60px; display: flex; flex-direction: column; align-items: center; }
-.hour-time { font-size: 14px; color: var(--text-2); }
-/* line 圖示的雲是很淺的灰色，放在淺灰卡片上看不見。反相後再把色相轉回來：雲變深色，太陽和雨滴的顏色大致不變。 */
-.hour-icon { width: 36px; height: 36px; margin-top: 10px; filter: invert(1) hue-rotate(180deg) brightness(1.25); }
-.hour-pop { font-size: 13px; color: var(--pop); }
-.hour-temp { margin-top: 10px; font-size: 15px; }
+/* 逐小時：每格由上到下是時間、圖示、氣溫、降雨機率；左右延伸到卡片邊緣 */
+.hourly-strip { margin: 0 -12px -4px; padding: 0 8px 4px; }
+.hour { flex: 0 0 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 2px 0; }
+.hour.day-start { border-left: 1px solid var(--line); }
+.hour-time { font-size: 13px; color: var(--text-2); }
+.hour-icon { width: 36px; height: 36px; }
+.hour-temp { font-size: 16px; font-weight: 700; }
+.hour-pop { font-size: 12px; color: var(--pop); }
 
 .advice-row { gap: 12px; margin: 0 -16px; padding: 0 16px; scroll-snap-type: x mandatory; scroll-padding: 0 16px; }
 .advice-card { flex: 0 0 86%; scroll-snap-align: start; padding: 18px 20px; border-radius: var(--card-radius); background: var(--card); }
