@@ -108,8 +108,10 @@
       </section>
       <section class="block obs"><h2>${obsNote(w)}</h2>
         <dl><div><dt>風</dt><dd>${w.obs.windDir} ${w.obs.windSpeed} m/s</dd></div><div><dt>濕度</dt><dd>${w.obs.humidity}%</dd></div>
-          <div><dt>氣壓</dt><dd>${w.obs.pressure} hPa</dd></div><div><dt>今日累積雨量</dt><dd>${w.obs.rainToday} mm</dd></div>
-          <div><dt>日出</dt><dd>${w.sun.rise}</dd></div><div><dt>日落</dt><dd>${w.sun.set}</dd></div></dl>
+          <div><dt>氣壓</dt><dd>${w.obs.pressure} hPa</dd></div><div><dt>今日累積雨量</dt><dd>${w.obs.rainToday} mm</dd></div></dl>
+      </section>
+      <section class="block sun"><h2>日出日落</h2>
+        <dl><div><dt>日出</dt><dd>${w.sun.rise}</dd></div><div><dt>日落</dt><dd>${w.sun.set}</dd></div></dl>
       </section>`;
   }
 

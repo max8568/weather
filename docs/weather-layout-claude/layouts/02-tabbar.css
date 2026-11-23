@@ -13,7 +13,6 @@
 .v-tabbar .bar [aria-selected="true"] { color: var(--text); font-weight: 700; }
 .v-tabbar .bar [aria-selected="true"] svg { padding: 2px 14px; box-sizing: content-box; border-radius: 999px; background: var(--sky-1); }
 
-/* 現在：大圖示、大字溫度置中 */
 /* 現在：左邊天藍方塊放溫度，右邊三個數字直排，兩塊並排 */
 .v-tabbar .place { padding: 18px 2px 12px; font-size: 15px; color: var(--text-2); }
 .v-tabbar .place strong { font-size: 20px; color: var(--text); }
@@ -23,6 +22,7 @@
 .v-tabbar .cond { display: flex; align-items: center; gap: 2px; margin-top: 6px; font-size: 17px; }
 .v-tabbar .cond img { width: 38px; height: 38px; margin-left: -6px; }
 .v-tabbar .range { margin-top: 2px; font-size: 13px; color: var(--text-2); }
+.v-tabbar .sky .note { margin-top: 2px; font-size: 12px; color: var(--text-2); }
 .v-tabbar .stats { display: grid; grid-template-rows: repeat(3, 1fr); gap: 8px; }
 .v-tabbar .stats div { display: flex; flex-direction: column; justify-content: center; padding: 8px 12px; border-radius: 18px; background: var(--card); }
 .v-tabbar .stats dt { font-size: 12px; color: var(--text-2); }

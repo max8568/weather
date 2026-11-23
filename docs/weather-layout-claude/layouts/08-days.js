@@ -12,10 +12,12 @@
     const head = `<div class="d-head">
         <div><p class="d-date">${md(d.date)}<span>${i === 0 ? '今天' : weekday(d.date)}</span></p>
           <p class="d-wx">${d.weather}</p>
-          <p class="d-t">最高<b class="max">${deg(d.max)}</b>最低<b class="min">${deg(d.min)}</b><span>降雨 ${pct(d.pop)}</span></p></div>
+          <p class="d-t"><span>最高<b class="max">${deg(d.max)}</b></span><span>最低<b class="min">${deg(d.min)}</b></span><span>降雨 ${pct(d.pop)}</span></p></div>
         ${icon(d.icon, d.weather)}
       </div>`;
-    const now = i === 0 ? `<p class="d-now">現在 <b>${deg(w.obs.temp)}</b>（${obsNote(w)}）　體感 ${deg(w.now.feels)}　降雨機率 ${pct(w.now.pop)}　紫外線 ${w.now.uv.value} ${w.now.uv.level}</p>` : '';
+    // 每一項各自不斷行，窄螢幕只在項目之間換行
+    const now = i === 0 ? `<p class="d-now">${[`現在 <b>${deg(w.obs.temp)}</b>（${obsNote(w)}）`, `未來 24 小時 ${deg(w.next24h.min)}–${deg(w.next24h.max)}`,
+      `體感 ${deg(w.now.feels)}`, `降雨機率 ${pct(w.now.pop)}`, `紫外線 ${w.now.uv.value} ${w.now.uv.level}`].map((s) => `<span>${s}</span>`).join('')}</p>` : '';
     const strip = hours.length
       ? `<h3 class="d-sub">${i === 0 ? '接下來' : '這一天'}每小時<span>${hh(hours[0].time)}–${hh(hours[hours.length - 1].time)}</span></h3>
         <div class="cols hscroll" tabindex="0" role="region" aria-label="${md(d.date)} 每小時預報，可以左右捲動" data-own-keys>${hours.map((h) => `<div class="col-h">

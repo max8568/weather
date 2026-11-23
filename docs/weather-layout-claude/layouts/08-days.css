@@ -22,13 +22,16 @@
 .v-days .d-date { font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
 .v-days .d-date span { margin-left: 10px; font-size: 16px; letter-spacing: 0; }
 .v-days .d-wx { margin-top: 8px; font-size: 18px; }
-.v-days .d-t { display: flex; align-items: baseline; gap: 4px; margin-top: 4px; font-size: 14px; color: var(--text-2); }
-.v-days .d-t b { margin-right: 8px; font-size: 24px; }
+/* 每組「標籤＋數字」不斷開；放不下時整組換行 */
+.v-days .d-t { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; margin-top: 4px; font-size: 14px; color: var(--text-2); }
+.v-days .d-t span { white-space: nowrap; }
+.v-days .d-t b { margin-left: 4px; font-size: 24px; }
 .v-days .d-t .max { color: var(--text); }
 .v-days .d-t .min { color: var(--text-2); }
 .v-days .d-head img { width: 112px; height: 112px; margin: -14px -10px -14px 0; }
 .v-days .d-now { margin-top: 10px; padding: 8px 12px; border-radius: 12px; background: rgba(255, 255, 255, .7); font-size: 13px; color: var(--text-2); line-height: 1.6; }
 .v-days .d-now b { color: var(--text); }
+.v-days .d-now span { display: inline-block; margin-right: 12px; white-space: nowrap; }
 .v-days .d-sub { display: flex; gap: 8px; align-items: baseline; margin-top: 16px; font-size: 14px; }
 .v-days .d-sub span { font-size: 12px; font-weight: 400; color: var(--note); }
 .v-days .d-none { margin-top: 16px; padding: 14px; border-radius: 12px; background: rgba(255, 255, 255, .7); font-size: 13px; color: var(--text-2); }

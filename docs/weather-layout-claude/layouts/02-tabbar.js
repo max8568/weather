@@ -36,8 +36,9 @@
       <div class="split">
         <div class="sky">
           <p class="temp">${deg(w.obs.temp)}</p>
+          <p class="note">${obsNote(w)}</p>
           <p class="cond">${icon(w.now.icon, '')}${w.now.weather}</p>
-          <p class="range">最高 ${deg(w.next24h.max)}　最低 ${deg(w.next24h.min)}</p>
+          <p class="range">未來 24 小時<br>最高 ${deg(w.next24h.max)}　最低 ${deg(w.next24h.min)}</p>
         </div>
         <dl class="stats">
           <div><dt>降雨機率</dt><dd>${pct(w.now.pop)}</dd></div>

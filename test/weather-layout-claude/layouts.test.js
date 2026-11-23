@@ -25,11 +25,28 @@ test('layouts are registered in order', () => {
 
 test('every layout shows all the data', () => {
   const MUST = ['中正區', '06:16', '17:04', '1016.2', '2.5', '68', '0.5', '中量級',
-    '今日白天', '今晚明晨', '明日白天', '週二', '週三', '週四', '週五', '週六', '週日', '實測'];
+    '今日白天', '今晚明晨', '明日白天', '週二', '週三', '週四', '週五', '週六', '週日', '實測', '未來 24 小時'];
   for (const l of W.LAYOUTS) {
     const html = l.render(W.WEATHER);
     for (const s of MUST) assert.ok(html.includes(s), `${l.key} missing ${s}`);
   }
+});
+
+const byKey = (key) => W.LAYOUTS.find((l) => l.key === key).render(W.WEATHER);
+
+test('tab bar labels the measured temperature where it is shown', () => {
+  const sky = byKey('tabbar').match(/<div class="sky">([\s\S]*?)<\/div>/)[1];
+  assert.ok(sky.includes('實測'), sky);
+});
+
+test('chart does not put sunrise and sunset under the measured heading', () => {
+  const obs = byKey('chart').match(/<section class="block obs">([\s\S]*?)<\/section>/)[1];
+  assert.ok(!obs.includes('日出') && !obs.includes('日落'), obs);
+});
+
+test('chart lets a finger on it scroll the page up and down', () => {
+  const css = readFileSync(DIR + 'layouts/05-chart.css', 'utf8');
+  assert.ok(!/touch-action:\s*pan-x\s*;/.test(css));
 });
 
 test('hourly has 72 entries and matches next24h', () => {
