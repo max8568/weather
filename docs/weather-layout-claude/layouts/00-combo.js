@@ -1,6 +1,6 @@
 // 0. 組合版：使用者從各排版挑出來拼成的一頁，統一成同一套樣式。
-// 上面是「底部分頁」的溫度方塊（地點移進方塊裡）加右邊三個數字，接著是逐小時、7 日溫度範圍、
-// 可以左右滑的生活建議卡片、目前觀測、日出日落。預報的區塊是灰底；實測的「目前觀測」是白底加淺藍框。
+// 上面是溫度卡片（左邊地點、日期、溫度、天氣，右邊天氣圖示）和下面一排三個數字，接著是逐小時、7 日溫度範圍、
+// 可以左右滑的生活建議卡片、目前觀測、日出日落。預報的區塊是灰底；放實測溫度的溫度卡片和「目前觀測」是白底加淺藍框。
 (function () {
   const { icon, deg, pct, md, hh, obsNote } = window.P;
 
@@ -18,21 +18,23 @@
     const lo = Math.min(...w.week.map((d) => d.min)), hi = Math.max(...w.week.map((d) => d.max));
     const at = (v) => ((v - lo) / (hi - lo)) * 100;
 
-    const hero = `<div class="hero">
-        <section class="sky">
-          <p class="place">${w.county}<strong>${w.town}</strong></p>
-          <p class="temp">${deg(w.obs.temp)}</p>
-          ${icon(w.now.icon, w.now.weather, 'big-icon')}
-          <p class="next">未來 24 小時</p>
-          <p class="cond">${w.now.weather}</p>
-          <p class="range"><span class="hl">最高 ${deg(w.next24h.max)}　最低 ${deg(w.next24h.min)}</span><span class="note">實測 ${w.obs.time}</span></p>
-        </section>
-        <dl class="stats">
-          <div><dt>降雨機率</dt><dd>${pct(w.now.pop)}</dd></div>
-          <div><dt>體感溫度</dt><dd>${deg(w.now.feels)}</dd></div>
-          <div><dt>紫外線</dt><dd>${w.now.uv.value}<small>${w.now.uv.level}</small></dd></div>
-        </dl>
-      </div>`;
+    // 日期用 UTC 算星期幾，不受瀏覽器時區影響
+    const today = w.week[0].date;
+    const date = `${Number(today.slice(5, 7))} 月 ${Number(today.slice(8, 10))} 日・星期${'日一二三四五六'[new Date(`${today}T00:00Z`).getUTCDay()]}`;
+    const hero = `<section class="now">
+        <div class="now-text">
+          <h1 class="place">${w.county} ${w.town}</h1>
+          <p class="date">${date}</p>
+          <p class="temp">${w.obs.temp}<span class="unit">°C</span><span class="note">實測 ${w.obs.time}</span></p>
+          <p class="cond">${w.now.weather}<span>未來 24 小時 ${deg(w.next24h.min)}–${deg(w.next24h.max)}</span></p>
+        </div>
+        <div class="now-icon">${icon(w.now.icon, w.now.weather)}</div>
+      </section>
+      <dl class="stats">
+        <div><dt>降雨機率</dt><dd>${w.now.pop}<small>%</small></dd></div>
+        <div><dt>體感溫度</dt><dd>${w.now.feels}<small>°C</small></dd></div>
+        <div><dt>紫外線</dt><dd>${w.now.uv.value}<small>${w.now.uv.level}</small></dd></div>
+      </dl>`;
 
     const hours = card('hours', '逐小時預報', '', `<div class="strip hscroll" tabindex="0" role="region" aria-label="逐小時預報，可以左右捲動" data-own-keys>${
       w.hourly.slice(0, 24).map((h, i) => {

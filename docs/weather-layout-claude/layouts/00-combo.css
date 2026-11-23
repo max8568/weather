@@ -1,39 +1,31 @@
-/* 組合版：每一區都是同一種卡片（灰底、22px 圓角、15px 粗體標題），只有實測的「目前觀測」是白底加淺藍框 */
+/* 組合版：每一區都是同一種卡片（灰底、22px 圓角、15px 粗體標題），只有放實測值的溫度卡片和「目前觀測」是白底加淺藍框 */
 .v-combo { display: grid; gap: 10px; padding: 12px; }
 .v-combo .card { min-width: 0; padding: 14px 16px 16px; border-radius: 22px; background: var(--card); }
 .v-combo .card h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; margin-bottom: 10px; font-size: 15px; }
 .v-combo .card h2 span { font-size: 12px; font-weight: 400; color: var(--note); }
 
-/* 最上面：左邊天藍方塊，右邊三格。右邊三格固定 135px 寬，其餘都給天藍方塊。
-   方塊裡上半分兩欄：左欄溫度、下面「未來 24 小時」；右欄天氣圖示、下面天氣現象。
-   最後一行橫跨整個方塊：左邊最高最低溫，右邊「實測 16:00」；寬度不夠時「實測」換到下一行。 */
-.v-combo .hero { display: grid; grid-template-columns: minmax(0, 1fr) 135px; gap: 10px; }
-/* 溫度緊接在地點下面；方塊比內容高時，多出來的空間留在最下面 */
-.v-combo .sky { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; column-gap: 6px;
-  padding: 14px 14px 12px; border-radius: 22px; background: var(--hero-panel); }
-.v-combo .place { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--text-2); }
-.v-combo .place strong { font-size: 18px; color: var(--text); }
-.v-combo .temp { grid-row: 2; grid-column: 1; align-self: end; margin-top: 4px; font-size: clamp(52px, 15vw, 80px); font-weight: 700; line-height: .95; letter-spacing: -3px; }
-/* 圖示檔四周有留白（右邊約 16%、下面約 29%），所以圖示可以伸進右邊內距和左邊欄距，
-   下緣用負的外距往上收，天氣現象才會貼近圖示。寬度和外距的 % 都是以右欄寬度計算。 */
-.v-combo .big-icon { grid-row: 2; grid-column: 2; align-self: end; justify-self: center; width: min(100% + 20px, 136px); height: auto;
-  margin: 0 -14px calc(min(100% + 20px, 136px) * -.16) -6px; }
-.v-combo .next { grid-row: 3; grid-column: 1; align-self: end; margin-top: 6px; font-size: 11px; color: var(--text-2); }
-/* 天氣現象緊貼在圖示下面 */
-.v-combo .cond { grid-row: 3; grid-column: 2; align-self: start; justify-self: center; margin-top: -2px; font-size: 14px; white-space: nowrap; }
-.v-combo .range { grid-row: 4; grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; column-gap: 12px;
-  font-size: 13px; color: var(--text-2); }
-.v-combo .range .hl { white-space: nowrap; }
-.v-combo .range .note { font-size: 11px; white-space: nowrap; }
+/* 最上面：溫度卡片。左邊地點、日期、溫度、天氣；右邊隔一條線放天氣圖示。
+   溫度是實測值，所以跟「目前觀測」一樣是白底加淺藍框。 */
+.v-combo .now { display: grid; grid-template-columns: minmax(0, 1fr) 30%; border-radius: 22px; background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--sky-1); }
+.v-combo .now-text { min-width: 0; padding: 18px 16px 16px 18px; }
+.v-combo .place { font-size: 20px; }
+.v-combo .date { margin-top: 4px; font-size: 13px; color: var(--note); }
+.v-combo .temp { margin-top: 12px; font-size: 52px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+.v-combo .temp .unit { margin-left: 2px; font-size: 20px; font-weight: 400; letter-spacing: 0; vertical-align: top; }
+.v-combo .temp .note { margin-left: 8px; font-size: 12px; font-weight: 400; letter-spacing: 0; color: var(--text-2); }
+/* 天氣現象和「未來 24 小時」放同一行；寬度不夠時整段「未來 24 小時」換到下一行 */
+.v-combo .cond { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; margin-top: 10px; font-size: 16px; font-weight: 700; }
+.v-combo .cond span { font-size: 13px; font-weight: 400; color: var(--text-2); white-space: nowrap; }
+.v-combo .now-icon { display: grid; place-items: center; min-width: 0; border-left: 1px solid var(--sky-1); }
+.v-combo .now-icon img { width: min(100%, 140px); height: auto; }
 
-/* 右邊三格：名稱在左、數字在右。三格共用同一欄數字（subgrid），數字置中在同一條線上 */
-.v-combo .stats { display: grid; grid-template-columns: 1fr auto; grid-template-rows: repeat(3, 1fr); gap: 10px; }
-.v-combo .stats div { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; column-gap: 6px;
-  padding: 8px 12px; border-radius: 18px; background: var(--card); }
-.v-combo .stats dt { font-size: 12px; color: var(--text-2); white-space: nowrap; }
-.v-combo .stats dd { font-size: 22px; font-weight: 700; line-height: 1.15; text-align: center; white-space: nowrap; }
-/* 紫外線的等級放在數字正下方 */
-.v-combo .stats small { display: block; font-size: 12px; font-weight: 400; line-height: 1.2; color: var(--text-2); }
+/* 溫度卡片下面一排三格，中間用直線隔開；名稱在上、數字在下 */
+.v-combo .stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 12px 0; border-radius: 22px; background: var(--card); }
+.v-combo .stats div { min-width: 0; padding: 2px 14px; }
+.v-combo .stats div + div { border-left: 1px solid var(--line); }
+.v-combo .stats dt { font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.v-combo .stats dd { margin-top: 4px; font-size: 20px; font-weight: 700; line-height: 1.2; white-space: nowrap; }
+.v-combo .stats small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
 
 /* 逐小時 */
 .v-combo .strip { margin: 0 -16px -4px; padding: 0 8px 4px; }
@@ -85,10 +77,6 @@
   .v-combo { padding: 10px; gap: 8px; }
   .v-combo .card { padding: 12px 14px 14px; }
   .v-combo .advs article { flex-basis: 86%; }
-  /* 320px 寬：右邊三格改回名稱在上、數字在下，寬度只佔內容需要的，圖示才放得大 */
-  .v-combo .hero { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
-  .v-combo .stats { grid-template-columns: 1fr; gap: 8px; }
-  .v-combo .stats div { grid-template-columns: 1fr; align-content: center; padding: 8px 10px; }
-  .v-combo .stats dt, .v-combo .stats dd { text-align: center; }
-  .v-combo .cond { font-size: 13px; }
+  .v-combo .now-text { padding: 16px 12px 14px 14px; }
+  .v-combo .stats div { padding: 2px 10px; }
 }

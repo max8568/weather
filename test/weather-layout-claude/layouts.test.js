@@ -73,9 +73,9 @@ test('every icon file exists', () => {
   for (const name of new Set(icons)) assert.ok(existsSync(`site/icons/weather/fill/${name}.svg`), name);
 });
 
-test('combo puts the place name and the measured label inside the temperature card', () => {
-  const sky = byKey('combo').match(/<section class="sky">([\s\S]*?)<\/section>/)[1];
-  assert.ok(sky.includes('中正區') && sky.includes('實測'), sky);
+test('combo temperature card has the place, the date, and the measured label', () => {
+  const now = byKey('combo').match(/<section class="now">([\s\S]*?)<\/section>/)[1];
+  assert.ok(now.includes('臺北市 中正區') && now.includes('11 月 23 日・星期一') && now.includes('實測'), now);
 });
 
 test('combo advice cards say what to do, built from the advice items', () => {
@@ -84,14 +84,19 @@ test('combo advice cards say what to do, built from the advice items', () => {
   assert.ok(html.includes('穿長袖，帶傘，衣服不適合在外面曬。'));
 });
 
-test('combo gives the three stats 135px and the rest to the temperature card', () => {
+test('combo shows the three stats in one row below the temperature card', () => {
+  const html = byKey('combo');
+  const stats = html.match(/<dl class="stats">([\s\S]*?)<\/dl>/);
+  assert.ok(stats && stats.index > html.indexOf('<section class="now">'));
+  assert.equal(stats[1].match(/<div>/g).length, 3);
   const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
-  assert.match(css, /\.v-combo \.hero \{[^}]*grid-template-columns: minmax\(0, 1fr\) 135px;/);
-  const icon = css.match(/\.v-combo \.big-icon \{[^}]*width: min\([^,]+, (\d+)px\)/);
-  assert.ok(icon && Number(icon[1]) >= 120, icon && icon[0]);
+  assert.match(css, /\.v-combo \.stats \{[^}]*grid-template-columns: repeat\(3, 1fr\);/);
 });
 
-test('combo puts the short measured note on the same line as the high and low', () => {
-  const range = byKey('combo').match(/<p class="range">([\s\S]*?)<\/p>/)[1];
-  assert.ok(range.includes('最高') && range.includes('最低') && range.includes(`實測 ${W.WEATHER.obs.time}`), range);
+test('combo puts the measured time beside the temperature and the 24-hour range beside the weather', () => {
+  const html = byKey('combo'), w = W.WEATHER;
+  const temp = html.match(/<p class="temp">([\s\S]*?)<\/p>/)[1];
+  assert.ok(temp.includes(`實測 ${w.obs.time}`), temp);
+  const cond = html.match(/<p class="cond">([\s\S]*?)<\/p>/)[1];
+  assert.ok(cond.includes(w.now.weather) && cond.includes(`未來 24 小時 ${w.next24h.min}°–${w.next24h.max}°`), cond);
 });
