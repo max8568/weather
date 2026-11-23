@@ -22,9 +22,10 @@
         <section class="sky">
           <p class="place">${w.county}<strong>${w.town}</strong></p>
           <p class="temp">${deg(w.obs.temp)}</p>
+          ${icon(w.now.icon, w.now.weather, 'big-icon')}
+          <p class="range"><small>未來 24 小時</small><span>最高 ${deg(w.next24h.max)}</span><span>最低 ${deg(w.next24h.min)}</span></p>
+          <p class="cond">${w.now.weather}</p>
           <p class="note">${obsNote(w)}</p>
-          <p class="cond">${icon(w.now.icon, '')}${w.now.weather}</p>
-          <p class="range">未來 24 小時<br>最高 ${deg(w.next24h.max)}　最低 ${deg(w.next24h.min)}</p>
         </section>
         <dl class="stats">
           <div><dt>降雨機率</dt><dd>${pct(w.now.pop)}</dd></div>

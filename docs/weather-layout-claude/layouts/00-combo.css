@@ -4,19 +4,30 @@
 .v-combo .card h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; margin-bottom: 10px; font-size: 15px; }
 .v-combo .card h2 span { font-size: 12px; font-weight: 400; color: var(--note); }
 
-/* 最上面：左邊天藍方塊（地點、溫度），右邊三個數字直排 */
-.v-combo .hero { display: grid; grid-template-columns: 1.35fr 1fr; gap: 10px; }
-.v-combo .sky { display: flex; flex-direction: column; min-height: 236px; padding: 14px 16px 16px; border-radius: 22px; background: var(--hero-panel); }
-.v-combo .place { display: flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--text-2); }
+/* 最上面：左邊天藍方塊，右邊三格。
+   方塊裡分兩欄：左欄溫度、下面最高最低溫；右欄天氣圖示、下面天氣現象。實測說明放在最下面一行。 */
+.v-combo .hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: 10px; }
+.v-combo .sky { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr auto auto; column-gap: 6px;
+  min-height: 220px; padding: 14px 14px 12px; border-radius: 22px; background: var(--hero-panel); }
+.v-combo .place { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--text-2); }
 .v-combo .place strong { font-size: 18px; color: var(--text); }
-.v-combo .temp { margin-top: auto; font-size: clamp(64px, 21vw, 88px); font-weight: 700; line-height: 1; letter-spacing: -4px; }
-.v-combo .sky .note { margin-top: 2px; font-size: 12px; color: var(--text-2); }
-.v-combo .cond { display: flex; align-items: center; gap: 2px; margin-top: 8px; font-size: 17px; }
-.v-combo .cond img { width: 38px; height: 38px; margin-left: -6px; }
-.v-combo .range { margin-top: 2px; font-size: 13px; color: var(--text-2); }
+.v-combo .temp { grid-row: 2; grid-column: 1; align-self: end; font-size: clamp(52px, 15vw, 80px); font-weight: 700; line-height: .95; letter-spacing: -3px; }
+.v-combo .big-icon { grid-row: 2; grid-column: 2; align-self: end; justify-self: center; width: min(100%, 92px); height: auto; margin-bottom: -4px; }
+.v-combo .range { grid-row: 3; grid-column: 1; margin-top: 6px; font-size: 13px; color: var(--text-2); }
+.v-combo .range small { display: block; font-size: 11px; color: var(--text-2); }
+/* 手機寬度時最高、最低各一行，左欄才不會比溫度寬、把右欄的圖示擠小；畫面夠寬才排成一行 */
+.v-combo .range span { display: block; white-space: nowrap; }
+@media (min-width: 440px) {
+  .v-combo .range span { display: inline; }
+  .v-combo .range span + span { margin-left: 8px; }
+}
+.v-combo .cond { grid-row: 3; grid-column: 2; align-self: end; justify-self: center; font-size: 14px; white-space: nowrap; }
+.v-combo .sky .note { grid-row: 4; grid-column: 1 / -1; margin-top: 6px; font-size: 11px; color: var(--text-2); }
+
+/* 右邊三格：名稱在左、數字在右 */
 .v-combo .stats { display: grid; grid-template-rows: repeat(3, 1fr); gap: 10px; }
-.v-combo .stats div { display: flex; flex-direction: column; justify-content: center; padding: 8px 14px; border-radius: 18px; background: var(--card); }
-.v-combo .stats dt { font-size: 12px; color: var(--text-2); }
+.v-combo .stats div { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 18px; background: var(--card); }
+.v-combo .stats dt { font-size: 12px; color: var(--text-2); white-space: nowrap; }
 .v-combo .stats dd { font-size: 22px; font-weight: 700; white-space: nowrap; }
 .v-combo .stats small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
 
@@ -70,4 +81,9 @@
   .v-combo { padding: 10px; gap: 8px; }
   .v-combo .card { padding: 12px 14px 14px; }
   .v-combo .advs article { flex-basis: 86%; }
+  /* 320px 寬：溫度方塊多分一點寬度給圖示，右邊三格改回名稱在上、數字在下 */
+  .v-combo .hero { grid-template-columns: 1.6fr 1fr; gap: 8px; }
+  .v-combo .stats { gap: 8px; }
+  .v-combo .stats div { flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; padding: 8px 10px; }
+  .v-combo .cond { font-size: 13px; }
 }
