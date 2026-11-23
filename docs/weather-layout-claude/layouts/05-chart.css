@@ -1,0 +1,86 @@
+.v-chart { padding: 0 16px 8px; }
+.v-chart .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0 12px; }
+.v-chart .head h1 { font-size: 22px; }
+.v-chart .head h1 span { margin-left: 8px; font-size: 14px; font-weight: 400; color: var(--text-2); }
+.v-chart .head p { font-size: 12px; color: var(--note); }
+.v-chart .now { display: grid; grid-template-columns: auto auto; align-items: center; column-gap: 2px; text-align: right; }
+.v-chart .now img { grid-row: span 2; width: 52px; height: 52px; }
+.v-chart .now strong { font-size: 34px; line-height: 1; color: var(--text); }
+.v-chart .now span { font-size: 13px; color: var(--text-2); }
+
+/* 圖表卡片：整個排版最顯眼的地方 */
+.v-chart .card { margin: 0 -16px; padding: 14px 0 6px; background: linear-gradient(180deg, var(--sky-2), var(--bg) 70%); }
+.v-chart .card h2 { padding: 0 16px; font-size: 20px; }
+.v-chart .hint { padding: 2px 16px 0; font-size: 12px; color: var(--note); }
+.v-chart .scroll { position: relative; margin-top: 6px; }
+.v-chart .plot { flex: none; display: block; touch-action: pan-x; cursor: crosshair; }
+/* 兩張圖的名稱固定在左邊，不跟著捲走 */
+.v-chart .labels { position: sticky; left: 0; z-index: 2; flex: none; width: 0; }
+.v-chart .labels span { position: absolute; left: 10px; padding: 1px 6px; border-radius: 6px; background: rgba(255, 255, 255, .9); font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.v-chart .labels .lt { top: 142px; }
+.v-chart .labels .lr { top: 176px; }
+
+.v-chart .night { fill: rgba(26, 26, 26, .045); }
+.v-chart .midnight { stroke: #c9c9ce; stroke-dasharray: 3 3; }
+.v-chart .day { font-size: 12px; font-weight: 700; fill: var(--text); }
+.v-chart .base { stroke: var(--line); }
+.v-chart .area { fill: rgba(240, 138, 60, .1); }
+.v-chart .temp-line { fill: none; stroke: var(--max); stroke-width: 2; stroke-linejoin: round; }
+.v-chart .pt { fill: var(--max); stroke: var(--bg); stroke-width: 2; }
+.v-chart .pt.lo { fill: var(--min); }
+.v-chart .val { font-size: 13px; font-weight: 700; fill: var(--text); text-anchor: middle; }
+.v-chart .val.small { font-size: 11px; font-weight: 400; fill: var(--text-2); }
+.v-chart .bar { fill: var(--pop); opacity: .5; }
+.v-chart .tick { font-size: 11px; fill: var(--note); text-anchor: middle; }
+.v-chart .cross { stroke: var(--text); stroke-width: 1; }
+.v-chart .cross-pt { fill: var(--bg); stroke: var(--text); stroke-width: 2; }
+.v-chart .tip { position: absolute; top: 0; z-index: 3; transform: translateX(-50%); padding: 6px 10px; border-radius: 10px; background: var(--text);
+  color: var(--bg); font-size: 12px; line-height: 1.5; white-space: nowrap; pointer-events: none; }
+.v-chart .tip b { margin-right: 6px; }
+
+.v-chart .stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 12px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.v-chart .stats div + div { border-left: 1px solid var(--line); padding-left: 10px; }
+.v-chart .stats dt { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.v-chart .stats dd { margin-top: 2px; font-size: 18px; font-weight: 700; white-space: nowrap; }
+.v-chart .stats small { margin-left: 2px; font-size: 11px; font-weight: 400; color: var(--text-2); }
+
+.v-chart .table { margin-top: 12px; }
+.v-chart .table summary { padding: 10px 0; font-size: 15px; font-weight: 700; cursor: pointer; }
+.v-chart .table table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+.v-chart .table caption { padding: 6px 0; text-align: left; font-weight: 700; }
+.v-chart .table th, .v-chart .table td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: left; font-weight: 400; }
+.v-chart .table thead th { color: var(--note); font-size: 12px; }
+.v-chart .table td:nth-child(3), .v-chart .table td:nth-child(4), .v-chart .table thead th:nth-child(3), .v-chart .table thead th:nth-child(4) { text-align: right; }
+
+.v-chart .block { margin-top: 20px; }
+.v-chart .block h2 { font-size: 17px; margin-bottom: 8px; }
+.v-chart .block h2 span { margin-left: 8px; font-size: 12px; font-weight: 400; color: var(--note); }
+/* 7 日：每天一條溫度範圍，兩端直接標數字 */
+.v-chart .range li { display: grid; grid-template-columns: 40px 32px 34px 1fr; align-items: center; gap: 8px; padding: 6px 0; }
+.v-chart .rd { font-size: 15px; font-weight: 700; }
+.v-chart .range img { width: 32px; height: 32px; }
+.v-chart .rp { font-size: 12px; color: var(--text-2); text-align: right; }
+.v-chart .rt { position: relative; height: 26px; margin: 0 24px; }
+.v-chart .rt::before { content: ""; position: absolute; left: -24px; right: -24px; top: 12px; height: 2px; background: var(--line); }
+.v-chart .rt i { font-style: normal; position: absolute; top: 9px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--min), var(--max)); }
+.v-chart .rt b { position: absolute; top: -5px; font-size: 13px; }
+.v-chart .rt b:first-child { right: calc(100% + 4px); }
+.v-chart .rt b:last-child { left: calc(100% + 4px); }
+
+.v-chart .adv { padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; color: var(--text-2); }
+.v-chart .adv strong { margin-right: 8px; font-size: 15px; color: var(--text); }
+.v-chart .adv ul { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; color: var(--text); }
+.v-chart .adv li { display: flex; align-items: center; gap: 4px; }
+.v-chart .adv .ui { width: 18px; height: 18px; }
+
+.v-chart .obs h2 { font-size: 14px; font-weight: 400; color: var(--note); }
+.v-chart .obs dl { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.v-chart .obs dl div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.v-chart .obs dt { color: var(--text-2); }
+.v-chart .obs dd { font-weight: 700; white-space: nowrap; }
+
+@media (max-width: 359px) {
+  .v-chart .stats { grid-template-columns: 1fr 1fr; row-gap: 10px; }
+  .v-chart .stats div:nth-child(3) { border-left: 0; padding-left: 0; }
+  .v-chart .obs dl { grid-template-columns: 1fr; }
+}
