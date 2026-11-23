@@ -25,18 +25,31 @@ export function openSheet({ title, content, onClose }) {
   sheet.append(head, body);
   backdrop.append(sheet);
   document.body.append(backdrop);
-  requestAnimationFrame(() => backdrop.classList.add('open'));
+  const trigger = document.activeElement;
+  const page = document.querySelector('main');
+  if (page) page.inert = true;
+  closeBtn.focus();
 
   let closed = false;
   function close() {
     if (closed) return;
     closed = true;
     document.removeEventListener('keydown', onKey);
-    backdrop.classList.remove('open');
+    backdrop.classList.add('closing');
+    if (page) page.inert = false;
+    if (trigger && trigger.isConnected) trigger.focus();
     setTimeout(() => backdrop.remove(), 250);
     if (onClose) onClose();
   }
-  function onKey(e) { if (e.key === 'Escape') close(); }
+  function onKey(e) {
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key !== 'Tab') return;
+    const items = [...sheet.querySelectorAll('button')];
+    const i = items.indexOf(document.activeElement);
+    if (!items.length) return;
+    if (e.shiftKey && i <= 0) { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (!e.shiftKey && (i === -1 || i === items.length - 1)) { e.preventDefault(); items[0].focus(); }
+  }
   document.addEventListener('keydown', onKey);
   closeBtn.addEventListener('click', close);
   backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });

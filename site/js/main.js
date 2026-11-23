@@ -1,5 +1,5 @@
 import { fetchForecast } from './api.js';
-import { resolveLocation } from './logic/location.js';
+import { resolveLocation, isTownList } from './logic/location.js';
 import { openPicker } from './render/picker.js';
 
 const KEY = 'weather.location';
@@ -36,7 +36,7 @@ function renderError(err) {
   const retry = document.createElement('button');
   retry.type = 'button';
   retry.textContent = '重試';
-  retry.addEventListener('click', towns.length ? load : init);
+  retry.addEventListener('click', towns.length && current ? load : init);
   hero.replaceChildren(msg, retry);
 }
 
@@ -53,7 +53,9 @@ async function init() {
   try {
     const res = await fetch('data/towns.json');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    towns = await res.json();
+    const list = await res.json();
+    if (!isTownList(list)) throw new Error('縣市清單格式不正確');
+    towns = list;
   } catch (err) {
     renderError(err);
     return;

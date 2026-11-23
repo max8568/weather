@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveLocation, DEFAULT_LOCATION } from '../../site/js/logic/location.js';
+import { resolveLocation, DEFAULT_LOCATION, isTownList } from '../../site/js/logic/location.js';
 
 const towns = [{ county: '臺北市', towns: ['中正區', '大安區'] }, { county: '新北市', towns: ['五股區'] }];
 test('resolveLocation keeps a valid saved location', () => assert.deepEqual(resolveLocation({county:'新北市',town:'五股區'}, towns), {county:'新北市',town:'五股區'}));
@@ -9,4 +9,10 @@ test('resolveLocation falls back to default for unknown names', () => {
   assert.deepEqual(resolveLocation({county:'臺北市',town:'五股區'}, towns), DEFAULT_LOCATION);
   assert.deepEqual(resolveLocation(null, towns), DEFAULT_LOCATION);
   assert.deepEqual(resolveLocation('garbage', towns), DEFAULT_LOCATION);
+});
+
+test('isTownList accepts only a non-empty list of {county, towns[]}', () => {
+  assert.equal(isTownList(towns), true);
+  for (const bad of [null, {}, 'x', [], [null], [{ county: '臺北市' }], [{ county: '臺北市', towns: [] }], [{ county: '臺北市', towns: [1] }], [{ county: 5, towns: ['a'] }]])
+    assert.equal(isTownList(bad), false);
 });

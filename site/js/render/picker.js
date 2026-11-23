@@ -4,6 +4,7 @@ import { openSheet } from './sheet.js';
 export function openPicker(towns, current, onPick) {
   const content = document.createElement('div');
   let sheet;
+  let picked = false;
 
   function listButton(label, selected, onClick) {
     const b = document.createElement('button');
@@ -16,6 +17,7 @@ export function openPicker(towns, current, onPick) {
 
   function showCounties() {
     content.replaceChildren(...towns.map((c) => listButton(c.county, c.county === current.county, () => showTowns(c))));
+    (content.querySelector('.selected') || content.firstElementChild).focus();
   }
 
   function showTowns(c) {
@@ -29,9 +31,12 @@ export function openPicker(towns, current, onPick) {
     title.textContent = c.county;
     content.replaceChildren(back, title, ...c.towns.map((t) =>
       listButton(t, c.county === current.county && t === current.town, () => {
+        if (picked) return;
+        picked = true;
         sheet.close();
         onPick({ county: c.county, town: t });
       })));
+    back.focus();
   }
 
   showCounties();
