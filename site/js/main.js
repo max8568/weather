@@ -1,6 +1,8 @@
 import { fetchForecast } from './api.js';
 import { resolveLocation, isTownList } from './logic/location.js';
 import { openPicker } from './render/picker.js';
+import { renderHero, setupCompactHeader } from './render/hero.js';
+import { renderDataTime, renderNowTiles, renderHourly, renderAdvice, renderWeekly, renderObsTiles, renderSun } from './render/sections.js';
 
 const KEY = 'weather.location';
 let towns = [];
@@ -14,19 +16,31 @@ function save(loc) {
 }
 
 const hero = document.getElementById('hero');
+const compact = document.getElementById('compact');
+const $ = (id) => document.getElementById(id);
+const sections = ['data-time', 'now', 'hourly', 'advice', 'weekly', 'obs', 'sun'].map($);
+const onDetail = () => {}; // Task 9 接上面板
+
+function openLocationPicker() {
+  openPicker(towns, current, (loc) => { current = loc; save(loc); load(true); });
+}
 
 function render(data) {
-  const t = data.observation?.temperature?.value;
-  const place = document.createElement('button');
-  place.type = 'button';
-  place.id = 'place';
-  place.className = 'place';
-  place.textContent = `${data.county} ${data.town}`;
-  place.addEventListener('click', () => openPicker(towns, current, (loc) => { current = loc; save(loc); load(true); }));
-  const temp = document.createElement('div');
-  temp.className = 'temp';
-  temp.textContent = t == null ? '--' : `${t}°`;
-  hero.replaceChildren(place, temp);
+  renderHero(hero, data, { onOpenPicker: openLocationPicker });
+  setupCompactHeader(hero, compact, data);
+  renderDataTime($('data-time'), data);
+  renderNowTiles($('now'), data);
+  renderHourly($('hourly'), data, { onDetail });
+  renderAdvice($('advice'), data);
+  renderWeekly($('weekly'), data, { onDetail });
+  renderObsTiles($('obs'), data);
+  renderSun($('sun'), data);
+}
+
+// 載入中或出錯時，只留最上方那一塊顯示狀態。
+function clearSections() {
+  for (const s of sections) s.replaceChildren();
+  compact.classList.remove('show');
 }
 
 function renderError(err) {
@@ -38,10 +52,12 @@ function renderError(err) {
   retry.textContent = '重試';
   retry.addEventListener('click', () => (towns.length && current ? load() : init()));
   hero.replaceChildren(msg, retry);
+  clearSections();
 }
 
 async function load(refocus = false) {
   hero.textContent = '載入中…';
+  clearSections();
   try {
     render(await fetchForecast(current.county, current.town));
     if (refocus) document.getElementById('place')?.focus();

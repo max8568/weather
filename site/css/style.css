@@ -1,14 +1,102 @@
-:root { --bg:#fff; --outside:#eef0f3; --card:#f5f5f7; --text:#1a1a1a; --muted:#8a8a8e;
+:root { --bg:#fff; --outside:#eef0f3; --card:#f5f5f7; --text:#1a1a1a; --text-2:#4a4a4f; --muted:#8a8a8e; --line:#e6e6ea;
   --pop:#3d8bef; --sun:#f5a623; --max:#f08a3c; --min:#4a9ff5; --hero-panel:linear-gradient(180deg,#a8daf6,#d4ecfb);
-  --radius:20px; --col:480px;
+  --radius:20px; --card-radius:16px; --col:480px;
   font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--outside); color: var(--text); }
 .col { max-width: var(--col); margin: 0 auto; min-height: 100vh; background: var(--bg); padding: 16px; }
-.hero { background: var(--hero-panel); border-radius: var(--radius); padding: 20px; text-align: center; }
-.place { font: inherit; font-size: 18px; border: 0; background: rgba(255,255,255,.6); border-radius: 999px; padding: 6px 16px; cursor: pointer; }
-.temp { font-size: 64px; font-weight: 300; margin-top: 12px; }
-.hero button:not(.place) { font: inherit; padding: 6px 16px; border-radius: 999px; border: 1px solid var(--muted); background: #fff; cursor: pointer; }
+section:empty, .data-time:empty { display: none; }
+button { color: inherit; }
+
+.hero { position: relative; overflow: hidden; margin: -16px -16px 0; padding: 12px 20px 28px; min-height: 300px; }
+.hero > button { font: inherit; margin-top: 12px; padding: 6px 16px; border-radius: 999px; border: 1px solid var(--muted); background: #fff; cursor: pointer; }
+.hero-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 34%;
+  background: radial-gradient(circle 110px at 70% 150px, rgba(255,255,255,.28) 99%, transparent), var(--hero-panel); }
+.hero-icon { position: absolute; right: -16px; bottom: -36px; width: 200px; height: 200px; pointer-events: none; }
+.hero-text { position: relative; }
+.menu-btn { display: block; width: 40px; height: 40px; margin-left: -8px; padding: 8px; border: 0; background: none; cursor: pointer; }
+.menu-btn svg { display: block; width: 24px; height: 24px; stroke-width: 2.2; }
+.place { display: block; font: inherit; font-size: 20px; font-weight: 700; margin-top: 8px; padding: 2px 0; border: 0; background: none; cursor: pointer; }
+.temp { font-size: 68px; font-weight: 700; line-height: 1; margin-top: 18px; letter-spacing: -1px; }
+.hero-range { margin-top: 14px; font-size: 14px; color: var(--muted); }
+.hero-weather { margin-top: 16px; font-size: 18px; }
+.hero-wind { margin-top: 10px; font-size: 14px; color: var(--text-2); }
+
+.compact { position: fixed; top: 0; left: 0; right: 0; z-index: 5; max-width: var(--col); margin: 0 auto; overflow: hidden;
+  padding: 12px 20px; background: var(--bg); box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  transform: translateY(-120%); visibility: hidden; transition: transform .2s, visibility .2s; }
+.compact.show { transform: none; visibility: visible; }
+.compact .hero-panel { width: 24%; }
+.compact .hero-icon { right: -4px; top: 50%; bottom: auto; width: 96px; height: 96px; transform: translateY(-50%); }
+.compact-text { position: relative; }
+.compact-place { font-size: 16px; font-weight: 700; }
+.compact-row { display: flex; align-items: baseline; gap: 10px; margin-top: 4px; }
+.compact-temp { font-size: 32px; font-weight: 700; line-height: 1.1; }
+.compact-weather { font-size: 16px; }
+
+.data-time { margin: 16px 0 12px; font-size: 13px; color: var(--muted); }
+.card { background: var(--card); border-radius: var(--card-radius); }
+.sec-head { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 10px; }
+.sec-head h2 { margin: 0; font-size: 15px; font-weight: 400; }
+.more { display: inline-flex; align-items: center; gap: 2px; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer; }
+.more svg { width: 18px; height: 18px; stroke-width: 2.4; }
+.unavailable { margin: 0; padding: 20px; border-radius: var(--card-radius); background: var(--card); text-align: center; font-size: 14px; color: var(--muted); }
+.hourly-strip, .advice-row { display: flex; overflow-x: auto; scrollbar-width: none; }
+
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+#obs, #sun { margin-top: 16px; }
+.tile { min-width: 0; padding: 12px; border-radius: 14px; background: var(--card); }
+.tile-label { font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile-value { margin-top: 8px; font-size: 22px; font-weight: 700; white-space: nowrap; }
+.tile-value small { margin-left: 4px; font-size: 13px; font-weight: 400; }
+.tile-unit { margin-top: 4px; font-size: 13px; color: var(--text-2); }
+.tile-station { margin-top: 6px; font-size: 11px; color: var(--muted); }
+
+.hourly-strip { padding: 14px 4px; }
+.hour { flex: 0 0 60px; display: flex; flex-direction: column; align-items: center; }
+.hour-time { font-size: 14px; color: var(--text-2); }
+/* line 圖示的雲是很淺的灰色，放在淺灰卡片上看不見。反相後再把色相轉回來：雲變深色，太陽和雨滴的顏色大致不變。 */
+.hour-icon { width: 36px; height: 36px; margin-top: 10px; filter: invert(1) hue-rotate(180deg) brightness(1.25); }
+.hour-pop { font-size: 13px; color: var(--pop); }
+.hour-temp { margin-top: 10px; font-size: 15px; }
+
+.advice-row { gap: 12px; margin: 0 -16px; padding: 0 16px; scroll-snap-type: x mandatory; scroll-padding: 0 16px; }
+.advice-card { flex: 0 0 86%; scroll-snap-align: start; padding: 18px 20px; border-radius: var(--card-radius); background: var(--card); }
+.advice-top { display: flex; justify-content: space-between; gap: 12px; }
+.advice-label { font-size: 13px; color: var(--text-2); }
+.advice-temp { margin-top: 6px; font-size: 22px; font-weight: 700; }
+.advice-pop { margin-top: 6px; font-size: 14px; color: var(--text-2); }
+.advice-look { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; text-align: center; }
+.advice-look img { width: 60px; height: 60px; }
+.advice-comfort { font-size: 14px; }
+.advice-items { display: flex; gap: 28px; margin-top: 16px; padding: 16px 12px 0; border-top: 1px solid var(--line); }
+.advice-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 14px; }
+.advice-item svg { width: 32px; height: 32px; }
+
+.week-list { padding-left: 16px; }
+.week-row { display: grid; grid-template-columns: 84px 64px 1fr; align-items: center; padding: 16px 16px 16px 0; border-bottom: 1px solid var(--line); }
+.week-row:last-child { border-bottom: 0; }
+.week-label { font-size: 17px; font-weight: 700; }
+.week-date { margin-top: 6px; font-size: 13px; color: var(--muted); }
+.week-look { display: flex; flex-direction: column; align-items: center; }
+.week-look img { width: 40px; height: 40px; }
+.week-pop { min-height: 1.2em; font-size: 12px; color: var(--pop); }
+.week-right { justify-self: end; }
+.week-temps { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; }
+.week-bar { position: relative; flex: 1; height: 4px; border-radius: 2px; background: var(--line); }
+.week-bar span { position: absolute; inset: 0; border-radius: 2px; background: linear-gradient(90deg, #a9c79c, #f2c94c); }
+.week-extra { margin-top: 6px; font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.week-extra span + span { margin-left: 10px; }
+
+.sun-card { padding: 18px 20px 8px; }
+.sun-times { display: flex; justify-content: space-between; }
+.sun-end img { display: block; width: 32px; height: 32px; margin-left: -4px; }
+.sun-end.right { text-align: right; }
+.sun-end.right img { margin: 0 -4px 0 auto; }
+.sun-time { font-size: 22px; font-weight: 700; }
+.sun-arc { display: block; width: 100%; height: auto; color: var(--text); }
+.sun-arc .horizon { stroke: #d6d6da; stroke-width: 1; }
+.sun-arc .sun-dot { fill: var(--sun); }
 .footer { margin-top: 24px; text-align: center; font-size: 12px; color: var(--muted); }
 
 .sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; z-index: 10; animation: fade-in .25s; }
