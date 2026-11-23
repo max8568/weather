@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, SHOW_WEEK_POP_AT } from '../../site/js/logic/format.js';
+import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, dayExtremes, SHOW_WEEK_POP_AT } from '../../site/js/logic/format.js';
 
 const half = (o) => ({ weather: '多雲', maxT: null, minT: null, maxAT: null, minAT: null, pop: null, humidity: null, uv: null, ...o });
 
@@ -52,4 +52,30 @@ test('coversWholeDay: slots must start by 03:00 and end at 21:00 or later', () =
   assert.equal(coversWholeDay(at('2026-11-26', [3, 6, 9, 12, 15, 18, 21])), true);
   assert.equal(coversWholeDay(at('2026-11-26', [4, 21])), false);
   assert.equal(coversWholeDay([]), false);
+});
+
+const slot = (date, hour, o) => ({ time: `${date}T${String(hour).padStart(2, '0')}:00:00+08:00`, temperature: null, apparentTemperature: null, humidity: null, beaufort: null, ...o });
+const fullWeek = { days: [
+  { date: '2026-11-24', label: '週二',
+    day: half({ maxT: 20, minT: 18, maxAT: 21, minAT: 17, humidity: 84 }),
+    night: half({ maxT: 18, minT: 16, maxAT: 17, minAT: 15, humidity: 74 }) },
+] };
+test('dayExtremes uses the weekly daily extremes when the day has both halves', () => {
+  const hourly = [slot('2026-11-24', 21, { temperature: 19, apparentTemperature: 19, humidity: 80 }), slot('2026-11-24', 23, { temperature: 18, apparentTemperature: 18, humidity: 82 })];
+  assert.deepEqual(dayExtremes('2026-11-24', hourly, fullWeek, 'temperature'), { min: 16, max: 20, partial: false });
+  assert.deepEqual(dayExtremes('2026-11-24', hourly, fullWeek, 'apparentTemperature'), { min: 15, max: 21, partial: false });
+});
+test('dayExtremes keeps the hourly rule for beaufort and humidity', () => {
+  const hourly = [slot('2026-11-24', 21, { humidity: 80 }), slot('2026-11-24', 23, { humidity: 82 })];
+  assert.deepEqual(dayExtremes('2026-11-24', hourly, fullWeek, 'humidity'), { min: 80, max: 82, partial: true });
+});
+test('dayExtremes falls back to hourly slots, marked partial, when weekly has only the night half', () => {
+  const week = { days: [{ date: '2026-11-23', label: '今天', day: null, night: half({ maxT: 22, minT: 20, maxAT: 24, minAT: 21 }) }] };
+  const hourly = [slot('2026-11-23', 23, { temperature: 21 }), slot('2026-11-24', 0, { temperature: 20 })];
+  assert.deepEqual(dayExtremes('2026-11-23', hourly, week, 'temperature'), { min: 21, max: 21, partial: true });
+});
+test('dayExtremes falls back to hourly slots when weekly is null', () => {
+  const hourly = [0, 3, 6, 9, 12, 15, 18, 21].map((hr, i) => slot('2026-11-25', hr, { temperature: 16 + i }));
+  assert.deepEqual(dayExtremes('2026-11-25', hourly, null, 'temperature'), { min: 16, max: 23, partial: false });
+  assert.deepEqual(dayExtremes('2026-11-26', hourly, null, 'temperature'), { min: null, max: null, partial: true });
 });
