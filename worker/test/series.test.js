@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { num, str, findTown, pointSeries, intervalSeries, valueAt } from '../src/parse/series.js';
+import { num, str, findTown, pointSeries, intervalSeries, valueAt, beaufortScale } from '../src/parse/series.js';
 
 const loc = {
   LocationName: '五股區',
@@ -68,4 +68,14 @@ test('num and str reject wrong input types', () => {
   assert.equal(str(false), null);
   assert.equal(str(0), null);
   assert.equal(str([]), null);
+});
+
+test('beaufortScale reads "<= 1" as 1', () => {
+  assert.equal(beaufortScale('<= 1'), 1);
+  assert.equal(beaufortScale('<=1'), 1);
+  assert.equal(beaufortScale(' <= 1 '), 1);
+  assert.equal(beaufortScale('3'), 3);
+  assert.equal(beaufortScale('-99'), null);
+  assert.equal(beaufortScale(undefined), null);
+  assert.equal(beaufortScale('<= 2'), null);
 });

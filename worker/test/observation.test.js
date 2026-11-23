@@ -19,6 +19,7 @@ const st = (name, lat, lon, county, town, el = {}, time = '2026-11-23T11:00:00+0
   },
 });
 const wrap = Station => ({ records: { Station } });
+const NOW = new Date('2026-11-23T11:24:00+08:00');
 
 test('picks nearest station per element, skipping -99', () => {
   const json = wrap([
@@ -43,7 +44,7 @@ test('all stations missing an element gives null', () => {
 
 test('windDirection value is text, rainToday and windSpeed read', () => {
   const json = wrap([st('A', 25.1, 121.4, '新北市', '五股區', { WindDirection: '45', WindSpeed: '3.2', Now: { Precipitation: '0.0' } })]);
-  const r = pickObservations(json, { lat: 25.1, lon: 121.4 });
+  const r = pickObservations(json, { lat: 25.1, lon: 121.4, now: NOW });
   assert.equal(r.windDirection.value, '東北風');
   assert.equal(r.windSpeed.value, 3.2);
   assert.equal(r.rainToday.value, 0);
@@ -89,7 +90,7 @@ test('degreesToText', () => {
 test('real morning fixture: 五股區 gets a temperature', () => {
   const rd = f => JSON.parse(readFileSync(new URL(`./fixtures/morning/${f}`, import.meta.url), 'utf8'));
   const { lat, lon } = parseThreeDay(rd('threeDay.json'), '五股區', new Date('2026-11-23T11:00:00+08:00'));
-  const r = pickObservations(rd('O-A0001-001.json'), { lat, lon, county: '新北市', town: '五股區' });
+  const r = pickObservations(rd('O-A0001-001.json'), { lat, lon, county: '新北市', town: '五股區', now: NOW });
   assert.equal(typeof r.temperature.value, 'number');
   assert.ok(r.temperature.station);
   assert.match(r.time, /\+08:00$/);
@@ -112,4 +113,34 @@ test('malformed station timestamp gives null time, not NaN', () => {
   assert.equal(r.temperature.value, 20);
   assert.equal(r.temperature.time, null);
   assert.equal(r.time, null);
+});
+
+test('rainToday only comes from a station observed on the current Taipei date', () => {
+  const now = new Date('2026-11-24T00:05:00+08:00');
+  const late = st('A', 25.1, 121.4, '新北市', '五股區', { AirTemperature: '20', Now: { Precipitation: '23.1' } }, '2026-11-23T23:00:00+08:00');
+  const fresh = st('B', 25.2, 121.4, '新北市', '泰山區', { Now: { Precipitation: '0.5' } }, '2026-11-24T00:00:00+08:00');
+  const r = pickObservations(wrap([late, fresh]), { lat: 25.1, lon: 121.4, now });
+  assert.deepEqual(r.rainToday, { value: 0.5, station: 'B', time: '2026-11-24T00:00:00+08:00' });
+  assert.equal(r.temperature.station, 'A'); // 其他項目不看日期
+  assert.equal(pickObservations(wrap([late]), { lat: 25.1, lon: 121.4, now }).rainToday, null);
+  const noTime = st('C', 25.1, 121.4, '新北市', '五股區', { Now: { Precipitation: '1.0' } }, 'garbage');
+  assert.equal(pickObservations(wrap([noTime]), { lat: 25.1, lon: 121.4, now }).rainToday, null);
+});
+
+test('wind direction 990 is variable wind, kept as a valid reading', () => {
+  const json = wrap([
+    st('A', 25.1, 121.4, '新北市', '五股區', { WindDirection: '990.0' }),
+    st('B', 25.2, 121.4, '新北市', '泰山區', { WindDirection: '90' }),
+  ]);
+  const r = pickObservations(json, { lat: 25.1, lon: 121.4 });
+  assert.deepEqual(r.windDirection, { value: '風向不定', station: 'A', time: '2026-11-23T11:00:00+08:00' });
+});
+
+test('real morning fixture: 茶改北部分場 990.0 reads 風向不定', () => {
+  const json = JSON.parse(readFileSync(new URL('./fixtures/morning/O-A0001-001.json', import.meta.url), 'utf8'));
+  const s = json.records.Station.find(x => x.StationName === '茶改北部分場');
+  const c = s.GeoInfo.Coordinates.find(x => x.CoordinateName === 'WGS84');
+  const r = pickObservations(json, { lat: Number(c.StationLatitude), lon: Number(c.StationLongitude), now: NOW });
+  assert.equal(r.windDirection.value, '風向不定');
+  assert.equal(r.windDirection.station, '茶改北部分場');
 });

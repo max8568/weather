@@ -1,6 +1,6 @@
 import { OBS } from '../fields.js';
 import { num, str } from './series.js';
-import { parseCwaTime, isoTaipei } from '../time.js';
+import { parseCwaTime, isoTaipei, toTaipei } from '../time.js';
 
 const DIRS = ['北風', '東北風', '東風', '東南風', '南風', '西南風', '西風', '西北風'];
 export const degreesToText = deg => DIRS[Math.round(deg / 45) % 8];
@@ -34,12 +34,18 @@ function candidates(stations, { lat, lon, county, town }) {
 const ELEMENTS = {
   temperature: v => num(v),
   humidity: v => num(v),
-  windDirection: v => { const n = num(v); return n === null || n < 0 || n > 360 ? null : degreesToText(n); },
+  // 990 是氣象署的「風向不定」，是有效的觀測值
+  windDirection: v => {
+    const n = num(v);
+    if (n === 990) return '風向不定';
+    return n === null || n < 0 || n > 360 ? null : degreesToText(n);
+  },
   windSpeed: v => num(v),
   pressure: v => num(v),
   rainToday: v => num(v),
 };
 
+// where.now 是現在時間：今天累積雨量只收觀測時間在台北今天的測站（昨天 23:00 的雨量過了午夜就不是「今天」）。
 export function pickObservations(json, where = {}) {
   const list = candidates(json?.records?.Station ?? [], where);
   const result = {};
@@ -50,7 +56,9 @@ export function pickObservations(json, where = {}) {
       if (value === null) continue;
       const t = str(get(st, OBS.time));
       const d = t ? parseCwaTime(t) : null;
-      result[key] = { value, station: get(st, OBS.name), time: d && !Number.isNaN(d.getTime()) ? isoTaipei(d) : null };
+      const valid = d && !Number.isNaN(d.getTime());
+      if (key === 'rainToday' && !(valid && toTaipei(d).dateKey === toTaipei(where.now).dateKey)) continue;
+      result[key] = { value, station: get(st, OBS.name), time: valid ? isoTaipei(d) : null };
       break;
     }
   }

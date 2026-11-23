@@ -1,6 +1,6 @@
 import { THREE_DAY, TOWN_COORDS } from '../fields.js';
 import { isoTaipei } from '../time.js';
-import { num, str, findTown, pointSeries, intervalSeries, valueAt } from './series.js';
+import { num, str, findTown, pointSeries, intervalSeries, valueAt, beaufortScale } from './series.js';
 
 export class TownNotFound extends Error {}
 
@@ -30,13 +30,14 @@ export function parseThreeDay(json, town, now) {
   let start = -1;
   temps.forEach((p, i) => { if (p.time <= now) start = i; });
   const slots = start < 0 ? temps : temps.slice(start);
+  if (!slots.length) throw new Error(`${town} 沒有逐時氣溫`);
 
   const hourly = slots.map(({ time, value }) => ({
     time: isoTaipei(time),
     temperature: num(value),
     apparentTemperature: num(pointAt(apparent, time)),
     humidity: num(pointAt(humidity, time)),
-    beaufort: num(pointAt(beaufort, time)),
+    beaufort: beaufortScale(pointAt(beaufort, time)),
     windDirection: str(pointAt(windDir, time)),
     comfort: str(pointAt(comfort, time)),
     weather: str(valueAt(weather, time)),

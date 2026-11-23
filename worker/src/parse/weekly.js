@@ -1,6 +1,6 @@
 import { WEEKLY } from '../fields.js';
 import { isoTaipei, toTaipei, dayLabel, addDays } from '../time.js';
-import { num, str, findTown, intervalSeries, valueAt } from './series.js';
+import { num, str, findTown, intervalSeries, valueAt, beaufortScale } from './series.js';
 import { TownNotFound } from './threeDay.js';
 
 export function uvLevelText(value) {
@@ -19,7 +19,8 @@ export function parseWeekly(json, town, now) {
   const at = (k, t) => valueAt(s[k], t);
 
   const days = [];
-  for (const w of [...s.weather].sort((a, b) => a.start - b.start)) {
+  // 已經結束的時段不用（例如 18:00 以後，今天白天那段）
+  for (const w of s.weather.filter(x => x.end > now).sort((a, b) => a.start - b.start)) {
     const tp = toTaipei(w.start);
     let day = days.find(d => d.date === tp.dateKey);
     if (!day) {
@@ -33,10 +34,11 @@ export function parseWeekly(json, town, now) {
       maxT: num(at('maxT', t)), minT: num(at('minT', t)),
       maxAT: num(at('maxAT', t)), minAT: num(at('minAT', t)),
       pop: num(at('pop', t)), humidity: num(at('humidity', t)),
-      beaufort: num(at('beaufort', t)), windDirection: str(at('windDirection', t)),
+      beaufort: beaufortScale(at('beaufort', t)), windDirection: str(at('windDirection', t)),
       uv: num(at('uv', t)), uvLevel: str(at('uvLevel', t)),
     };
   }
+  if (!days.length) throw new Error(`${town} 沒有一週預報的時段`);
   let uv = null;
   const todayKey = toTaipei(now).dateKey;
   for (const d of days) {

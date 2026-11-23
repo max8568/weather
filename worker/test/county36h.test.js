@@ -66,3 +66,15 @@ test('parseCounty36h treats a null entry in a secondary element as missing', () 
   const j = withEl('PoP', e => ({ ...e, time: [null, e.time[1], e.time[2]] }));
   assert.deepEqual(parseCounty36h(j, '新北市', now).map(p => p.pop), [null, 70, 100]);
 });
+
+test('parseCounty36h drops periods that have already ended', () => {
+  const evening = parseCounty36h(json, '新北市', new Date('2026-11-23T18:01:00+08:00'));
+  assert.deepEqual(evening.map(p => p.label), ['今晚明晨', '明日白天']);
+  assert.deepEqual(evening.map(p => p.pop), [70, 100]);
+  const one = parseCounty36h(json, '新北市', new Date('2026-11-24T07:00:00+08:00'));
+  assert.deepEqual(one.map(p => p.label), ['今日白天']);
+  assert.equal(one[0].start, '2026-11-24T06:00:00+08:00');
+});
+test('parseCounty36h throws when every period has ended', () => {
+  assert.throws(() => parseCounty36h(json, '新北市', new Date('2026-11-24T18:00:00+08:00')));
+});

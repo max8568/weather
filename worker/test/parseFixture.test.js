@@ -19,3 +19,10 @@ test('real morning fixture parses', () => {
   assert.ok(w.days.length === 6 || w.days.length === 7);
   assert.equal(w.uv.label, '紫外線');
 });
+
+test('real morning fixture: "<= 1" wind slots keep a beaufort value', () => {
+  const meta = read('meta.json');
+  const t = parseThreeDay(read('threeDay.json'), meta.town, new Date(meta.capturedAt));
+  assert.equal(t.hourly.filter(h => h.beaufort === null).length, 0);
+  assert.ok(t.hourly.some(h => h.beaufort === 1));
+});

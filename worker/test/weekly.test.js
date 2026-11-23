@@ -73,3 +73,27 @@ test('uv is chosen before the 7-day cap', () => {
   assert.ok(r.days.length <= 7);
   assert.equal(r.uv.value, 6);
 });
+
+test('weekly drops halves that have already ended (18:01 with a morning payload)', () => {
+  const uvs = [['23T06:00', '23T18:00', 5], ['24T06:00', '24T18:00', 3]];
+  const r = parseWeekly(build(H, uvs), '五股區', new Date('2026-11-23T18:01:00+08:00'));
+  assert.equal(r.days[0].label, '今天');
+  assert.equal(r.days[0].day, null);
+  assert.equal(r.days[0].night.maxT, 26);
+  assert.deepEqual(r.uv, { value: 3, level: '中量級', label: '明天紫外線' });
+});
+
+test('weekly throws when no half is left', () => {
+  assert.throws(() => parseWeekly(build(H, []), '五股區', new Date('2026-11-25T06:00:00+08:00')));
+  assert.throws(() => parseWeekly(build([], []), '五股區', new Date('2026-11-23T09:27:00+08:00')));
+});
+
+test('weekly beaufort "<= 1" becomes 1', () => {
+  const j = build(H.slice(0, 2), []);
+  j.records.Locations[0].Location[0].WeatherElement.push(el('風速', [
+    iv('23T06:00', '23T18:00', { BeaufortScale: '<= 1' }), iv('23T18:00', '24T06:00', { BeaufortScale: '3' }),
+  ]));
+  const r = parseWeekly(j, '五股區', new Date('2026-11-23T09:27:00+08:00'));
+  assert.equal(r.days[0].day.beaufort, 1);
+  assert.equal(r.days[0].night.beaufort, 3);
+});

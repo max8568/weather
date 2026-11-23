@@ -9,6 +9,11 @@ export function num(v) {
   return Number.isFinite(n) && n > -90 ? n : null;
 }
 
+// 蒲福風級：氣象署把 0 到 1 級寫成 "<= 1"，當成 1。
+export function beaufortScale(v) {
+  return typeof v === 'string' && /^<=\s*1$/.test(v.trim()) ? 1 : num(v);
+}
+
 export function str(v) {
   return typeof v === 'string' && v !== '' && v !== '-99' ? v : null;
 }

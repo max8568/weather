@@ -9,3 +9,8 @@ test('DATASETS covers 22 counties with paired ids', () => {
   assert.deepEqual(DATASETS['新北市'], { threeDay: 'F-D0047-069', weekly: 'F-D0047-071' });
   assert.ok(!('臺灣' in DATASETS));
 });
+
+test('site/data/towns.json lists exactly the DATASETS counties', async () => {
+  const { default: towns } = await import('../../site/data/towns.json', { with: { type: 'json' } });
+  assert.deepEqual(towns.map(c => c.county).sort(), Object.keys(DATASETS).sort());
+});

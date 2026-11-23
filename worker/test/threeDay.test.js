@@ -58,3 +58,16 @@ test('out-of-order temperature array still starts at the slot containing now', (
   assert.deepEqual(r.hourly.map(h => h.time.slice(11, 16)), ['09:00', '10:00', '11:00']);
   assert.equal(r.hourly[0].temperature, 20);
 });
+
+test('beaufort "<= 1" and "<=1" become 1', () => {
+  const w = small();
+  w.records.Locations[0].Location[0].WeatherElement[2] = el('風速', [
+    pt('09:00', 'BeaufortScale', '<= 1'), pt('10:00', 'BeaufortScale', '<=1'), pt('11:00', 'BeaufortScale', '3'),
+  ]);
+  assert.deepEqual(parseThreeDay(w, '五股區', now).hourly.map(h => h.beaufort), [1, 1, 3]);
+});
+
+test('parseThreeDay throws when there would be no hourly slots', () => {
+  assert.throws(() => parseThreeDay(wrap({ WeatherElement: [el('溫度', [])] }), '五股區', now));
+  assert.throws(() => parseThreeDay(wrap({ WeatherElement: [] }), '五股區', now));
+});
