@@ -1,0 +1,95 @@
+/* 由 docs/weather-layout-claude/build-panels.mjs 從 site/ 產生，不要手改；網站改了就重跑那支程式。 */
+.sheet-backdrop { --radius: 20px; }
+.sheet-backdrop .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.sheet-backdrop .tile { min-width: 0; padding: 12px; border-radius: 14px; background: var(--card); }
+.sheet-backdrop .tile-label { font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-backdrop .tile-value { margin-top: 8px; font-size: 22px; font-weight: 700; white-space: nowrap; }
+.sheet-backdrop .tile-value small { margin-left: 4px; font-size: 13px; font-weight: 400; }
+.sheet-backdrop .tile-unit { margin-top: 4px; font-size: 13px; color: var(--text-2); }
+.sheet-backdrop .tile-station { margin-top: 6px; font-size: 11px; color: var(--muted); }
+.sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; z-index: 10; animation: fade-in .25s; }
+.sheet-backdrop .sheet { width: 100%; max-width: var(--col); max-height: 85vh; display: flex; flex-direction: column; background: var(--bg); border-radius: var(--radius) var(--radius) 0 0; animation: slide-up .25s; }
+.sheet-backdrop.closing { pointer-events: none; opacity: 0; transition: opacity .25s; }
+.sheet-backdrop.closing .sheet { transform: translateY(100%); transition: transform .25s; }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes slide-up { from { transform: translateY(100%); } }
+.sheet-backdrop .sheet-head { position: relative; padding: 16px; text-align: center; }
+.sheet-backdrop .sheet-head h2 { margin: 0; font-size: 17px; }
+.sheet-backdrop .sheet-close { position: absolute; left: 12px; top: 10px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--card); font-size: 20px; line-height: 1; cursor: pointer; }
+.sheet-backdrop .sheet-body { overflow-y: auto; padding: 0 16px 24px; }
+
+/* 72 小時、7 日面板共用：日期列和分頁 */
+.sheet-backdrop .date-row { display: grid; grid-template-columns: repeat(7, 1fr); margin: 0 -8px; }
+.sheet-backdrop .date-row button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 0; border: 0; background: none; font: inherit; color: var(--muted); cursor: pointer; }
+.sheet-backdrop .date-row .dow { font-size: 15px; }
+.sheet-backdrop .date-row .dnum { width: 34px; height: 34px; line-height: 34px; border-radius: 50%; font-size: 17px; font-weight: 700; }
+.sheet-backdrop .date-row [aria-pressed="true"] { color: var(--text); }
+.sheet-backdrop .date-row [aria-pressed="true"] .dow { font-weight: 700; }
+.sheet-backdrop .date-row [aria-pressed="true"] .dnum { background: #a8daf6; }
+.sheet-backdrop .seg { display: flex; padding: 3px; border-radius: 999px; background: #ebebed; }
+.sheet-backdrop .seg button { flex: 1; padding: 7px 0; border: 0; border-radius: 999px; background: none; font: inherit; font-size: 15px; color: var(--text-2); cursor: pointer; }
+.sheet-backdrop .seg [aria-pressed="true"] { background: #d2d2d6; color: var(--text); font-weight: 700; }
+.sheet-backdrop .seg.light [aria-pressed="true"] { background: #fff; box-shadow: inset 0 0 0 2px #dcdce0; }
+.sheet-backdrop .dot { display: inline-block; flex: none; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; vertical-align: middle; }
+.sheet-backdrop .dot.max { background: var(--max); }
+.sheet-backdrop .dot.min { background: var(--min); }
+.sheet-backdrop .dot.uv { background: #f5c142; }
+
+/* 72 小時面板 */
+.sheet-backdrop .p72 { padding-top: 4px; }
+.sheet-backdrop .p72-date { margin-bottom: 10px; padding: 12px 0 10px; border-bottom: 1px solid var(--line); text-align: center; font-size: 17px; }
+.sheet-backdrop .p72-now { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding-left: 6px; }
+.sheet-backdrop .p72-value { font-size: 40px; font-weight: 700; line-height: 1; }
+.sheet-backdrop .p72-icon { width: 44px; height: 44px; }
+.sheet-backdrop .p72-range { margin-top: 8px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.sheet-backdrop .p72-range span + span { margin-left: 8px; }
+/* 兩張圖共用的橫向捲動容器。y 軸刻度那一欄固定在右邊，「降雨機率」標題固定在左邊 */
+.sheet-backdrop .chart-scroll { margin-top: 8px; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { .sheet-backdrop .chart-scroll { scroll-behavior: auto; } }
+.sheet-backdrop .chart { display: flex; width: max-content; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.sheet-backdrop .chart svg { display: block; flex: none; cursor: pointer; }
+.sheet-backdrop .chart .grid { stroke: var(--line); stroke-width: 1; }
+.sheet-backdrop .chart .grid.dash { stroke-dasharray: 3 3; }
+.sheet-backdrop .chart .x-label { font-size: 12px; fill: var(--muted); }
+.sheet-backdrop .chart-y { position: sticky; right: 0; flex: none; width: 44px; background: var(--bg); }
+.sheet-backdrop .chart-y span { position: absolute; left: 6px; transform: translateY(-50%); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.sheet-backdrop .pop-head { position: sticky; left: 0; display: flex; justify-content: space-between; margin: 12px 0 4px; font-size: 15px; font-weight: 700; }
+.sheet-backdrop .pop-value { color: var(--pop); }
+.sheet-backdrop .p72-extras { display: grid; grid-template-columns: 1fr 1fr; margin-top: 16px; padding: 0 20px; }
+.sheet-backdrop .p72-extra { display: flex; align-items: center; gap: 14px; }
+.sheet-backdrop .p72-extra svg { width: 34px; height: 34px; }
+.sheet-backdrop .extra-label { font-size: 13px; color: var(--muted); }
+.sheet-backdrop .extra-value { margin-top: 2px; font-size: 17px; font-weight: 700; }
+
+/* 7 日面板 */
+/* 兩個分頁內容高度不同；固定最小高度，換分頁時面板才不會上下跳。85vh 是 .sheet 的最大高度，84px 約是標題列加下方留白 */
+.sheet-backdrop .p7 { min-height: calc(85vh - 84px); }
+.sheet-backdrop .p7 .seg { margin-top: 4px; }
+.sheet-backdrop .p7 .date-row { margin-top: 18px; }
+.sheet-backdrop .half { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding: 22px 0; }
+.sheet-backdrop .half + .half { border-top: 1px solid var(--line); }
+.sheet-backdrop .half-name { font-size: 15px; color: var(--text-2); }
+.sheet-backdrop .half-temp { margin-top: 4px; font-size: 22px; font-weight: 700; }
+.sheet-backdrop .half-line { margin-top: 6px; font-size: 14px; color: var(--text-2); }
+.sheet-backdrop .half-look { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; font-size: 14px; }
+.sheet-backdrop .half-look img { width: 56px; height: 56px; }
+.sheet-backdrop .p7-tiles { grid-template-columns: 1fr 1fr; margin-top: 8px; }
+.sheet-backdrop .p7-tiles .tile-value { display: flex; align-items: center; }
+.sheet-backdrop .week-head { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+.sheet-backdrop .week-head h3 { margin: 0; font-size: 16px; }
+.sheet-backdrop .legend { display: flex; align-items: center; font-size: 14px; color: var(--text-2); }
+.sheet-backdrop .legend .dot.min { margin-left: 12px; }
+.sheet-backdrop .week-chart { display: block; width: 100%; height: auto; margin: 8px 0 16px; }
+.sheet-backdrop .week-chart .grid { stroke: var(--line); stroke-width: 1; }
+.sheet-backdrop .week-chart .y-label, .sheet-backdrop .week-chart .x-label { font-size: 13px; fill: var(--muted); }
+.sheet-backdrop .week-chart .x-label.today { fill: var(--text); font-weight: 700; }
+.sheet-backdrop .week-chart .area { fill: rgba(240,138,60,.08); }
+.sheet-backdrop .week-chart path.hi, .sheet-backdrop .week-chart path.lo { fill: none; stroke-width: 2.5; }
+.sheet-backdrop .week-chart path.hi { stroke: var(--max); }
+.sheet-backdrop .week-chart path.lo { stroke: var(--min); }
+.sheet-backdrop .week-chart circle.hi { fill: var(--max); }
+.sheet-backdrop .week-chart circle.lo { fill: var(--min); }
+.sheet-backdrop .week-chart .halo { fill-opacity: .2; }
+.sheet-backdrop .week-chart .mark { font-size: 15px; font-weight: 700; }
+.sheet-backdrop .week-chart .mark.hi { fill: var(--max); }
+.sheet-backdrop .week-chart .mark.lo { fill: var(--min); }

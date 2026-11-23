@@ -157,7 +157,7 @@ test('combo cards use the overview card style: grey, 1px border, 6px corners', (
 test('combo section titles sit above their cards, not inside them', () => {
   const html = byKey('combo');
   for (const title of ['逐小時預報', '7 日預報', '目前觀測', '日出日落']) {
-    assert.match(html, new RegExp(`<h2>${title}(<span>[^<]*</span>)?</h2>\\s*<div class="card">`), title);
+    assert.match(html, new RegExp(`<h2>${title}(<span>[^<]*</span>)?</h2>(<button[^>]*>[^]*?</button>)?</div>\\s*<div class="card">`), title);
   }
 });
 
@@ -167,4 +167,49 @@ test('combo advice cards sit right under the title, each one grey, with no box a
   const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
   const art = css.match(/\.v-combo \.advs article \{([^}]*)\}/)[1];
   for (const p of [/background: var\(--card\);/, /border: 1px solid var\(--line\);/, /border-radius: 6px;/]) assert.match(art, p);
+});
+
+test('combo hourly and 7-day sections each have a detail button, like the live site', () => {
+  const html = byKey('combo');
+  for (const [cls, key] of [['hours', 'hourly'], ['week', 'weekly']]) {
+    const head = html.match(new RegExp(`<section class="sec ${cls}"><div class="sec-head">([^]*?)</div>`))[1];
+    assert.match(head, new RegExp(`<button type="button" class="more" data-detail="${key}">詳細預報<svg`), cls);
+  }
+});
+
+test('the detail panels bundled into the prototype match the site source', async () => {
+  const { build } = await import('../../docs/weather-layout-claude/build-panels.mjs');
+  const out = build();
+  const norm = (x) => x.replace(/\r\n/g, '\n');
+  assert.equal(norm(readFileSync(DIR + 'site-panels.js', 'utf8')), out.js, 'site-panels.js is out of date: run node docs/weather-layout-claude/build-panels.mjs');
+  assert.equal(norm(readFileSync(DIR + 'site-panels.css', 'utf8')), out.css, 'site-panels.css is out of date: run node docs/weather-layout-claude/build-panels.mjs');
+});
+
+test('the bundle loads as a plain script and exposes both site panels', () => {
+  const win = {};
+  win.window = win;
+  vm.runInContext(readFileSync(DIR + 'site-panels.js', 'utf8'), vm.createContext(win), { filename: 'site-panels.js' });
+  assert.equal(typeof win.SITE_PANELS.open72hPanel, 'function');
+  assert.equal(typeof win.SITE_PANELS.open7dPanel, 'function');
+});
+
+test('the detail panels get data that agrees with the 7-day list and the hourly strip', async () => {
+  const { dayRow } = await import('../../site/js/logic/format.js');
+  const win = {};
+  win.window = win;
+  const ctx = vm.createContext(win);
+  for (const f of ['data.js', 'detail.js']) vm.runInContext(readFileSync(DIR + f, 'utf8'), ctx, { filename: f });
+  const data = JSON.parse(JSON.stringify(win.DETAIL.siteData(win.WEATHER)));
+  assert.equal(data.threeDay.hourly.length, 72);
+  data.threeDay.hourly.forEach((x, i) => {
+    assert.equal(x.temperature, win.WEATHER.hourly[i].temp);
+    for (const k of ['apparentTemperature', 'beaufort', 'humidity', 'pop']) assert.equal(typeof x[k], 'number', `${x.time} ${k}`);
+    for (const k of ['weather', 'windDirection', 'comfort']) assert.equal(typeof x[k], 'string', `${x.time} ${k}`);
+  });
+  assert.equal(data.weekly.days.length, 7);
+  data.weekly.days.forEach((d, i) => {
+    const r = dayRow(d), wk = win.WEATHER.week[i];
+    assert.deepEqual([r.min, r.max, r.pop], [wk.min, wk.max, wk.pop], wk.label);
+    for (const half of [d.day, d.night]) for (const k of ['humidity', 'beaufort', 'minAT', 'maxAT']) assert.equal(typeof half[k], 'number', `${wk.label} ${k}`);
+  });
 });

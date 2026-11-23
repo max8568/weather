@@ -3,8 +3,14 @@
 .v-combo { --card: #f6f7f9; --line: #e2e5ea; display: grid; gap: 20px; padding: 13px; }
 .v-combo .sec { min-width: 0; }
 .v-combo .card { min-width: 0; padding: 15px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
-.v-combo .sec > h2 { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin: 0 2px 8px; font-size: 18px; line-height: 1.35; }
-.v-combo .sec > h2 span { font-size: 13px; font-weight: 400; color: var(--text-2); }
+.v-combo .sec > h2, .v-combo .sec-head { margin: 0 2px 8px; }
+.v-combo .sec h2 { flex: 1; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; font-size: 18px; line-height: 1.35; }
+.v-combo .sec h2 span { font-size: 13px; font-weight: 400; color: var(--text-2); }
+/* 標題列右邊的「詳細預報」按鈕，照網站的 .more。有按鈕時副標題緊跟在標題後面，不推到右邊 */
+.v-combo .sec-head { display: flex; align-items: center; gap: 12px; }
+.v-combo .sec-head:has(.more) h2 { justify-content: flex-start; }
+.v-combo .more { flex: none; display: inline-flex; align-items: center; gap: 2px; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer; }
+.v-combo .more svg { width: 18px; height: 18px; stroke-width: 2.4; }
 
 /* 最上面：溫度卡片和下面一排三格，兩塊之間只隔 8px */
 .v-combo .lead { display: grid; gap: 8px; min-width: 0; }

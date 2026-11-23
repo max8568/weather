@@ -12,6 +12,7 @@
     laundry: clothesline,
     'no-laundry': `${clothesline}M5 20L19 4`,
     wind: 'M3 9h10.5a2.5 2.5 0 1 0-2.5-2.5M3 13h15.5a2.5 2.5 0 1 1-2.5 2.5M3 17h8',
+    'chevron-right': 'M9 6l6 6-6 6',
   };
 
   // 溫度的固定色階：18° 以下是藍色（越冷越深），18° 以上是紅色（越熱越深）。

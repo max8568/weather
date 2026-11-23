@@ -27,8 +27,29 @@
     const time = `${t.getUTCFullYear()}-${pad(t.getUTCMonth() + 1)}-${pad(t.getUTCDate())}T${pad(t.getUTCHours())}:00`;
     const [, weather, dayIcon, nightIcon, pop] = SPELLS.find(([until]) => time < until);
     const hour = t.getUTCHours();
-    return { time, weather, icon: hour < 6 || hour >= 18 ? nightIcon : dayIcon, temp, pop };
+    // 詳細預報面板另外要用：體感溫度、蒲福風級、濕度、風向、舒適度。下雨的時段濕度高、風大一級、體感低一度
+    const wet = pop >= 60;
+    return {
+      time, weather, icon: hour < 6 || hour >= 18 ? nightIcon : dayIcon, temp, pop,
+      feels: temp + (wet ? -1 : 1), beaufort: wet ? 3 : 2, humidity: wet ? 90 : 72, windDir: '東北風',
+      comfort: temp >= 20 ? '舒適' : temp >= 16 ? '稍有寒意' : '寒冷',
+    };
   });
+
+  // 7 日預報每天分白天（06–18）、晚上（18–隔天 06），欄位跟網站的 weekly.days 一樣，給 7 日詳細預報面板用。
+  // 白天最高溫是那天的最高溫、晚上最低溫是那天的最低溫，降雨機率取兩段的最大值，列表和面板的數字才對得上。
+  const next = (date) => { const d = new Date(`${date}T00:00Z`); d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 10); };
+  const halves = (d) => {
+    const wet = d.pop >= 60;
+    const half = (start, end, minT, maxT, pop) => ({
+      start, end, minT, maxT, pop, weather: d.weather, humidity: wet ? 88 : 70, beaufort: wet ? 3 : 2,
+      minAT: minT + (wet ? -1 : 1), maxAT: maxT + (wet ? -1 : 1),
+    });
+    const day = half(`${d.date}T06:00`, `${d.date}T18:00`, Math.max(d.min, d.max - 2), d.max, d.pop);
+    const night = half(`${d.date}T18:00`, `${next(d.date)}T06:00`, d.min, Math.min(d.max, d.min + 2), Math.max(0, d.pop - 10));
+    const uv = wet ? 1 : d.pop >= 20 ? 3 : 5;
+    return { ...d, day: { ...day, uv, uvLevel: uv <= 2 ? '低量級' : '中量級' }, night };
+  };
 
   window.WEATHER = {
     county: '臺北市',
@@ -54,7 +75,7 @@
       { date: '2026-11-27', label: '週五', icon: 'partly-cloudy-day', weather: '多雲時晴', max: 23, min: 17, pop: 10 },
       { date: '2026-11-28', label: '週六', icon: 'clear-day', weather: '晴', max: 24, min: 18, pop: 0 },
       { date: '2026-11-29', label: '週日', icon: 'partly-cloudy-day', weather: '晴時多雲', max: 24, min: 18, pop: 10 },
-    ],
+    ].map(halves),
     sun: { rise: '06:16', set: '17:04' },
   };
 })();

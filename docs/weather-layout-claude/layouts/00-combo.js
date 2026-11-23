@@ -11,9 +11,10 @@
   const minutes = (s) => Number(s.slice(0, 2)) * 60 + Number(s.slice(3, 5));
   const daylight = (now, rise, set) => Math.min(1, Math.max(0, (minutes(now) - minutes(rise)) / (minutes(set) - minutes(rise))));
 
-  // 標題放在卡片外面、卡片上方；卡片裡只放內容
-  const card = (cls, title, sub, body) =>
-    `<section class="sec ${cls}"><h2>${title}${sub ? `<span>${sub}</span>` : ''}</h2><div class="card">${body}</div></section>`;
+  // 標題放在卡片外面、卡片上方；卡片裡只放內容。detail 有值時，標題右邊加「詳細預報」按鈕（跟網站一樣）
+  const more = (key) => `<button type="button" class="more" data-detail="${key}">詳細預報${ui('chevron-right')}</button>`;
+  const card = (cls, title, sub, body, detail) =>
+    `<section class="sec ${cls}"><div class="sec-head"><h2>${title}${sub ? `<span>${sub}</span>` : ''}</h2>${detail ? more(detail) : ''}</div><div class="card">${body}</div></section>`;
 
   function render(w) {
     const lo = Math.min(...w.week.map((d) => d.min)), hi = Math.max(...w.week.map((d) => d.max));
@@ -41,11 +42,11 @@
       w.hourly.slice(0, 24).map((h, i) => {
         const midnight = h.time.endsWith('T00:00');
         return `<div class="hour${i && midnight ? ' day-start' : ''}"><time>${midnight ? md(h.time) : hh(h.time)}</time>${icon(h.icon, h.weather)}<b>${deg(h.temp)}</b><span>${pct(h.pop)}</span></div>`;
-      }).join('')}</div>`);
+      }).join('')}</div>`, 'hourly');
 
     const week = card('week', '7 日預報', '最低溫到最高溫', `<ul>${w.week.map((d) => `<li>
         <b class="w-day">${d.label}</b>${icon(d.icon, d.weather)}<span class="w-pop">${pct(d.pop)}</span>
-        <span class="w-range"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%;background:${tempGradient(d.min, d.max)}"><b>${deg(d.min)}</b><b>${deg(d.max)}</b></i></span></li>`).join('')}</ul>`);
+        <span class="w-range"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%;background:${tempGradient(d.min, d.max)}"><b>${deg(d.min)}</b><b>${deg(d.max)}</b></i></span></li>`).join('')}</ul>`, 'weekly');
 
     // 生活建議照網站現在的排版：上半時段、溫度、降雨，右邊圖示和舒適度；下半一排建議圖示。
     // 外面沒有卡片，標題下面直接是一排可以左右滑的卡片
@@ -86,5 +87,10 @@
     return hero + hours + week + advice + obs + sun;
   }
 
-  window.LAYOUTS.push({ key: 'combo', name: '組合版', render });
+  // 「詳細預報」打開網站的 72 小時、7 日面板（detail.js）
+  function mount(root, w) {
+    root.querySelectorAll('[data-detail]').forEach((b) => b.addEventListener('click', () => window.DETAIL[b.dataset.detail](w)));
+  }
+
+  window.LAYOUTS.push({ key: 'combo', name: '組合版', render, mount });
 })();
