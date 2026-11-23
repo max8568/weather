@@ -2,13 +2,15 @@ import { parseCwaTime } from '../time.js';
 
 // 缺值：氣象署用字串 "-99"（或更小的 -998 之類）表示。
 export function num(v) {
-  if (v === null || v === undefined || v === '') return null;
-  const n = Number(v);
+  let n;
+  if (typeof v === 'number') n = v;
+  else if (typeof v === 'string' && v.trim() !== '') n = Number(v);
+  else return null;
   return Number.isFinite(n) && n > -90 ? n : null;
 }
 
 export function str(v) {
-  return v === undefined || v === null || v === '' || v === '-99' ? null : v;
+  return typeof v === 'string' && v !== '' && v !== '-99' ? v : null;
 }
 
 export function findTown(json, town) {

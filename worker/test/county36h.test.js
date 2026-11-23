@@ -44,3 +44,20 @@ test('parseCounty36h throws for missing county', () => {
   assert.throws(() => parseCounty36h(json, '火星市', new Date()), /火星市/);
   assert.throws(() => parseCounty36h({}, '新北市', new Date()));
 });
+
+const withEl = (name, replace) => ({ records: { location: [{ locationName: '新北市',
+  weatherElement: json.records.location[1].weatherElement.map(e => e.elementName === name ? replace(e) : e) }] } });
+const now = new Date('2026-11-23T09:27:00+08:00');
+
+test('parseCounty36h matches other elements by time, not position', () => {
+  const dropFirst = withEl('PoP', e => ({ ...e, time: e.time.slice(1) }));
+  const r = parseCounty36h(dropFirst, '新北市', now);
+  assert.deepEqual(r.map(p => p.pop), [null, 70, 100]);
+  const reordered = withEl('MaxT', e => ({ ...e, time: [...e.time].reverse() }));
+  assert.deepEqual(parseCounty36h(reordered, '新北市', now).map(p => p.maxT), [24, 20, 21]);
+});
+test('parseCounty36h throws when Wx is missing or not 3 periods', () => {
+  assert.throws(() => parseCounty36h(withEl('Wx', e => ({ ...e, time: [] })), '新北市', now), /3/);
+  assert.throws(() => parseCounty36h(withEl('Wx', e => ({ ...e, time: e.time.slice(0, 2) })), '新北市', now), /3/);
+  assert.throws(() => parseCounty36h({ records: { location: [{ locationName: '新北市', weatherElement: [] }] } }, '新北市', now), /3/);
+});

@@ -56,3 +56,16 @@ test('valueAt picks interval containing t, end exclusive', () => {
   assert.equal(valueAt(iv, t('2026-11-24T06:00:00+08:00')), undefined);
   assert.equal(valueAt(iv, t('2026-11-23T05:59:59+08:00')), undefined);
 });
+
+test('num and str reject wrong input types', () => {
+  assert.equal(num(false), null);
+  assert.equal(num(true), null);
+  assert.equal(num([]), null);
+  assert.equal(num({}), null);
+  assert.equal(num(' '), null);
+  assert.equal(num(22), 22);
+  assert.equal(num(-99), null);
+  assert.equal(str(false), null);
+  assert.equal(str(0), null);
+  assert.equal(str([]), null);
+});
