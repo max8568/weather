@@ -1,1 +1,1 @@
-{"private":true,"type":"module","scripts":{"test":"node --test"},"devDependencies":{"js-yaml":"4.3.2"}}
+{"private":true,"type":"module","scripts":{"test":"node --test","preview":"npx --yes http-server@14.1.1 site -a localhost -p 8000 -c-1 -o"},"devDependencies":{"js-yaml":"4.3.2"}}
