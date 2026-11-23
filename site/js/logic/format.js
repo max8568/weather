@@ -66,17 +66,18 @@ export function coversWholeDay(times) {
 const WEEKLY_EXTREMES = { temperature: ['min', 'max'], apparentTemperature: ['minAT', 'maxAT'] };
 
 // 72 小時面板上「最高 最低」的數字。field 是逐時資料的欄位名稱。
-// 氣溫和體感溫度：一週預報裡那天白天、晚上兩段都有的話，用一週預報給的整天最高最低。
-// 其他情況用逐時資料裡那天的最高最低；逐時資料沒涵蓋整天時 partial 是 true，畫面要寫「預報時段內」。
+// 氣溫和體感溫度：一週預報裡那天白天、晚上兩段都有的話，用一週預報給的整天最高最低，
+// 再把那天的逐時數值也算進去（兩份預報可能對不上，畫面上選到的數值不能比「最高」還高）。
+// 其他情況只用逐時資料裡那天的最高最低；逐時資料沒涵蓋整天時 partial 是 true，畫面要寫「預報時段內」。
 export function dayExtremes(dateKey, hourly, weekly, field) {
+  const slots = hourly.filter((p) => p.time.slice(0, 10) === dateKey);
+  const values = slots.map((p) => p[field]);
   const keys = WEEKLY_EXTREMES[field];
   const day = keys && weekly ? weekly.days.find((d) => d.date === dateKey) : null;
   if (day && day.day && day.night) {
     const r = dayRow(day);
-    return { min: r[keys[0]], max: r[keys[1]], partial: false };
+    return { min: minOf([r[keys[0]], ...values]), max: maxOf([r[keys[1]], ...values]), partial: false };
   }
-  const slots = hourly.filter((p) => p.time.slice(0, 10) === dateKey);
-  const values = slots.map((p) => p[field]);
   return { min: minOf(values), max: maxOf(values), partial: !coversWholeDay(slots.map((p) => p.time)) };
 }
 

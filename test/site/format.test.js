@@ -79,3 +79,12 @@ test('dayExtremes falls back to hourly slots when weekly is null', () => {
   assert.deepEqual(dayExtremes('2026-11-25', hourly, null, 'temperature'), { min: 16, max: 23, partial: false });
   assert.deepEqual(dayExtremes('2026-11-26', hourly, null, 'temperature'), { min: null, max: null, partial: true });
 });
+test('dayExtremes widens the weekly range to include every hourly value of that date', () => {
+  // 11/24 00:00 逐時 21°，比一週預報的最高 20° 還高；23:00 的 15° 比一週預報的最低 16° 還低
+  const hourly = [slot('2026-11-24', 0, { temperature: 21 }), slot('2026-11-24', 12, { temperature: 19 }), slot('2026-11-24', 23, { temperature: 15 }), slot('2026-11-25', 0, { temperature: 30 })];
+  assert.deepEqual(dayExtremes('2026-11-24', hourly, fullWeek, 'temperature'), { min: 15, max: 21, partial: false });
+  // 一週預報缺值時只用逐時的；兩邊都缺就是 null
+  const noTemps = { days: [{ ...fullWeek.days[0], day: half({}), night: half({}) }] };
+  assert.deepEqual(dayExtremes('2026-11-24', hourly, noTemps, 'temperature'), { min: 15, max: 21, partial: false });
+  assert.deepEqual(dayExtremes('2026-11-24', [], noTemps, 'temperature'), { min: null, max: null, partial: false });
+});
