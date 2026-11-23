@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, dayExtremes, beaufortText, heroStations, SHOW_WEEK_POP_AT } from '../../site/js/logic/format.js';
+import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, dayExtremes, beaufortText, heroStations, SHOW_WEEK_POP_AT, tempColor, tempGradient, dateLabel, obsItems } from '../../site/js/logic/format.js';
 
 const half = (o) => ({ weather: '多雲', maxT: null, minT: null, maxAT: null, minAT: null, pop: null, humidity: null, uv: null, ...o });
 
@@ -131,4 +131,42 @@ test('heroStations: one station when all hero readings share it, grouped by stat
   assert.equal(heroStations({ temperature: null, windDirection: obsAt('泰山'), humidity: obsAt('泰山') }), '泰山測站');
   assert.equal(heroStations({ temperature: null, windDirection: null, humidity: null }), '');
   assert.equal(heroStations(null), '');
+});
+
+const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const lum = (hex) => { const [r, g, b] = rgb(hex).map((c) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+
+test('tempColor: blue up to 15°, red from 21°, light everywhere', () => {
+  for (const t of [0, 8, 15]) { const [r, , b] = rgb(tempColor(t)); assert.ok(b > r, `${t}`); }
+  for (const t of [21, 30, 40]) { const [r, , b] = rgb(tempColor(t)); assert.ok(r > b, `${t}`); }
+  for (let t = 0; t <= 40; t++) assert.ok(lum(tempColor(t)) >= 0.2, `${t} ${tempColor(t)}`);
+  assert.equal(tempColor(-5), tempColor(0)); assert.equal(tempColor(45), tempColor(40));
+});
+test('tempGradient: every stop is that temperature on the scale', () => {
+  for (const [min, max] of [[19, 24], [17, 20], [16, 21], [10, 30]]) {
+    const stops = tempGradient(min, max).match(/linear-gradient\(90deg, (.*)\)/)[1].split(', ').map((x) => x.split(' '));
+    assert.equal(stops[0][1], '0%'); assert.equal(stops.at(-1)[1], '100%');
+    for (const [color, at] of stops) {
+      const want = rgb(tempColor(min + (parseFloat(at) / 100) * (max - min)));
+      rgb(color).forEach((c, k) => assert.ok(Math.abs(c - want[k]) <= 1, `${min}-${max} ${at}`));
+    }
+  }
+  assert.match(tempGradient(16, 21), /#f3aa94 80%/);
+});
+test('dateLabel', () => {
+  assert.equal(dateLabel('2026-11-23T16:10:00+08:00'), '11 月 23 日・星期一');
+  assert.equal(dateLabel('2026-12-01T06:00:00+08:00'), '12 月 1 日・星期二');
+  assert.equal(dateLabel('2027-01-01T00:30:00+08:00'), '1 月 1 日・星期五');
+});
+test('obsItems: each item keeps its own station; missing values show -- with no station', () => {
+  const o = (value, station) => ({ value, station, time: '2026-11-23T16:00:00+08:00' });
+  const items = obsItems({ time: '2026-11-23T16:00:00+08:00', humidity: o(68, '臺北'), windSpeed: o(2.5, '五股'),
+    windDirection: o('東北風', '五股'), pressure: o(null, '臺北'), rainToday: null });
+  assert.deepEqual(items.map((x) => x.label), ['濕度', '風速', '風向', '氣壓', '今天累積雨量']);
+  assert.deepEqual(items[0], { label: '濕度', value: '68', unit: '%', station: '臺北' });
+  assert.deepEqual(items[1], { label: '風速', value: '2.5', unit: 'm/s', station: '五股' });
+  assert.deepEqual(items[2], { label: '風向', value: '東北風', unit: '', station: '五股' });
+  assert.deepEqual(items[3], { label: '氣壓', value: '--', unit: '', station: '' });
+  assert.deepEqual(items[4], { label: '今天累積雨量', value: '--', unit: '', station: '' });
+  assert.ok(obsItems(null).every((x) => x.value === '--' && x.station === ''));
 });

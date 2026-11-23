@@ -122,3 +122,42 @@ export function weekdayChar(date) {
   const day = new Date(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10)))).getUTCDay();
   return '日一二三四五六'[day];
 }
+
+// 7 日預報溫度條的固定色階：18° 以下是藍色（越冷越深），18° 以上是紅色（越熱越深）。
+// 16° 到 20° 之間由淺藍漸變到淺紅，18° 剛好落在中間的淺灰紫色。顏色都偏淺（相對亮度 0.2 以上）。
+const TEMP_SCALE = [[0, '#5f84ba'], [16, '#8cc1f2'], [20, '#f3aa94'], [40, '#ca6360']];
+const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+export function tempColor(t) {
+  const v = Math.min(40, Math.max(0, t));
+  const k = TEMP_SCALE.findIndex(([at], i) => i && v <= at);
+  const [a0, c0] = TEMP_SCALE[k - 1], [a1, c1] = TEMP_SCALE[k];
+  const f = (v - a0) / (a1 - a0), x = hexRgb(c0), y = hexRgb(c1);
+  return `#${x.map((n, i) => Math.round(n + (y[i] - n) * f).toString(16).padStart(2, '0')).join('')}`;
+}
+
+// 一天最低溫到最高溫那一段的漸層：兩端和中間經過的色階點都標上顏色。
+export function tempGradient(min, max) {
+  const pts = [min, ...TEMP_SCALE.map(([at]) => at).filter((at) => at > min && at < max), max];
+  const at = (t) => (max === min ? 0 : ((t - min) / (max - min)) * 100);
+  return `linear-gradient(90deg, ${pts.map((t, i) => `${tempColor(t)} ${i === pts.length - 1 ? 100 : +at(t).toFixed(2)}%`).join(', ')})`;
+}
+
+// 溫度卡片上的日期：「11 月 23 日・星期一」。iso 是台北時間字串，直接讀日期，不用瀏覽器的時鐘。
+export function dateLabel(iso) {
+  return `${Number(iso.slice(5, 7))} 月 ${Number(iso.slice(8, 10))} 日・星期${weekdayChar(iso)}`;
+}
+
+// 「目前觀測」的五格，固定順序。每格帶自己的測站；缺值顯示 --，不寫單位和測站。
+const OBS_ITEMS = [
+  ['濕度', 'humidity', '%'], ['風速', 'windSpeed', 'm/s'], ['風向', 'windDirection', ''],
+  ['氣壓', 'pressure', 'hPa'], ['今天累積雨量', 'rainToday', 'mm'],
+];
+export function obsItems(obs) {
+  return OBS_ITEMS.map(([label, key, unit]) => {
+    const o = obs?.[key];
+    const v = o?.value;
+    const ok = key === 'windDirection' ? typeof v === 'string' && v !== '' : typeof v === 'number';
+    return ok ? { label, value: String(v), unit, station: o.station || '' } : { label, value: '--', unit: '', station: '' };
+  });
+}
