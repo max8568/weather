@@ -8,19 +8,18 @@
 
 /* 最上面：溫度卡片和下面一排三格，兩塊之間只隔 8px */
 .v-combo .lead { display: grid; gap: 8px; min-width: 0; }
-/* 溫度卡片：左邊地點、日期、溫度、天氣；右邊隔一條線放天氣圖示 */
+/* 溫度卡片：左邊地點、日期、溫度、未來 24 小時；右邊隔一條線放天氣圖示，天氣現象在圖示正下方 */
 .v-combo .now { display: grid; grid-template-columns: minmax(0, 1fr) 30%; min-height: 200px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
 .v-combo .now-text { min-width: 0; padding: 17px; }
 .v-combo .place { font-size: 22px; line-height: 1.35; letter-spacing: -.03em; }
 .v-combo .date { margin-top: 5px; font-size: 14px; color: var(--text-2); }
 .v-combo .temp { margin-top: 14px; font-size: 54px; font-weight: 700; line-height: 1; letter-spacing: -.065em; }
 .v-combo .temp .unit { margin-left: 5px; font-size: .44em; font-weight: 500; line-height: 1.45; letter-spacing: -.04em; vertical-align: top; }
-.v-combo .temp .note { margin-left: 8px; font-size: 12px; font-weight: 400; letter-spacing: 0; color: var(--text-2); }
-/* 天氣現象和「未來 24 小時」放同一行；寬度不夠時整段「未來 24 小時」換到下一行 */
-.v-combo .cond { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; margin-top: 6px; font-size: 17px; font-weight: 650; }
-.v-combo .cond span { font-size: 14px; font-weight: 400; color: var(--text-2); white-space: nowrap; }
-.v-combo .now-icon { display: grid; place-items: center; min-width: 0; border-left: 1px solid var(--line); }
-.v-combo .now-icon img { width: 100%; height: auto; }
+.v-combo .range { margin-top: 6px; font-size: 14px; color: var(--text-2); }
+.v-combo .now-icon { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; border-left: 1px solid var(--line); }
+.v-combo .now-icon img { display: block; width: 100%; height: auto; }
+/* 圖示檔下緣有約 29% 的留白，負的上緣間距（以圖示寬度計算）讓天氣現象貼近圖示 */
+.v-combo .cond { margin-top: -18%; padding: 0 4px; font-size: 17px; font-weight: 650; line-height: 1.3; text-align: center; }
 
 /* 三格：白底加灰框，中間用直線隔開；名稱在上、數字在下 */
 .v-combo .stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 10px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
@@ -45,9 +44,11 @@
 .v-combo .w-day { font-size: 15px; }
 .v-combo .week img { width: 32px; height: 32px; }
 .v-combo .w-pop { font-size: 12px; color: var(--pop); text-align: right; }
-.v-combo .w-range { position: relative; height: 26px; margin: 0 26px; }
-.v-combo .w-range::before { content: ""; position: absolute; left: -26px; right: -26px; top: 12px; height: 2px; background: var(--line); }
-.v-combo .w-range i { position: absolute; top: 9px; height: 8px; border-radius: 4px; font-style: normal; background: linear-gradient(90deg, var(--min), var(--max)); }
+/* 左邊留 40px，最低溫的數字跟降雨機率才不會黏在一起 */
+.v-combo .w-range { position: relative; height: 26px; margin: 0 26px 0 40px; }
+.v-combo .w-range::before { content: ""; position: absolute; left: -40px; right: -26px; top: 12px; height: 2px; background: var(--line); }
+.v-combo .w-range i { position: absolute; top: 9px; height: 8px; border-radius: 4px; font-style: normal; }
+/* 溫度條的顏色由 P.tempGradient 照固定色階算出來，寫在每一條的 style 裡 */
 .v-combo .w-range b { position: absolute; top: -5px; font-size: 13px; }
 .v-combo .w-range b:first-child { right: calc(100% + 4px); }
 .v-combo .w-range b:last-child { left: calc(100% + 4px); }
@@ -75,10 +76,16 @@
 .v-combo .obs dd { font-size: 18px; font-weight: 700; white-space: nowrap; }
 .v-combo .obs small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
 
-.v-combo .sun-row { display: flex; justify-content: space-between; }
-.v-combo .sun-row p { display: grid; grid-template-columns: auto auto; align-items: center; column-gap: 6px; font-size: 13px; color: var(--text-2); }
-.v-combo .sun-row img { grid-row: span 2; width: 40px; height: 40px; }
-.v-combo .sun-row b { font-size: 20px; color: var(--text); }
+/* 日出日落：照網站（site/css/style.css 的 .sun-*），兩端圖示和時間，下面弧線 */
+.v-combo .sun .card { padding-bottom: 8px; }
+.v-combo .sun-times { display: flex; justify-content: space-between; }
+.v-combo .sun-end img { display: block; width: 32px; height: 32px; margin-left: -4px; }
+.v-combo .sun-end.right { text-align: right; }
+.v-combo .sun-end.right img { margin: 0 -4px 0 auto; }
+.v-combo .sun-time { font-size: 22px; font-weight: 700; }
+.v-combo .sun-arc { display: block; width: 100%; height: auto; color: var(--text); }
+.v-combo .sun-arc .horizon { stroke: #d6d6da; stroke-width: 1; }
+.v-combo .sun-arc .sun-dot { fill: var(--sun); }
 
 @media (max-width: 379px) {
   .v-combo .a-top img { width: 64px; height: 64px; margin-top: 0; }

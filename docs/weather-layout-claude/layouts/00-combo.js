@@ -1,8 +1,15 @@
 // 0. 組合版：使用者從各排版挑出來拼成的一頁，統一成同一套樣式。
-// 上面是溫度卡片（左邊地點、日期、溫度、天氣，右邊天氣圖示）和下面一排三個數字，接著是逐小時、7 日溫度範圍、
+// 上面是溫度卡片（左邊地點、日期、溫度、未來 24 小時，右邊天氣圖示和天氣）和下面一排三個數字，接著是逐小時、7 日溫度範圍、
 // 可以左右滑的生活建議卡片、目前觀測、日出日落。每張卡片都照「即時總覽」原型的卡片樣式。
 (function () {
-  const { icon, deg, pct, ui, md, hh, obsNote } = window.P;
+  const { icon, deg, pct, ui, md, hh, obsNote, tempGradient } = window.P;
+
+  // 日出日落的弧線照網站（site/js/render/sections.js 的 renderSun）：一段餘弦曲線，
+  // 兩端在地平線下，t = 0.25 和 0.75 跟地平線相交，中間是白天。
+  const ARC = { x0: 40, width: 240, base: 62, amp: 30 };
+  const arcPoint = (t) => [ARC.x0 + t * ARC.width, ARC.base - ARC.amp * Math.cos(Math.PI * (2 * t - 1))];
+  const minutes = (s) => Number(s.slice(0, 2)) * 60 + Number(s.slice(3, 5));
+  const daylight = (now, rise, set) => Math.min(1, Math.max(0, (minutes(now) - minutes(rise)) / (minutes(set) - minutes(rise))));
 
   // 標題放在卡片外面、卡片上方；卡片裡只放內容
   const card = (cls, title, sub, body) =>
@@ -19,10 +26,10 @@
         <div class="now-text">
           <h1 class="place">${w.county} ${w.town}</h1>
           <p class="date">${date}</p>
-          <p class="temp">${w.obs.temp}<span class="unit">°C</span><span class="note">實測 ${w.obs.time}</span></p>
-          <p class="cond">${w.now.weather}<span>未來 24 小時 ${deg(w.next24h.min)}–${deg(w.next24h.max)}</span></p>
+          <p class="temp">${w.obs.temp}<span class="unit">°C</span></p>
+          <p class="range">未來 24 小時 ${deg(w.next24h.min)}–${deg(w.next24h.max)}</p>
         </div>
-        <div class="now-icon">${icon(w.now.icon, w.now.weather)}</div>
+        <div class="now-icon">${icon(w.now.icon, w.now.weather)}<p class="cond">${w.now.weather}</p></div>
       </section>
       <dl class="stats">
         <div><dt>降雨機率</dt><dd>${w.now.pop}<small>%</small></dd></div>
@@ -38,7 +45,7 @@
 
     const week = card('week', '7 日預報', '最低溫到最高溫', `<ul>${w.week.map((d) => `<li>
         <b class="w-day">${d.label}</b>${icon(d.icon, d.weather)}<span class="w-pop">${pct(d.pop)}</span>
-        <span class="w-range"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%"><b>${deg(d.min)}</b><b>${deg(d.max)}</b></i></span></li>`).join('')}</ul>`);
+        <span class="w-range"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%;background:${tempGradient(d.min, d.max)}"><b>${deg(d.min)}</b><b>${deg(d.max)}</b></i></span></li>`).join('')}</ul>`);
 
     // 生活建議照網站現在的排版：上半時段、溫度、降雨，右邊圖示和舒適度；下半一排建議圖示。
     // 外面沒有卡片，標題下面直接是一排可以左右滑的卡片
@@ -57,10 +64,24 @@
         <div><dt>今日累積雨量</dt><dd>${w.obs.rainToday}<small>mm</small></dd></div>
       </dl>`);
 
-    const sun = card('sun', '日出日落', '', `<div class="sun-row">
-        <p>${icon('sunrise')}<span>日出</span><b>${w.sun.rise}</b></p>
-        <p>${icon('sunset')}<span>日落</span><b>${w.sun.set}</b></p>
-      </div>`);
+    // 日出日落照網站：兩端是圖示和時間，下面一條弧線，太陽停在資料時間的位置
+    const path = Array.from({ length: 49 }, (_, i) => arcPoint(i / 48))
+      .map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+    const [sx, sy] = arcPoint(0.25 + 0.5 * daylight(w.updated, w.sun.rise, w.sun.set));
+    const { x0, width, base } = ARC;
+    const sun = card('sun', '日出日落', '', `<div class="sun-times">
+        <div class="sun-end">${icon('sunrise', '日出')}<div class="sun-time">${w.sun.rise}</div></div>
+        <div class="sun-end right">${icon('sunset', '日落')}<div class="sun-time">${w.sun.set}</div></div>
+      </div>
+      <svg class="sun-arc" viewBox="0 20 320 80" aria-hidden="true">
+        <defs><linearGradient id="sun-arc-fade" gradientUnits="userSpaceOnUse" x1="${x0}" x2="${x0 + width}">
+          <stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset=".25" stop-color="currentColor"/>
+          <stop offset=".75" stop-color="currentColor"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+        </linearGradient></defs>
+        <line class="horizon" x1="16" x2="304" y1="${base}" y2="${base}"/>
+        <path d="${path}" fill="none" stroke="url(#sun-arc-fade)" stroke-width="2"/>
+        <circle class="sun-dot" cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="7"/>
+      </svg>`);
 
     return hero + hours + week + advice + obs + sun;
   }

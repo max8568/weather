@@ -73,9 +73,10 @@ test('every icon file exists', () => {
   for (const name of new Set(icons)) assert.ok(existsSync(`site/icons/weather/fill/${name}.svg`), name);
 });
 
-test('combo temperature card has the place, the date, and the measured label', () => {
+test('combo temperature card has the place and the date, and leaves the measured label to the observations card', () => {
   const now = byKey('combo').match(/<section class="now">([\s\S]*?)<\/section>/)[1];
-  assert.ok(now.includes('臺北市 中正區') && now.includes('11 月 23 日・星期一') && now.includes('實測'), now);
+  assert.ok(now.includes('臺北市 中正區') && now.includes('11 月 23 日・星期一'), now);
+  assert.ok(!now.includes('實測'), now);
 });
 
 test('combo advice cards follow the live site: period, range, rain, comfort, then one icon per advice item', () => {
@@ -98,12 +99,46 @@ test('combo shows the three stats in one row below the temperature card', () => 
   assert.match(css, /\.v-combo \.stats \{[^}]*grid-template-columns: repeat\(3, 1fr\);/);
 });
 
-test('combo puts the measured time beside the temperature and the 24-hour range beside the weather', () => {
+test('combo shows the weather under the icon and the 24-hour range on the left', () => {
   const html = byKey('combo'), w = W.WEATHER;
-  const temp = html.match(/<p class="temp">([\s\S]*?)<\/p>/)[1];
-  assert.ok(temp.includes(`實測 ${w.obs.time}`), temp);
-  const cond = html.match(/<p class="cond">([\s\S]*?)<\/p>/)[1];
-  assert.ok(cond.includes(w.now.weather) && cond.includes(`未來 24 小時 ${w.next24h.min}°–${w.next24h.max}°`), cond);
+  const right = html.match(/<div class="now-icon">([\s\S]*?)<\/div>/)[1];
+  assert.ok(right.includes('<img') && right.includes(`<p class="cond">${w.now.weather}</p>`), right);
+  const left = html.match(/<div class="now-text">([\s\S]*?)<\/div>/)[1];
+  assert.ok(left.includes(`未來 24 小時 ${w.next24h.min}°–${w.next24h.max}°`) && !left.includes(w.now.weather), left);
+});
+
+test('7-day bars are colored on a fixed scale: blue up to 18°, red above, blended around 18°', () => {
+  const { tempColor } = W.P;
+  const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  for (const t of [0, 8, 15]) { const [r, , b] = rgb(tempColor(t)); assert.ok(b > r, `${t}° should be blue`); }
+  for (const t of [21, 30, 40]) { const [r, , b] = rgb(tempColor(t)); assert.ok(r > b, `${t}° should be red`); }
+  // 每一條溫度條上的每個顏色點，都是那個溫度在固定色階上的顏色
+  const bars = [...byKey('combo').matchAll(/<i style="[^"]*background:linear-gradient[(]90deg, ([^)]*)[)]/g)].map((m) => m[1]);
+  assert.equal(bars.length, W.WEATHER.week.length);
+  W.WEATHER.week.forEach((d, i) => {
+    const stops = bars[i].split(', ').map((x) => x.split(' '));
+    assert.equal(stops[0][1], '0%'); assert.equal(stops.at(-1)[1], '100%');
+    // 百分比有四捨五入，每個顏色分量容許差 1
+    for (const [color, at] of stops) {
+      const want = rgb(tempColor(d.min + (parseFloat(at) / 100) * (d.max - d.min)));
+      rgb(color).forEach((c, k) => assert.ok(Math.abs(c - want[k]) <= 1, `${d.label} ${at} ${color}`));
+    }
+  });
+});
+
+test('7-day rows leave room between the rain chance and the lowest temperature', () => {
+  const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
+  const left = Number(css.match(/[.]v-combo [.]w-range [{][^}]*margin: 0 26px 0 (\d+)px;/)[1]);
+  assert.ok(left >= 40, left);
+});
+
+test('combo sunrise and sunset card follows the live site: times at both ends, an arc, and the sun at the data time', () => {
+  const html = byKey('combo'), w = W.WEATHER;
+  const sun = html.match(/<section class="sec sun">([\s\S]*?)<\/section>/)[1];
+  assert.ok(sun.includes(w.sun.rise) && sun.includes(w.sun.set) && sun.includes('class="sun-arc"'), sun);
+  const m = (s) => Number(s.slice(0, 2)) * 60 + Number(s.slice(3, 5));
+  const f = (m(w.updated) - m(w.sun.rise)) / (m(w.sun.set) - m(w.sun.rise));
+  assert.ok(sun.includes(`<circle class="sun-dot" cx="${(40 + (0.25 + 0.5 * f) * 240).toFixed(1)}"`), sun);
 });
 
 test('combo cards use the overview card style: grey, 1px border, 6px corners', () => {
