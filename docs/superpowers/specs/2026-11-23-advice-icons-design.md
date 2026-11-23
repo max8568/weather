@@ -33,3 +33,11 @@
 ## 考慮過的做法
 
 只有一種合理做法：改 `site/js/logic/advice.js` 的規則、`site/js/render/ui-icons.js` 的圖示和 `sections.js` 的對應表。規則照截圖反推，氣象署沒有公開它的判斷方式。
+
+## 補充：天氣圖示和卡片背景的對比（使用者選 D）
+
+問題：fill 風格的雲是近白色（漸層 `#f3f7fe` → `#deeafb`、邊線 `#e6effc`），放在淺灰卡片（`#f5f5f7`）上看不清楚。生活建議、7 日預報和兩個面板都受影響。
+
+考慮過的做法（比較圖給使用者看過）：A 不改；B 加 CSS 陰影；C 淺藍色圓底；D 雲加深邊線。使用者選 **D**。
+
+做法：在 `site/icons/weather/fill/` 有雲的 8 個檔（cloudy、fog、overcast、partly-cloudy-day、partly-cloudy-night、rain、snow、thunderstorms-rain）把 `stroke="#e6effc"` 改成 `stroke="#a3b1c6"`，`stop-color="#deeafb"` 改成 `stop-color="#cfdbec"`。其他顏色、line 風格圖示、晴天和日出日落圖示不動。圖示是 MIT 授權，可以修改，LICENSE 保留。

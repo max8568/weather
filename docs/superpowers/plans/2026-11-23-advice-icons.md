@@ -80,3 +80,34 @@ test('keys', () => assert.deepEqual(adviceItems({maxT:22, minT:20, pop:70, weath
 `wrangler dev` + `http-server` 起來，390×844 和 320 寬截圖生活建議區塊，跟 `ref/0010.png` 比對：圖示風格、一行 4 個、文字。再用 DevTools 把某張卡片資料改成晚上 20 - 22°、降雨 70%（或在 console 呼叫 render 用假資料）確認出現 4 個圖示且沒有換行。結束後停掉所有伺服器（含 workerd.exe）。
 
 - [ ] **Step 8: Commit** `git commit -m "feat(site): advice icons per ref 0010 (light jacket, no-laundry)"`（連同兩份 docs）
+
+---
+
+### Task 2: 雲的邊線調深（使用者選 D）
+
+**Files:**
+- Modify: `site/icons/weather/fill/{cloudy,fog,overcast,partly-cloudy-day,partly-cloudy-night,rain,snow,thunderstorms-rain}.svg`
+- Test: `test/site/icon-files.test.js`
+
+**Interfaces:** 無（只改 SVG 檔內的顏色）
+
+- [ ] **Step 1: 寫失敗測試** `test/site/icon-files.test.js`
+
+```js
+const DIR = 'site/icons/weather/fill/';
+const CLOUDY = ['cloudy','fog','overcast','partly-cloudy-day','partly-cloudy-night','rain','snow','thunderstorms-rain'];
+test('cloud outlines are dark enough for grey cards', () => {
+  for (const f of CLOUDY) {
+    const s = readFileSync(DIR + f + '.svg', 'utf8');
+    assert.ok(!s.includes('#e6effc') && !s.includes('#deeafb'), f);
+    assert.ok(s.includes('stroke="#a3b1c6"') && s.includes('stop-color="#cfdbec"'), f);
+  }
+});
+test('cloudless icons are untouched', () => { /* clear-day、clear-night、sunrise、sunset 不含 #a3b1c6 */ });
+```
+
+- [ ] **Step 2: 跑 `node --test test/site/icon-files.test.js`，確認失敗**
+- [ ] **Step 3: 在 8 個檔做兩個顏色替換**（只換這兩個值）
+- [ ] **Step 4: 跑測試通過，再跑 `npm test`**
+- [ ] **Step 5: 瀏覽器確認** 390×844：生活建議卡片、7 日預報、7 日面板、72 小時面板、最上方大圖示的雲邊線都看得清楚，截圖存 `.superpowers/sdd/2026-11-23-advice-icons/shots/task2-*.png`；停掉所有伺服器。
+- [ ] **Step 6: Commit** `git commit -m "fix(site): darken cloud outlines in fill icons for contrast on grey cards"`（連同 spec 和 plan 的補充）
