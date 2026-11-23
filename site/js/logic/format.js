@@ -53,7 +53,10 @@ export function hhmm(iso) {
 }
 
 export function hourLabel(iso, index) {
-  return index === 0 ? '現在' : `${iso.slice(11, 13)}時`;
+  if (index === 0) return '現在';
+  const hour = iso.slice(11, 13);
+  if (hour === '00') return `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`;
+  return `${hour}時`;
 }
 
 // 同一天的逐時資料有沒有涵蓋整天：第一筆不晚於 03:00、最後一筆不早於 21:00。
