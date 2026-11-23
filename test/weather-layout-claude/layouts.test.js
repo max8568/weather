@@ -84,9 +84,9 @@ test('combo advice cards say what to do, built from the advice items', () => {
   assert.ok(html.includes('穿長袖，帶傘，衣服不適合在外面曬。'));
 });
 
-test('combo gives the three stats only the width they need and the rest to the temperature card', () => {
+test('combo gives the three stats 135px and the rest to the temperature card', () => {
   const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
-  assert.match(css, /\.v-combo \.hero \{[^}]*grid-template-columns: minmax\(0, 1fr\) auto;/);
+  assert.match(css, /\.v-combo \.hero \{[^}]*grid-template-columns: minmax\(0, 1fr\) 135px;/);
   const icon = css.match(/\.v-combo \.big-icon \{[^}]*width: min\([^,]+, (\d+)px\)/);
   assert.ok(icon && Number(icon[1]) >= 120, icon && icon[0]);
 });

@@ -4,10 +4,10 @@
 .v-combo .card h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; margin-bottom: 10px; font-size: 15px; }
 .v-combo .card h2 span { font-size: 12px; font-weight: 400; color: var(--note); }
 
-/* 最上面：左邊天藍方塊，右邊三格。右邊三格只佔數字和名稱需要的寬度，其餘都給天藍方塊。
+/* 最上面：左邊天藍方塊，右邊三格。右邊三格固定 135px 寬，其餘都給天藍方塊。
    方塊裡上半分兩欄：左欄溫度、下面「未來 24 小時」；右欄天氣圖示、下面天氣現象。
    最後一行橫跨整個方塊：左邊最高最低溫，右邊「實測 16:00」；寬度不夠時「實測」換到下一行。 */
-.v-combo .hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.v-combo .hero { display: grid; grid-template-columns: minmax(0, 1fr) 135px; gap: 10px; }
 /* 溫度緊接在地點下面；方塊比內容高時，多出來的空間留在最下面 */
 .v-combo .sky { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; column-gap: 6px;
   padding: 14px 14px 12px; border-radius: 22px; background: var(--hero-panel); }
@@ -85,8 +85,8 @@
   .v-combo { padding: 10px; gap: 8px; }
   .v-combo .card { padding: 12px 14px 14px; }
   .v-combo .advs article { flex-basis: 86%; }
-  /* 320px 寬：右邊三格改回名稱在上、數字在下，寬度更窄 */
-  .v-combo .hero { gap: 8px; }
+  /* 320px 寬：右邊三格改回名稱在上、數字在下，寬度只佔內容需要的，圖示才放得大 */
+  .v-combo .hero { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
   .v-combo .stats { grid-template-columns: 1fr; gap: 8px; }
   .v-combo .stats div { grid-template-columns: 1fr; align-content: center; padding: 8px 10px; }
   .v-combo .stats dt, .v-combo .stats dd { text-align: center; }
