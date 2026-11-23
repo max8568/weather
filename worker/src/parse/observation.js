@@ -34,7 +34,7 @@ function candidates(stations, { lat, lon, county, town }) {
 const ELEMENTS = {
   temperature: v => num(v),
   humidity: v => num(v),
-  windDirection: v => { const n = num(v); return n === null ? null : degreesToText(n); },
+  windDirection: v => { const n = num(v); return n === null || n < 0 || n > 360 ? null : degreesToText(n); },
   windSpeed: v => num(v),
   pressure: v => num(v),
   rainToday: v => num(v),
@@ -49,7 +49,8 @@ export function pickObservations(json, where = {}) {
       const value = convert(get(st, OBS[key]));
       if (value === null) continue;
       const t = str(get(st, OBS.time));
-      result[key] = { value, station: get(st, OBS.name), time: t ? isoTaipei(parseCwaTime(t)) : null };
+      const d = t ? parseCwaTime(t) : null;
+      result[key] = { value, station: get(st, OBS.name), time: d && !Number.isNaN(d.getTime()) ? isoTaipei(d) : null };
       break;
     }
   }

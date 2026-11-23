@@ -94,3 +94,22 @@ test('real morning fixture: 五股區 gets a temperature', () => {
   assert.ok(r.temperature.station);
   assert.match(r.time, /\+08:00$/);
 });
+
+test('out-of-range wind direction counts as missing, next station is tried', () => {
+  const json = wrap([
+    st('A', 25.1, 121.4, '新北市', '五股區', { WindDirection: '-45' }),
+    st('B', 25.2, 121.4, '新北市', '泰山區', { WindDirection: '90' }),
+  ]);
+  const r = pickObservations(json, { lat: 25.1, lon: 121.4 });
+  assert.equal(r.windDirection.value, '東風');
+  assert.equal(r.windDirection.station, 'B');
+  assert.equal(pickObservations(wrap([st('A', 25.1, 121.4, '新北市', '五股區', { WindDirection: '400' })]), { lat: 25.1, lon: 121.4 }).windDirection, null);
+});
+
+test('malformed station timestamp gives null time, not NaN', () => {
+  const json = wrap([st('A', 25.1, 121.4, '新北市', '五股區', { AirTemperature: '20' }, 'garbage')]);
+  const r = pickObservations(json, { lat: 25.1, lon: 121.4 });
+  assert.equal(r.temperature.value, 20);
+  assert.equal(r.temperature.time, null);
+  assert.equal(r.time, null);
+});

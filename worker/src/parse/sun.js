@@ -1,10 +1,15 @@
 import { SUN } from '../fields.js';
-import { str } from './series.js';
+
+const hhmm = v => {
+  const m = typeof v === 'string' ? /^([01]?\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?$/.exec(v.trim()) : null;
+  return m ? `${m[1].padStart(2, '0')}:${m[2]}` : null;
+};
 
 export function parseSun(json, county) {
   const loc = json?.records?.locations?.location?.find(l => l[SUN.county] === county);
   const day = loc?.time?.[0];
-  const sunrise = str(day?.[SUN.sunrise]), sunset = str(day?.[SUN.sunset]);
-  if (!loc || !day || !sunrise || !sunset) throw new Error(`找不到日出日落資料：${county}`);
-  return { date: day[SUN.date], sunrise, sunset };
+  const date = day?.[SUN.date];
+  const sunrise = hhmm(day?.[SUN.sunrise]), sunset = hhmm(day?.[SUN.sunset]);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? '') || !sunrise || !sunset) throw new Error(`找不到日出日落資料：${county}`);
+  return { date, sunrise, sunset };
 }
