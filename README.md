@@ -6,10 +6,11 @@
 
 ## 本機開發
 
-1. 建立 `worker/.dev.vars`，內容一行：`CWA_API_KEY=你的授權碼`（這個檔案不會進 git）。
-2. 在 `worker/` 啟動 Worker：`npx wrangler dev --port 8787`
-3. 在專案根目錄啟動網頁：`npx --yes http-server@14.1.1 site -p 8000 -c-1`
-4. 打開 http://localhost:8000 。在 localhost 開啟時，網頁會自動連 http://localhost:8787 。
+1. 安裝套件：在專案根目錄和 `worker/` 各執行一次 `npm ci`（根目錄的套件給測試和腳本用，`worker/` 的是 wrangler）。
+2. 建立 `worker/.dev.vars`，內容一行：`CWA_API_KEY=你的授權碼`（這個檔案不會進 git）。
+3. 在 `worker/` 啟動 Worker：`npx wrangler dev --port 8787`
+4. 在專案根目錄啟動網頁：`npx --yes http-server@14.1.1 site -p 8000 -c-1`
+5. 打開 http://localhost:8000 。在 localhost 開啟時，網頁會自動連 http://localhost:8787 。
 
 ## 測試
 
@@ -28,7 +29,9 @@ npx wrangler deploy
 
 ## 部署網頁
 
-推送到 `main` 後，`.github/workflows/pages.yml` 會把 `site/` 發佈到 GitHub Pages。
+第一次發佈前，到 GitHub 上這個 repo 的 **Settings → Pages → Build and deployment → Source** 選 **GitHub Actions**。沒有設定的話，workflow 會在發佈那一步失敗。
+
+設定好之後，推送到 `main`，`.github/workflows/pages.yml` 就會把 `site/` 發佈到 GitHub Pages。
 
 ## 重新產生資料檔
 
