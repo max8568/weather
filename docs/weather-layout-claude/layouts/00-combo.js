@@ -47,12 +47,13 @@
         <b class="w-day">${d.label}</b>${icon(d.icon, d.weather)}<span class="w-pop">${pct(d.pop)}</span>
         <span class="w-range"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%"><b>${deg(d.min)}</b><b>${deg(d.max)}</b></i></span></li>`).join('')}</ul>`);
 
-    const advice = card('advice', '生活建議', '', `<div class="advs hscroll" tabindex="0" role="region" aria-label="生活建議，可以左右捲動" data-own-keys>${
+    // 生活建議沒有外面那張卡片，標題下面直接是一排可以左右滑的卡片
+    const advice = `<section class="sec advice"><h2>生活建議</h2><div class="advs hscroll" tabindex="0" role="region" aria-label="生活建議，可以左右捲動" data-own-keys>${
       w.advice.map((a) => `<article>
         <header><div><h3>${a.label}</h3><p>${a.from}–${a.to}</p></div>${icon(a.icon, a.weather)}</header>
         <p class="say">${advise(a)}</p>
         <p class="nums"><b>${deg(a.min)}–${deg(a.max)}</b><span>降雨 ${pct(a.pop)}</span><span>${a.comfort}</span></p>
-      </article>`).join('')}</div>`);
+      </article>`).join('')}</div></section>`;
 
     const obs = card('obs', '目前觀測', obsNote(w), `<dl>
         <div><dt>濕度</dt><dd>${w.obs.humidity}<small>%</small></dd></div>

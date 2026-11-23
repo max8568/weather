@@ -52,9 +52,9 @@
 .v-combo .w-range b:first-child { right: calc(100% + 4px); }
 .v-combo .w-range b:last-child { left: calc(100% + 4px); }
 
-/* 生活建議：灰底卡片裡放可以左右滑的白底灰框卡片 */
-.v-combo .advs { gap: 10px; margin: 0 -12px; padding: 0 12px; scroll-snap-type: x mandatory; scroll-padding: 0 12px; }
-.v-combo .advs article { flex: 0 0 80%; display: flex; flex-direction: column; scroll-snap-align: start; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+/* 生活建議：外面沒有卡片，標題下面直接是一排灰底卡片，左右滑時可以滑到螢幕邊 */
+.v-combo .advs { gap: 10px; margin: 0 -13px; padding: 0 13px; scroll-snap-type: x mandatory; scroll-padding: 0 13px; }
+.v-combo .advs article { flex: 0 0 80%; display: flex; flex-direction: column; scroll-snap-align: start; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
 .v-combo .advs header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
 .v-combo .advs h3 { font-size: 16px; }
 .v-combo .advs header p { font-size: 12px; color: var(--note); }

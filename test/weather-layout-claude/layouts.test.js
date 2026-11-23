@@ -116,7 +116,15 @@ test('combo cards use the overview card style: grey, 1px border, 6px corners', (
 
 test('combo section titles sit above their cards, not inside them', () => {
   const html = byKey('combo');
-  for (const title of ['逐小時預報', '7 日預報', '生活建議', '目前觀測', '日出日落']) {
-    assert.match(html, new RegExp(`<h2>${title}(<span>[^<]*</span>)?</h2>\s*<div class="card">`), title);
+  for (const title of ['逐小時預報', '7 日預報', '目前觀測', '日出日落']) {
+    assert.match(html, new RegExp(`<h2>${title}(<span>[^<]*</span>)?</h2>\\s*<div class="card">`), title);
   }
+});
+
+test('combo advice cards sit right under the title, each one grey, with no box around them', () => {
+  const html = byKey('combo');
+  assert.match(html, /<h2>生活建議<\/h2>\s*<div class="advs hscroll"/);
+  const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
+  const art = css.match(/\.v-combo \.advs article \{([^}]*)\}/)[1];
+  for (const p of [/background: var\(--card\);/, /border: 1px solid var\(--line\);/, /border-radius: 6px;/]) assert.match(art, p);
 });
