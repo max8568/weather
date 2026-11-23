@@ -52,17 +52,22 @@
 .v-combo .w-range b:first-child { right: calc(100% + 4px); }
 .v-combo .w-range b:last-child { left: calc(100% + 4px); }
 
-/* 生活建議：外面沒有卡片，標題下面直接是一排灰底卡片，左右滑時可以滑到螢幕邊 */
-.v-combo .advs { gap: 10px; margin: 0 -13px; padding: 0 13px; scroll-snap-type: x mandatory; scroll-padding: 0 13px; }
-.v-combo .advs article { flex: 0 0 80%; display: flex; flex-direction: column; scroll-snap-align: start; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
-.v-combo .advs header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-.v-combo .advs h3 { font-size: 16px; }
-.v-combo .advs header p { font-size: 12px; color: var(--note); }
-.v-combo .advs header img { width: 48px; height: 48px; margin: -8px -6px -10px 0; }
-.v-combo .say { flex: 1; margin: 10px 0 12px; font-size: 15px; line-height: 1.6; }
-.v-combo .nums { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-size: 13px; color: var(--text-2); }
-.v-combo .nums b { font-size: 18px; color: var(--text); }
-.v-combo .nums span:first-of-type { color: var(--pop); }
+/* 生活建議：照網站現在的排版（site/css/style.css 的 .advice-*），卡片用組合版的灰底灰框。
+   外面沒有卡片，標題下面直接是一排卡片，左右滑時可以滑到螢幕邊 */
+.v-combo .advs { gap: 12px; margin: 0 -13px; padding: 0 13px; scroll-snap-type: x mandatory; scroll-padding: 0 13px; }
+.v-combo .advs article { flex: 0 0 86%; scroll-snap-align: start; padding: 18px 20px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+/* 上半：左欄時段、溫度、降雨；右欄圖示和舒適度。最後一列的降雨和舒適度以基準線對齊 */
+.v-combo .a-top { display: grid; grid-template-columns: 1fr auto; column-gap: 12px; }
+.v-combo .a-label { grid-area: 1 / 1; font-size: 13px; color: var(--text-2); }
+.v-combo .a-temp { grid-area: 2 / 1; margin-top: 6px; font-size: 22px; font-weight: 700; }
+.v-combo .a-pop { grid-area: 3 / 1; align-self: baseline; margin-top: 6px; font-size: 14px; color: var(--text-2); }
+/* 圖示四周有透明留白，負的上緣間距讓留白和時段那一列重疊 */
+.v-combo .a-top img { grid-area: 1 / 2 / 3 / 3; justify-self: center; align-self: end; width: 80px; height: 80px; margin-top: -14px; }
+.v-combo .a-comfort { grid-area: 3 / 2; align-self: baseline; font-size: 14px; text-align: center; }
+/* 下半：一張卡片最多 4 個建議，固定 4 欄，字不換行 */
+.v-combo .a-items { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); list-style: none; }
+.v-combo .a-items li { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
+.v-combo .a-items svg { width: 32px; height: 32px; }
 
 /* 目前觀測 */
 .v-combo .obs dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 10px; }
@@ -75,8 +80,11 @@
 .v-combo .sun-row img { grid-row: span 2; width: 40px; height: 40px; }
 .v-combo .sun-row b { font-size: 20px; color: var(--text); }
 
+@media (max-width: 379px) {
+  .v-combo .a-top img { width: 64px; height: 64px; margin-top: 0; }
+}
+
 @media (max-width: 359px) {
-  .v-combo .advs article { flex-basis: 86%; }
   .v-combo .place { font-size: 20px; }
   .v-combo .stats small { margin-left: 2px; }
 }

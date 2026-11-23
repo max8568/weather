@@ -78,10 +78,15 @@ test('combo temperature card has the place, the date, and the measured label', (
   assert.ok(now.includes('臺北市 中正區') && now.includes('11 月 23 日・星期一') && now.includes('實測'), now);
 });
 
-test('combo advice cards say what to do, built from the advice items', () => {
-  const html = byKey('combo');
-  assert.ok(html.includes('穿短袖，適合曬衣服。'));
-  assert.ok(html.includes('穿長袖，帶傘，衣服不適合在外面曬。'));
+test('combo advice cards follow the live site: period, range, rain, comfort, then one icon per advice item', () => {
+  const arts = byKey('combo').match(/<article>[\s\S]*?<\/article>/g);
+  assert.equal(arts.length, W.WEATHER.advice.length);
+  W.WEATHER.advice.forEach((a, i) => {
+    for (const s of [a.label, `${a.min} - ${a.max}°`, `降雨 ${a.pop}%`, a.comfort]) assert.ok(arts[i].includes(s), `${a.label} missing ${s}`);
+    const items = arts[i].match(/<li>[\s\S]*?<\/li>/g) || [];
+    assert.equal(items.length, a.items.length, a.label);
+    a.items.forEach((it, j) => assert.ok(items[j].includes('<svg') && items[j].includes(it.label), it.label));
+  });
 });
 
 test('combo shows the three stats in one row below the temperature card', () => {

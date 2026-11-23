@@ -2,14 +2,7 @@
 // 上面是溫度卡片（左邊地點、日期、溫度、天氣，右邊天氣圖示）和下面一排三個數字，接著是逐小時、7 日溫度範圍、
 // 可以左右滑的生活建議卡片、目前觀測、日出日落。每張卡片都照「即時總覽」原型的卡片樣式。
 (function () {
-  const { icon, deg, pct, md, hh, obsNote } = window.P;
-
-  // 生活建議的句子從建議項目組出來
-  const DO = {
-    'short-sleeve': '穿短袖', 'long-sleeve': '穿長袖', 'light-jacket': '加一件薄外套',
-    umbrella: '帶傘', laundry: '適合曬衣服', 'no-laundry': '衣服不適合在外面曬',
-  };
-  const advise = (a) => `${a.items.map((it) => DO[it.key]).join('，')}。`;
+  const { icon, deg, pct, ui, md, hh, obsNote } = window.P;
 
   // 標題放在卡片外面、卡片上方；卡片裡只放內容
   const card = (cls, title, sub, body) =>
@@ -47,12 +40,13 @@
         <b class="w-day">${d.label}</b>${icon(d.icon, d.weather)}<span class="w-pop">${pct(d.pop)}</span>
         <span class="w-range"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%"><b>${deg(d.min)}</b><b>${deg(d.max)}</b></i></span></li>`).join('')}</ul>`);
 
-    // 生活建議沒有外面那張卡片，標題下面直接是一排可以左右滑的卡片
+    // 生活建議照網站現在的排版：上半時段、溫度、降雨，右邊圖示和舒適度；下半一排建議圖示。
+    // 外面沒有卡片，標題下面直接是一排可以左右滑的卡片
     const advice = `<section class="sec advice"><h2>生活建議</h2><div class="advs hscroll" tabindex="0" role="region" aria-label="生活建議，可以左右捲動" data-own-keys>${
       w.advice.map((a) => `<article>
-        <header><div><h3>${a.label}</h3><p>${a.from}–${a.to}</p></div>${icon(a.icon, a.weather)}</header>
-        <p class="say">${advise(a)}</p>
-        <p class="nums"><b>${deg(a.min)}–${deg(a.max)}</b><span>降雨 ${pct(a.pop)}</span><span>${a.comfort}</span></p>
+        <div class="a-top"><p class="a-label">${a.label}</p><p class="a-temp">${a.min} - ${a.max}°</p><p class="a-pop">降雨 ${pct(a.pop)}</p>
+          ${icon(a.icon, a.weather)}<p class="a-comfort">${a.comfort}</p></div>
+        <ul class="a-items">${a.items.map((it) => `<li>${ui(it.key)}<span>${it.label}</span></li>`).join('')}</ul>
       </article>`).join('')}</div></section>`;
 
     const obs = card('obs', '目前觀測', obsNote(w), `<dl>
