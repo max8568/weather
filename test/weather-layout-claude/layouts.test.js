@@ -133,6 +133,7 @@ test('7-day temperatures sit in fixed columns on both sides of a grey track, lik
   const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
   assert.match(css, /[.]v-combo [.]w-temps [{][^}]*grid-template-columns: (\d+)px 1fr \1px;/);
   assert.match(css, /[.]v-combo [.]w-bar [{][^}]*background: var[(]--line[)];/);
+  assert.match(css, /[.]v-combo [.]w-bar [{][^}]*height: 6px;/);
   const gap = Number(css.match(/[.]v-combo [.]w-temps [{][^}]*margin-left: (\d+)px;/)[1]);
   assert.ok(gap >= 16, gap);
 });

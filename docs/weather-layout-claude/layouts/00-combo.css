@@ -55,8 +55,8 @@
    左邊空 16px，最低溫跟降雨機率才不會黏在一起 */
 .v-combo .w-temps { display: grid; grid-template-columns: 30px 1fr 30px; align-items: center; gap: 8px; margin-left: 16px; font-size: 15px; font-weight: 700; }
 .v-combo .w-temps b:last-child { text-align: right; }
-.v-combo .w-bar { position: relative; height: 4px; border-radius: 2px; background: var(--line); }
-.v-combo .w-bar i { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+.v-combo .w-bar { position: relative; height: 6px; border-radius: 3px; background: var(--line); }
+.v-combo .w-bar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
 /* 溫度條的顏色由 P.tempGradient 照固定色階算出來，寫在每一條的 style 裡 */
 .v-combo .w-range b { position: absolute; top: -5px; font-size: 13px; }
 .v-combo .w-range b:first-child { right: calc(100% + 4px); }
