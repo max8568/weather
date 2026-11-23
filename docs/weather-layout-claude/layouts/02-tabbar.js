@@ -32,18 +32,19 @@
     const at = (v) => ((v - lo) / (hi - lo)) * 100;
 
     const now = `
-      <div class="sky">
-        <p class="place">${w.county} <strong>${w.town}</strong></p>
-        ${icon(w.now.icon, '', 'sky-icon')}
-        <p class="temp">${deg(w.obs.temp)}</p>
-        <p class="cond">${w.now.weather}</p>
-        <p class="range">未來 24 小時 最高 ${deg(w.next24h.max)}　最低 ${deg(w.next24h.min)}</p>
+      <p class="place">${w.county} <strong>${w.town}</strong></p>
+      <div class="split">
+        <div class="sky">
+          <p class="temp">${deg(w.obs.temp)}</p>
+          <p class="cond">${icon(w.now.icon, '')}${w.now.weather}</p>
+          <p class="range">最高 ${deg(w.next24h.max)}　最低 ${deg(w.next24h.min)}</p>
+        </div>
+        <dl class="stats">
+          <div><dt>降雨機率</dt><dd>${pct(w.now.pop)}</dd></div>
+          <div><dt>體感溫度</dt><dd>${deg(w.now.feels)}</dd></div>
+          <div><dt>紫外線</dt><dd>${w.now.uv.value}<small>${w.now.uv.level}</small></dd></div>
+        </dl>
       </div>
-      <dl class="stats">
-        <div><dt>降雨機率</dt><dd>${pct(w.now.pop)}</dd></div>
-        <div><dt>體感溫度</dt><dd>${deg(w.now.feels)}</dd></div>
-        <div><dt>紫外線</dt><dd>${w.now.uv.value}<small>${w.now.uv.level}</small></dd></div>
-      </dl>
       <h2 class="sub">${obsNote(w)}</h2>
       <dl class="obs">
         <div><dt>溫度</dt><dd>${deg(w.obs.temp)}</dd></div>

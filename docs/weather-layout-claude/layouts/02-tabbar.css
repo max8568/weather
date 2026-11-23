@@ -14,18 +14,19 @@
 .v-tabbar .bar [aria-selected="true"] svg { padding: 2px 14px; box-sizing: content-box; border-radius: 999px; background: var(--sky-1); }
 
 /* 現在：大圖示、大字溫度置中 */
-.v-tabbar .sky { margin: 0 -16px; padding: 18px 16px 26px; text-align: center; background: var(--hero-panel); border-radius: 0 0 32px 32px; }
-.v-tabbar .place { font-size: 15px; color: var(--text-2); }
+/* 現在：左邊天藍方塊放溫度，右邊三個數字直排，兩塊並排 */
+.v-tabbar .place { padding: 18px 2px 12px; font-size: 15px; color: var(--text-2); }
 .v-tabbar .place strong { font-size: 20px; color: var(--text); }
-.v-tabbar .sky-icon { width: 132px; height: 132px; margin: 4px auto -8px; }
-.v-tabbar .temp { font-size: 96px; font-weight: 700; line-height: 1; letter-spacing: -4px; padding-left: 12px; }
-.v-tabbar .cond { margin-top: 8px; font-size: 20px; }
-.v-tabbar .range { margin-top: 4px; font-size: 14px; color: var(--text-2); }
-.v-tabbar .stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: -18px 4px 0; padding: 14px 4px; border-radius: 20px; background: var(--bg);
-  box-shadow: 0 6px 18px rgba(40, 90, 140, .12); text-align: center; position: relative; }
-.v-tabbar .stats div + div { border-left: 1px solid var(--line); }
+.v-tabbar .split { display: grid; grid-template-columns: 1.35fr 1fr; gap: 8px; }
+.v-tabbar .sky { display: flex; flex-direction: column; justify-content: flex-end; min-height: 220px; padding: 16px; border-radius: 24px; background: var(--hero-panel); }
+.v-tabbar .temp { font-size: clamp(64px, 21vw, 88px); font-weight: 700; line-height: 1; letter-spacing: -4px; }
+.v-tabbar .cond { display: flex; align-items: center; gap: 2px; margin-top: 6px; font-size: 17px; }
+.v-tabbar .cond img { width: 38px; height: 38px; margin-left: -6px; }
+.v-tabbar .range { margin-top: 2px; font-size: 13px; color: var(--text-2); }
+.v-tabbar .stats { display: grid; grid-template-rows: repeat(3, 1fr); gap: 8px; }
+.v-tabbar .stats div { display: flex; flex-direction: column; justify-content: center; padding: 8px 12px; border-radius: 18px; background: var(--card); }
 .v-tabbar .stats dt { font-size: 12px; color: var(--text-2); }
-.v-tabbar .stats dd { margin-top: 2px; font-size: 22px; font-weight: 700; white-space: nowrap; }
+.v-tabbar .stats dd { font-size: 22px; font-weight: 700; white-space: nowrap; }
 .v-tabbar .stats small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
 .v-tabbar .sub { margin: 24px 4px 8px; font-size: 13px; font-weight: 400; color: var(--note); }
 .v-tabbar .obs { border-radius: 16px; background: var(--card); padding: 2px 16px; }
