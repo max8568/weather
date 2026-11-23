@@ -16,7 +16,7 @@ function load() {
 }
 
 const W = load();
-const EXPECTED = ['bento', 'tabbar', 'timeline', 'pages', 'chart', 'brief', 'dial', 'days'];
+const EXPECTED = ['bento', 'tabbar', 'timeline', 'pages', 'chart', 'brief', 'dial', 'days', 'sheet'];
 
 test('layouts are registered in order', () => {
   // vm 裡的陣列原型跟這裡不同，先轉成這邊的陣列再比
