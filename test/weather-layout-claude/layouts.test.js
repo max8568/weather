@@ -16,7 +16,7 @@ function load() {
 }
 
 const W = load();
-const EXPECTED = ['bento', 'tabbar', 'chart', 'days'];
+const EXPECTED = ['combo', 'bento', 'tabbar', 'chart', 'days'];
 
 test('layouts are registered in order', () => {
   // vm 裡的陣列原型跟這裡不同，先轉成這邊的陣列再比
@@ -71,4 +71,15 @@ test('every icon file exists', () => {
   const w = W.WEATHER;
   const icons = [w.now.icon, ...w.hourly.map((x) => x.icon), ...w.advice.map((x) => x.icon), ...w.week.map((x) => x.icon)];
   for (const name of new Set(icons)) assert.ok(existsSync(`site/icons/weather/fill/${name}.svg`), name);
+});
+
+test('combo puts the place name and the measured label inside the temperature card', () => {
+  const sky = byKey('combo').match(/<section class="sky">([\s\S]*?)<\/section>/)[1];
+  assert.ok(sky.includes('中正區') && sky.includes('實測'), sky);
+});
+
+test('combo advice cards say what to do, built from the advice items', () => {
+  const html = byKey('combo');
+  assert.ok(html.includes('穿短袖，適合曬衣服。'));
+  assert.ok(html.includes('穿長袖，帶傘，衣服不適合在外面曬。'));
 });

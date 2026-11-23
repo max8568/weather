@@ -1,0 +1,73 @@
+/* 組合版：每一區都是同一種卡片（灰底、22px 圓角、15px 粗體標題），只有實測的「目前觀測」是白底加淺藍框 */
+.v-combo { display: grid; gap: 10px; padding: 12px; }
+.v-combo .card { min-width: 0; padding: 14px 16px 16px; border-radius: 22px; background: var(--card); }
+.v-combo .card h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; margin-bottom: 10px; font-size: 15px; }
+.v-combo .card h2 span { font-size: 12px; font-weight: 400; color: var(--note); }
+
+/* 最上面：左邊天藍方塊（地點、溫度），右邊三個數字直排 */
+.v-combo .hero { display: grid; grid-template-columns: 1.35fr 1fr; gap: 10px; }
+.v-combo .sky { display: flex; flex-direction: column; min-height: 236px; padding: 14px 16px 16px; border-radius: 22px; background: var(--hero-panel); }
+.v-combo .place { display: flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--text-2); }
+.v-combo .place strong { font-size: 18px; color: var(--text); }
+.v-combo .temp { margin-top: auto; font-size: clamp(64px, 21vw, 88px); font-weight: 700; line-height: 1; letter-spacing: -4px; }
+.v-combo .sky .note { margin-top: 2px; font-size: 12px; color: var(--text-2); }
+.v-combo .cond { display: flex; align-items: center; gap: 2px; margin-top: 8px; font-size: 17px; }
+.v-combo .cond img { width: 38px; height: 38px; margin-left: -6px; }
+.v-combo .range { margin-top: 2px; font-size: 13px; color: var(--text-2); }
+.v-combo .stats { display: grid; grid-template-rows: repeat(3, 1fr); gap: 10px; }
+.v-combo .stats div { display: flex; flex-direction: column; justify-content: center; padding: 8px 14px; border-radius: 18px; background: var(--card); }
+.v-combo .stats dt { font-size: 12px; color: var(--text-2); }
+.v-combo .stats dd { font-size: 22px; font-weight: 700; white-space: nowrap; }
+.v-combo .stats small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
+
+/* 逐小時 */
+.v-combo .strip { margin: 0 -16px -4px; padding: 0 8px 4px; }
+.v-combo .hour { flex: 0 0 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 2px 0; }
+.v-combo .hour.day-start { border-left: 1px solid var(--line); }
+.v-combo .hour time { font-size: 13px; color: var(--text-2); }
+.v-combo .hour img { width: 36px; height: 36px; }
+.v-combo .hour b { font-size: 16px; }
+.v-combo .hour span { font-size: 12px; color: var(--pop); }
+
+/* 7 日：每天一條溫度範圍，兩端標數字 */
+.v-combo .week li { display: grid; grid-template-columns: 40px 32px 34px 1fr; align-items: center; gap: 8px; padding: 6px 0; }
+.v-combo .week li + li { border-top: 1px solid var(--line); }
+.v-combo .w-day { font-size: 15px; }
+.v-combo .week img { width: 32px; height: 32px; }
+.v-combo .w-pop { font-size: 12px; color: var(--pop); text-align: right; }
+.v-combo .w-range { position: relative; height: 26px; margin: 0 26px; }
+.v-combo .w-range::before { content: ""; position: absolute; left: -26px; right: -26px; top: 12px; height: 2px; background: var(--line); }
+.v-combo .w-range i { position: absolute; top: 9px; height: 8px; border-radius: 4px; font-style: normal; background: linear-gradient(90deg, var(--min), var(--max)); }
+.v-combo .w-range b { position: absolute; top: -5px; font-size: 13px; }
+.v-combo .w-range b:first-child { right: calc(100% + 4px); }
+.v-combo .w-range b:last-child { left: calc(100% + 4px); }
+
+/* 生活建議：灰底卡片裡放可以左右滑的白卡片 */
+.v-combo .advs { gap: 10px; margin: 0 -16px; padding: 0 16px; scroll-snap-type: x mandatory; scroll-padding: 0 16px; }
+.v-combo .advs article { flex: 0 0 80%; display: flex; flex-direction: column; scroll-snap-align: start; padding: 14px 16px; border-radius: 18px; background: var(--bg); }
+.v-combo .advs header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.v-combo .advs h3 { font-size: 16px; }
+.v-combo .advs header p { font-size: 12px; color: var(--note); }
+.v-combo .advs header img { width: 48px; height: 48px; margin: -8px -6px -10px 0; }
+.v-combo .say { flex: 1; margin: 10px 0 12px; font-size: 15px; line-height: 1.6; }
+.v-combo .nums { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-size: 13px; color: var(--text-2); }
+.v-combo .nums b { font-size: 18px; color: var(--text); }
+.v-combo .nums span:first-of-type { color: var(--pop); }
+
+/* 目前觀測：實測值，白底加淺藍框 */
+.v-combo .obs { background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--sky-1); }
+.v-combo .obs dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 10px; }
+.v-combo .obs dt { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.v-combo .obs dd { font-size: 18px; font-weight: 700; white-space: nowrap; }
+.v-combo .obs small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
+
+.v-combo .sun-row { display: flex; justify-content: space-between; }
+.v-combo .sun-row p { display: grid; grid-template-columns: auto auto; align-items: center; column-gap: 6px; font-size: 13px; color: var(--text-2); }
+.v-combo .sun-row img { grid-row: span 2; width: 40px; height: 40px; }
+.v-combo .sun-row b { font-size: 20px; color: var(--text); }
+
+@media (max-width: 359px) {
+  .v-combo { padding: 10px; gap: 8px; }
+  .v-combo .card { padding: 12px 14px 14px; }
+  .v-combo .advs article { flex-basis: 86%; }
+}

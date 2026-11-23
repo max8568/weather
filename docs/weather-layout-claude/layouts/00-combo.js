@@ -1,0 +1,70 @@
+// 0. 組合版：使用者從各排版挑出來拼成的一頁，統一成同一套樣式。
+// 上面是「底部分頁」的溫度方塊（地點移進方塊裡）加右邊三個數字，接著是逐小時、7 日溫度範圍、
+// 可以左右滑的生活建議卡片、目前觀測、日出日落。預報的區塊是灰底；實測的「目前觀測」是白底加淺藍框。
+(function () {
+  const { icon, deg, pct, md, hh, obsNote } = window.P;
+
+  // 生活建議的句子從建議項目組出來
+  const DO = {
+    'short-sleeve': '穿短袖', 'long-sleeve': '穿長袖', 'light-jacket': '加一件薄外套',
+    umbrella: '帶傘', laundry: '適合曬衣服', 'no-laundry': '衣服不適合在外面曬',
+  };
+  const advise = (a) => `${a.items.map((it) => DO[it.key]).join('，')}。`;
+
+  const card = (cls, title, sub, body) =>
+    `<section class="card ${cls}"><h2>${title}${sub ? `<span>${sub}</span>` : ''}</h2>${body}</section>`;
+
+  function render(w) {
+    const lo = Math.min(...w.week.map((d) => d.min)), hi = Math.max(...w.week.map((d) => d.max));
+    const at = (v) => ((v - lo) / (hi - lo)) * 100;
+
+    const hero = `<div class="hero">
+        <section class="sky">
+          <p class="place">${w.county}<strong>${w.town}</strong></p>
+          <p class="temp">${deg(w.obs.temp)}</p>
+          <p class="note">${obsNote(w)}</p>
+          <p class="cond">${icon(w.now.icon, '')}${w.now.weather}</p>
+          <p class="range">未來 24 小時<br>最高 ${deg(w.next24h.max)}　最低 ${deg(w.next24h.min)}</p>
+        </section>
+        <dl class="stats">
+          <div><dt>降雨機率</dt><dd>${pct(w.now.pop)}</dd></div>
+          <div><dt>體感溫度</dt><dd>${deg(w.now.feels)}</dd></div>
+          <div><dt>紫外線</dt><dd>${w.now.uv.value}<small>${w.now.uv.level}</small></dd></div>
+        </dl>
+      </div>`;
+
+    const hours = card('hours', '逐小時預報', '', `<div class="strip hscroll" tabindex="0" role="region" aria-label="逐小時預報，可以左右捲動" data-own-keys>${
+      w.hourly.slice(0, 24).map((h, i) => {
+        const midnight = h.time.endsWith('T00:00');
+        return `<div class="hour${i && midnight ? ' day-start' : ''}"><time>${midnight ? md(h.time) : hh(h.time)}</time>${icon(h.icon, h.weather)}<b>${deg(h.temp)}</b><span>${pct(h.pop)}</span></div>`;
+      }).join('')}</div>`);
+
+    const week = card('week', '7 日預報', '最低溫到最高溫', `<ul>${w.week.map((d) => `<li>
+        <b class="w-day">${d.label}</b>${icon(d.icon, d.weather)}<span class="w-pop">${pct(d.pop)}</span>
+        <span class="w-range"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%"><b>${deg(d.min)}</b><b>${deg(d.max)}</b></i></span></li>`).join('')}</ul>`);
+
+    const advice = card('advice', '生活建議', '', `<div class="advs hscroll" tabindex="0" role="region" aria-label="生活建議，可以左右捲動" data-own-keys>${
+      w.advice.map((a) => `<article>
+        <header><div><h3>${a.label}</h3><p>${a.from}–${a.to}</p></div>${icon(a.icon, a.weather)}</header>
+        <p class="say">${advise(a)}</p>
+        <p class="nums"><b>${deg(a.min)}–${deg(a.max)}</b><span>降雨 ${pct(a.pop)}</span><span>${a.comfort}</span></p>
+      </article>`).join('')}</div>`);
+
+    const obs = card('obs', '目前觀測', obsNote(w), `<dl>
+        <div><dt>濕度</dt><dd>${w.obs.humidity}<small>%</small></dd></div>
+        <div><dt>風速</dt><dd>${w.obs.windSpeed}<small>m/s</small></dd></div>
+        <div><dt>風向</dt><dd>${w.obs.windDir}</dd></div>
+        <div><dt>氣壓</dt><dd>${w.obs.pressure}<small>hPa</small></dd></div>
+        <div><dt>今日累積雨量</dt><dd>${w.obs.rainToday}<small>mm</small></dd></div>
+      </dl>`);
+
+    const sun = card('sun', '日出日落', '', `<div class="sun-row">
+        <p>${icon('sunrise')}<span>日出</span><b>${w.sun.rise}</b></p>
+        <p>${icon('sunset')}<span>日落</span><b>${w.sun.set}</b></p>
+      </div>`);
+
+    return hero + hours + week + advice + obs + sun;
+  }
+
+  window.LAYOUTS.push({ key: 'combo', name: '組合版', render });
+})();
