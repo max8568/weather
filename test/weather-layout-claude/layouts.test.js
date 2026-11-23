@@ -83,3 +83,8 @@ test('combo advice cards say what to do, built from the advice items', () => {
   assert.ok(html.includes('穿短袖，適合曬衣服。'));
   assert.ok(html.includes('穿長袖，帶傘，衣服不適合在外面曬。'));
 });
+
+test('combo puts the short measured note on the same line as the high and low', () => {
+  const range = byKey('combo').match(/<p class="range">([\s\S]*?)<\/p>/)[1];
+  assert.ok(range.includes('最高') && range.includes('最低') && range.includes(`實測 ${W.WEATHER.obs.time}`), range);
+});

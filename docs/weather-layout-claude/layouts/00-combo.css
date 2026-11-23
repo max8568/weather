@@ -5,26 +5,23 @@
 .v-combo .card h2 span { font-size: 12px; font-weight: 400; color: var(--note); }
 
 /* 最上面：左邊天藍方塊，右邊三格。
-   方塊裡分兩欄：左欄溫度、下面最高最低溫；右欄天氣圖示、下面天氣現象。實測說明放在最下面一行。 */
+   方塊裡上半分兩欄：左欄溫度、下面「未來 24 小時」；右欄天氣圖示、下面天氣現象。
+   最後一行橫跨整個方塊：左邊最高最低溫，右邊「實測 16:00」；寬度不夠時「實測」換到下一行。 */
 .v-combo .hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: 10px; }
-/* 溫度緊接在地點下面；方塊比內容高時，多出來的空間留在實測說明上方 */
-.v-combo .sky { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto auto 1fr; column-gap: 6px;
+/* 溫度緊接在地點下面；方塊比內容高時，多出來的空間留在最下面 */
+.v-combo .sky { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; column-gap: 6px;
   padding: 14px 14px 12px; border-radius: 22px; background: var(--hero-panel); }
 .v-combo .place { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--text-2); }
 .v-combo .place strong { font-size: 18px; color: var(--text); }
 .v-combo .temp { grid-row: 2; grid-column: 1; align-self: end; margin-top: 4px; font-size: clamp(52px, 15vw, 80px); font-weight: 700; line-height: .95; letter-spacing: -3px; }
 .v-combo .big-icon { grid-row: 2; grid-column: 2; align-self: end; justify-self: center; width: min(100%, 92px); height: auto; margin-bottom: -4px; }
-.v-combo .range { grid-row: 3; grid-column: 1; margin-top: 6px; font-size: 13px; color: var(--text-2); }
-.v-combo .range small { display: block; font-size: 11px; color: var(--text-2); }
-/* 手機寬度時最高、最低各一行，左欄才不會比溫度寬、把右欄的圖示擠小；畫面夠寬才排成一行 */
-.v-combo .range span { display: block; white-space: nowrap; }
-@media (min-width: 440px) {
-  .v-combo .range span { display: inline; }
-  .v-combo .range span + span { margin-left: 8px; }
-}
+.v-combo .next { grid-row: 3; grid-column: 1; align-self: end; margin-top: 6px; font-size: 11px; color: var(--text-2); }
 /* 天氣現象緊貼在圖示下面 */
 .v-combo .cond { grid-row: 3; grid-column: 2; align-self: start; justify-self: center; margin-top: -2px; font-size: 14px; white-space: nowrap; }
-.v-combo .sky .note { grid-row: 4; grid-column: 1 / -1; align-self: end; margin-top: 6px; font-size: 11px; color: var(--text-2); }
+.v-combo .range { grid-row: 4; grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; column-gap: 12px;
+  font-size: 13px; color: var(--text-2); }
+.v-combo .range .hl { white-space: nowrap; }
+.v-combo .range .note { font-size: 11px; white-space: nowrap; }
 
 /* 右邊三格：名稱在左、數字在右。三格共用同一欄數字（subgrid），數字置中在同一條線上 */
 .v-combo .stats { display: grid; grid-template-columns: 1fr auto; grid-template-rows: repeat(3, 1fr); gap: 10px; }

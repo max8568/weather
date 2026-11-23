@@ -23,9 +23,9 @@
           <p class="place">${w.county}<strong>${w.town}</strong></p>
           <p class="temp">${deg(w.obs.temp)}</p>
           ${icon(w.now.icon, w.now.weather, 'big-icon')}
-          <p class="range"><small>未來 24 小時</small><span>最高 ${deg(w.next24h.max)}</span><span>最低 ${deg(w.next24h.min)}</span></p>
+          <p class="next">未來 24 小時</p>
           <p class="cond">${w.now.weather}</p>
-          <p class="note">${obsNote(w)}</p>
+          <p class="range"><span class="hl">最高 ${deg(w.next24h.max)}　最低 ${deg(w.next24h.min)}</span><span class="note">實測 ${w.obs.time}</span></p>
         </section>
         <dl class="stats">
           <div><dt>降雨機率</dt><dd>${pct(w.now.pop)}</dd></div>
