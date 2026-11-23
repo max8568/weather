@@ -1,6 +1,7 @@
 // 用法：node scripts/capture-fixtures.mjs <morning|evening>
 // 從氣象署抓真實回應存成測試資料。授權碼從 worker/.dev.vars 讀，存檔前會換成 REDACTED。
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { redact } from './redact.mjs';
 
 const label = process.argv[2];
 const windows = { morning: [6, 17], evening: [18, 23] };
@@ -31,27 +32,27 @@ async function get(id, params = {}) {
   return json;
 }
 
-function redact(v) {
-  if (typeof v === 'string') return v === key ? 'REDACTED' : v;
-  if (Array.isArray(v)) return v.map(redact);
-  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, redact(x)]));
-  return v;
-}
+// 先把 5 份都抓到並檢查過，才寫檔；任何一份失敗就不動上一次的存檔
+const obs = await get('O-A0001-001');
+const keep = new Set(['新北市', '臺北市', '桃園市']);
+obs.records.Station = obs.records.Station.filter((s) => keep.has(s.GeoInfo?.CountyName));
+const files = {
+  'F-C0032-001.json': await get('F-C0032-001', { locationName: '新北市' }),
+  'threeDay.json': await get('F-D0047-069', { LocationName: '五股區' }),
+  'weekly.json': await get('F-D0047-071', { LocationName: '五股區' }),
+  'O-A0001-001.json': obs,
+  'A-B0062-001.json': await get('A-B0062-001', { CountyName: '新北市', Date: today }),
+  'meta.json': { capturedAt: taipei.toISOString().replace('Z', '+08:00'), county: '新北市', town: '五股區' },
+};
+if (!obs.records.Station.length) throw new Error('O-A0001-001: 沒有符合的測站');
+if (!files['threeDay.json'].records?.Locations?.[0]?.Location?.length) throw new Error('threeDay: 沒有鄉鎮資料');
+if (!files['weekly.json'].records?.Locations?.[0]?.Location?.length) throw new Error('weekly: 沒有鄉鎮資料');
+if (!files['A-B0062-001.json'].records?.locations?.location?.length) throw new Error('A-B0062-001: 沒有資料');
+if (!files['F-C0032-001.json'].records?.location?.length) throw new Error('F-C0032-001: 沒有資料');
 
 const dir = new URL(`../worker/test/fixtures/${label}/`, import.meta.url);
 mkdirSync(dir, { recursive: true });
-const save = (name, json) => writeFileSync(new URL(name, dir), JSON.stringify(redact(json), null, 1));
-
-save('F-C0032-001.json', await get('F-C0032-001', { locationName: '新北市' }));
-save('threeDay.json', await get('F-D0047-069', { LocationName: '五股區' }));
-save('weekly.json', await get('F-D0047-071', { LocationName: '五股區' }));
-
-const obs = await get('O-A0001-001');
-const keep = new Set(['新北市', '臺北市', '桃園市']);
-const stations = obs.records.Station.filter((s) => keep.has(s.GeoInfo?.CountyName));
-obs.records.Station = stations;
-save('O-A0001-001.json', obs);
-
-save('A-B0062-001.json', await get('A-B0062-001', { CountyName: '新北市', Date: today }));
-save('meta.json', { capturedAt: taipei.toISOString().replace('Z', '+08:00'), county: '新北市', town: '五股區' });
-console.log('saved to', label, '; obs stations kept:', stations.length);
+for (const [name, json] of Object.entries(files)) {
+  writeFileSync(new URL(name, dir), JSON.stringify(redact(json, key), null, 1));
+}
+console.log('saved to', label, '; obs stations kept:', obs.records.Station.length);
