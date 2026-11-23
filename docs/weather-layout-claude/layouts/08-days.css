@@ -1,0 +1,73 @@
+.v-days { padding: 0 12px 8px; }
+.v-days .top { display: flex; align-items: baseline; gap: 10px; padding: 16px 4px 10px; }
+.v-days .top h1 { font-size: 22px; }
+.v-days .top p { font-size: 13px; color: var(--note); }
+
+/* 7 天的按鈕：選中的那天整格變天藍色，下面的內容跟它接在一起 */
+.v-days .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.v-days .days button { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; padding: 8px 0 10px; border: 0;
+  border-radius: 16px 16px 0 0; background: none; cursor: pointer; }
+.v-days .wk { font-size: 12px; color: var(--text-2); }
+.v-days .num { font-size: 20px; font-weight: 700; line-height: 1.2; }
+.v-days .days img { width: 30px; height: 30px; }
+.v-days .hl { font-size: 13px; font-weight: 700; }
+.v-days .hl small { display: block; font-size: 11px; font-weight: 400; color: var(--text-2); text-align: center; }
+.v-days .days [aria-pressed="true"] { background: var(--sky-1); }
+.v-days .days [aria-pressed="true"] .wk { color: var(--text); font-weight: 700; }
+
+.v-days .detail { padding: 16px 16px 18px; border-radius: 0 0 22px 22px; background: linear-gradient(180deg, var(--sky-1), var(--sky-2) 55%, var(--bg)); }
+.v-days .days:not(:has(button:first-child[aria-pressed="true"])) + .detail { border-top-left-radius: 22px; }
+.v-days .days:not(:has(button:last-child[aria-pressed="true"])) + .detail { border-top-right-radius: 22px; }
+.v-days .d-head { display: flex; justify-content: space-between; align-items: center; }
+.v-days .d-date { font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+.v-days .d-date span { margin-left: 10px; font-size: 16px; letter-spacing: 0; }
+.v-days .d-wx { margin-top: 8px; font-size: 18px; }
+.v-days .d-t { display: flex; align-items: baseline; gap: 4px; margin-top: 4px; font-size: 14px; color: var(--text-2); }
+.v-days .d-t b { margin-right: 8px; font-size: 24px; }
+.v-days .d-t .max { color: var(--text); }
+.v-days .d-t .min { color: var(--text-2); }
+.v-days .d-head img { width: 112px; height: 112px; margin: -14px -10px -14px 0; }
+.v-days .d-now { margin-top: 10px; padding: 8px 12px; border-radius: 12px; background: rgba(255, 255, 255, .7); font-size: 13px; color: var(--text-2); line-height: 1.6; }
+.v-days .d-now b { color: var(--text); }
+.v-days .d-sub { display: flex; gap: 8px; align-items: baseline; margin-top: 16px; font-size: 14px; }
+.v-days .d-sub span { font-size: 12px; font-weight: 400; color: var(--note); }
+.v-days .d-none { margin-top: 16px; padding: 14px; border-radius: 12px; background: rgba(255, 255, 255, .7); font-size: 13px; color: var(--text-2); }
+
+/* 每小時：柱子高度跟著氣溫 */
+.v-days .cols { gap: 2px; margin: 8px -16px 0; padding: 0 12px; align-items: flex-end; }
+.v-days .col-h { flex: 0 0 42px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.v-days .col-h .v { font-size: 13px; font-weight: 700; }
+.v-days .col-h i { width: 10px; border-radius: 5px 5px 2px 2px; background: linear-gradient(180deg, var(--max), rgba(240, 138, 60, .35)); }
+.v-days .col-h img { width: 30px; height: 30px; }
+.v-days .col-h .p { font-size: 11px; color: var(--pop); }
+.v-days .col-h time { font-size: 11px; color: var(--text-2); }
+
+.v-days .fixed { margin-top: 18px; padding: 0 4px; }
+.v-days .fixed h2 { margin-bottom: 8px; font-size: 13px; font-weight: 400; color: var(--note); }
+.v-days .obs dl { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border-radius: 16px; overflow: hidden; box-shadow: inset 0 0 0 1.5px var(--sky-1); background: var(--sky-2); }
+.v-days .obs dl div { padding: 10px 12px; background: var(--bg); }
+.v-days .obs dt { font-size: 12px; color: var(--text-2); }
+.v-days .obs dd { font-size: 16px; font-weight: 700; }
+.v-days .advs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.v-days .advs article { display: flex; flex-direction: column; align-items: center; padding: 12px 6px; border-radius: 16px; background: var(--card); text-align: center; }
+.v-days .advs h3 { font-size: 14px; }
+.v-days .advs .t { font-size: 11px; color: var(--text-2); }
+.v-days .advs img { width: 48px; height: 48px; }
+.v-days .advs .n { font-size: 16px; font-weight: 700; }
+.v-days .advs ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; margin-top: 8px; }
+.v-days .advs li { display: flex; flex-direction: column; align-items: center; font-size: 10px; white-space: nowrap; }
+.v-days .advs .ui { width: 22px; height: 22px; }
+.v-days .sun { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; }
+.v-days .sun h2 { width: 100%; margin-bottom: 0; }
+.v-days .sun p { display: flex; align-items: center; gap: 4px; font-size: 14px; color: var(--text-2); }
+.v-days .sun b { font-size: 18px; color: var(--text); }
+.v-days .sun img { width: 32px; height: 32px; }
+
+@media (max-width: 359px) {
+  .v-days { padding: 0 8px 8px; }
+  .v-days .num { font-size: 17px; }
+  .v-days .days img { width: 26px; height: 26px; }
+  .v-days .d-date { font-size: 34px; }
+  .v-days .d-head img { width: 88px; height: 88px; }
+  .v-days .advs { grid-template-columns: 1fr; }
+}
