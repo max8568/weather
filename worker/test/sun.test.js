@@ -33,3 +33,11 @@ test('parseSun normalises HH:MM:SS to HH:MM and rejects junk times', () => {
   assert.deepEqual(parseSun(mk('06:16:00', '17:04:30'), '新北市'), { date: '2026-11-23', sunrise: '06:16', sunset: '17:04' });
   assert.throws(() => parseSun(mk('abc', '17:04'), '新北市'));
 });
+
+test('parseSun rejects impossible dates and out-of-range times', () => {
+  const mk = (date, a, b) => ({ records: { locations: { location: [{ CountyName: '新北市', time: [{ Date: date, SunRiseTime: a, SunSetTime: b }] }] } } });
+  assert.throws(() => parseSun(mk('2026-02-30', '06:16', '17:04'), '新北市'));
+  assert.throws(() => parseSun(mk('2026-11-23', '24:00', '17:04'), '新北市'));
+  assert.throws(() => parseSun(mk('2026-11-23', '06:16', '17:60'), '新北市'));
+  assert.equal(parseSun(mk('2028-02-29', '06:16', '17:04'), '新北市').date, '2028-02-29');
+});
