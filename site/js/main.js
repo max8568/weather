@@ -69,7 +69,7 @@ async function load(refocus = false) {
   clearSections();
   try {
     render(await fetchForecast(current.county, current.town));
-    if (refocus) document.getElementById('place')?.focus();
+    if (refocus) document.getElementById('menu')?.focus();
   } catch (err) {
     renderError(err);
   }

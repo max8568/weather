@@ -89,20 +89,26 @@ export function renderDataTime(el, data) {
   el.replaceChildren(...parts.flatMap((text, i) => (i ? ['・', h('span', '', text)] : [h('span', '', text)])));
 }
 
+// 溫度卡片下面一排三格：名稱在上、數字在下，單位用小字；缺值只寫 --，不寫單位。
+function stat(label, value, unit) {
+  const dd = h('dd', '', value);
+  if (value !== '--' && unit) dd.append(h('small', '', unit));
+  const box = h('div');
+  box.append(h('dt', '', label), dd);
+  return box;
+}
+
 export function renderNowTiles(el, data) {
   const td = data.threeDay, wk = data.weekly;
   if (!td && !wk) return renderUnavailable(el, '目前天氣');
-  const uv = wk?.uv;
-  const uvValue = h('div', 'tile-value');
-  if (uv) uvValue.append(String(uv.value), h('small', '', uv.level));
-  else uvValue.textContent = '--';
-  const grid = h('div', 'tiles');
-  grid.append(
-    tile('降雨機率', h('div', 'tile-value', pct(td?.current.pop))),
-    tile(uv?.label || '紫外線', uvValue),
-    tile('體感溫度', h('div', 'tile-value', deg(td?.current.apparentTemperature))),
+  const uv = wk?.uv, pop = td?.current.pop, feels = td?.current.apparentTemperature;
+  const stats = h('dl', 'stats');
+  stats.append(
+    stat('降雨機率', typeof pop === 'number' ? String(pop) : '--', '%'),
+    stat('體感溫度', typeof feels === 'number' ? String(Math.round(feels)) : '--', '°C'),
+    stat(uv?.label || '紫外線', uv ? String(uv.value) : '--', uv?.level || ''),
   );
-  el.replaceChildren(grid);
+  el.replaceChildren(stats);
 }
 
 export function renderHourly(el, data, { onDetail }) {
