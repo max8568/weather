@@ -55,6 +55,25 @@ export function stepPath(points, endX) {
   return `${d} H${r(endX)}`;
 }
 
+// 有缺值的階梯圖：連續有值的時段各畫一段，每段畫到下一個時段的起點（最後一段畫到 endX）。
+// 缺值的時段沒有線、也沒有填色，跟上方顯示的「--」一致。其餘參數和 scalePoints 一樣，xs 必填。
+export function stepSegments(values, { xs, endX, ...scale }) {
+  const bottom = r(scalePoints([scale.min], { ...scale, xs: [0] })[0][1]);
+  const lines = [], areas = [];
+  let start = 0;
+  for (let i = 0; i <= values.length; i++) {
+    if (i < values.length && typeof values[i] === 'number') continue;
+    if (i > start) {
+      const pts = scalePoints(values.slice(start, i), { ...scale, xs: xs.slice(start, i) });
+      const line = stepPath(pts, i < values.length ? xs[i] : endX);
+      lines.push(line);
+      areas.push(`${line} V${bottom} H${r(pts[0][0])} Z`);
+    }
+    start = i + 1;
+  }
+  return { line: lines.join(' '), area: areas.join(' ') };
+}
+
 const STEPS = [1, 2, 3, 5, 10, 20, 25, 50, 100];
 
 // 刻度：從小到大試間隔，取第一個能讓格數不超過 maxIntervals 的。
@@ -83,6 +102,8 @@ export const PAD_X = 12;      // 第一個點和最後一個點離圖邊的距�
 const LABEL_H = 26;           // 底下時間文字的高度
 const PAD_TOP = 16;
 const PAD_BOTTOM = 2;
+const HOLD_MS = 300;          // 手指按住多久開始選時刻
+const HOLD_SLOP = 8;          // 按住期間手指可以晃動的距離（px），超過就當成滑動
 let uid = 0;
 
 // 畫一張圖到 container。values 和 xs、xLabels 一一對應；xLabels 空字串的位置不寫字。
@@ -120,9 +141,13 @@ export function renderChart(container, {
 
   const pts = scalePoints(values, scale);
   if (pts.length) {
-    const line = kind === 'step' ? stepPath(pts, width) : smoothPath(pts);
-    const first = r(pts[0][0]), last = r(pts[pts.length - 1][0]), b = r(bottom);
-    const area = kind === 'step' ? `${line} V${b} H${first} Z` : `${line} L${last} ${b} L${first} ${b} Z`;
+    let line, area;
+    if (kind === 'step') ({ line, area } = stepSegments(values, { ...scale, endX: width }));
+    else {
+      const first = r(pts[0][0]), last = r(pts[pts.length - 1][0]), b = r(bottom);
+      line = smoothPath(pts);
+      area = `${line} L${last} ${b} L${first} ${b} Z`;
+    }
     svg.append(svgEl('path', { d: area, fill: `url(#${id})` }));
     svg.append(svgEl('path', { d: line, fill: 'none', 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, { stroke: color }));
   }
@@ -131,7 +156,6 @@ export function renderChart(container, {
 
   const axis = document.createElement('div');
   axis.className = 'chart-y';
-  axis.style.height = `${plotH}px`;
   for (const t of yTicks) {
     const label = document.createElement('span');
     label.textContent = `${t}${unit}`;
@@ -155,17 +179,40 @@ export function renderChart(container, {
     dot.append(svgEl('circle', { cx, cy, r: kind === 'line' ? 6 : 4.5 }, { fill: color }));
   }
 
-  // 點一下選那個時刻；滑鼠或觸控筆按住拖動時一路跟著選。手指滑動交給瀏覽器捲動圖表。
-  function pick(e) {
-    const x = e.clientX - svg.getBoundingClientRect().left;
+  function pick(clientX) {
+    const x = clientX - svg.getBoundingClientRect().left;
     let best = 0;
     xs.forEach((v, i) => { if (Math.abs(v - x) < Math.abs(xs[best] - x)) best = i; });
     if (best === current) return;
     select(best);
     if (onSelect) onSelect(best);
   }
-  svg.addEventListener('click', pick);
-  svg.addEventListener('pointermove', (e) => { if (e.pointerType !== 'touch' && e.buttons & 1) pick(e); });
+  // 點一下選那個時刻；滑鼠或觸控筆按住拖動時一路跟著選。
+  svg.addEventListener('click', (e) => pick(e.clientX));
+  svg.addEventListener('pointermove', (e) => { if (e.pointerType !== 'touch' && e.buttons & 1) pick(e.clientX); });
+
+  // 手指：按住不動約 300ms 才開始選，之後到放開前左右移動都在選時刻，這段期間圖表和頁面都不捲動。
+  // 沒按住就滑動，照常捲動圖表。要擋住捲動只能在 touchmove 呼叫 preventDefault，所以用 touch 事件。
+  let hold = 0, scrubbing = false, startX = 0, startY = 0;
+  const stopTouch = () => { clearTimeout(hold); hold = 0; scrubbing = false; };
+  svg.addEventListener('touchstart', (e) => {
+    stopTouch();
+    if (e.touches.length !== 1) return;
+    ({ clientX: startX, clientY: startY } = e.touches[0]);
+    hold = setTimeout(() => { hold = 0; scrubbing = true; pick(startX); }, HOLD_MS);
+  }, { passive: true });
+  svg.addEventListener('touchmove', (e) => {
+    const t = e.touches[0];
+    if (scrubbing) {
+      e.preventDefault();
+      pick(t.clientX);
+    } else if (hold && Math.hypot(t.clientX - startX, t.clientY - startY) > HOLD_SLOP) {
+      stopTouch(); // 手指在 300ms 內就移動了，當成滑動
+    }
+  }, { passive: false });
+  svg.addEventListener('touchend', stopTouch);
+  svg.addEventListener('touchcancel', stopTouch);
+  svg.addEventListener('contextmenu', (e) => { if (scrubbing) e.preventDefault(); });
 
   return { select };
 }

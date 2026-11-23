@@ -1,7 +1,7 @@
 import { openSheet } from './sheet.js';
 import { renderChart, niceTicks, PAD_X } from '../chart.js';
 import { iconKey, isNight, iconUrl } from '../logic/icons.js';
-import { weekdayChar } from '../logic/format.js';
+import { weekdayChar, coversWholeDay } from '../logic/format.js';
 import { h, img, pct, choiceRow, dateRow } from './sections.js';
 import * as ui from './ui-icons.js';
 
@@ -109,9 +109,12 @@ export function open72hPanel(data) {
     icon.hidden = !p.weather;
     icon.src = iconUrl(iconKey(p.weather), { night: isNight(p.time) });
     icon.alt = p.weather || '';
-    const sameDay = nums(pts.filter((q) => dateOf(q.time) === date).map((q) => q[t.key]));
+    // 那天的資料沒涵蓋整天（今天從現在開始、最後一天只到下午）時，最高最低只是資料時段內的，要寫清楚。
+    const dayPts = pts.filter((q) => dateOf(q.time) === date);
+    const sameDay = nums(dayPts.map((q) => q[t.key]));
     const hi = sameDay.length ? Math.max(...sameDay) : null, lo = sameDay.length ? Math.min(...sameDay) : null;
     range.replaceChildren(h('span', '', `最高 ${fmt(hi, t.unit)}`), h('span', '', `最低 ${fmt(lo, t.unit)}`));
+    if (!coversWholeDay(dayPts.map((q) => q.time))) range.prepend(h('span', '', '預報時段內'));
     popValue.textContent = pct(p.pop);
     wind.textContent = p.windDirection || '--';
     comfort.textContent = p.comfort || '--';

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { scalePoints, smoothPath, stepPath, niceTicks } from '../../site/js/chart.js';
+import { scalePoints, smoothPath, stepPath, stepSegments, niceTicks } from '../../site/js/chart.js';
 
 // d 字串裡每一段 C 的六個數字
 const curves = (d) => [...d.matchAll(/C([^C]+)/g)].map((m) => m[1].trim().split(/\s+/).map(Number));
@@ -9,6 +9,22 @@ test('stepPath', () => assert.equal(stepPath([[0, 10], [10, 20]], 20), 'M0 10 H1
 test('stepPath with more points', () => {
   assert.equal(stepPath([[0, 10], [10, 20], [30, 5]], 40), 'M0 10 H10 V20 H30 V5 H40');
   assert.equal(stepPath([], 40), '');
+});
+
+const STEP_SCALE = { xs: [0, 10, 20], endX: 30, height: 100, min: 0, max: 100, padTop: 0, padBottom: 0 };
+test('stepSegments breaks the line and the fill at a missing slot', () => {
+  const s = stepSegments([20, null, 70], STEP_SCALE);
+  assert.equal(s.line, 'M0 80 H10 M20 30 H30');
+  assert.equal(s.area, 'M0 80 H10 V100 H0 Z M20 30 H30 V100 H20 Z');
+});
+test('stepSegments without gaps is one stepPath', () => {
+  const s = stepSegments([20, 50, 70], STEP_SCALE);
+  assert.equal(s.line, 'M0 80 H10 V50 H20 V30 H30');
+  assert.equal(s.area, 'M0 80 H10 V50 H20 V30 H30 V100 H0 Z');
+});
+test('stepSegments with leading, trailing and only missing slots', () => {
+  assert.equal(stepSegments([null, 50, null], STEP_SCALE).line, 'M10 50 H20');
+  assert.deepEqual(stepSegments([null, null, null], STEP_SCALE), { line: '', area: '' });
 });
 
 test('smoothPath passes through every point', () => {

@@ -56,6 +56,13 @@ export function hourLabel(iso, index) {
   return index === 0 ? '現在' : `${iso.slice(11, 13)}時`;
 }
 
+// 同一天的逐時資料有沒有涵蓋整天：第一筆不晚於 03:00、最後一筆不早於 21:00。
+// times 是照時間排好的台北時間 ISO 字串，直接讀字串裡的時分。
+export function coversWholeDay(times) {
+  if (!times.length) return false;
+  return hhmm(times[0]) <= '03:00' && hhmm(times[times.length - 1]) >= '21:00';
+}
+
 // 日期字串（或台北時間 ISO 的前 10 碼）是星期幾，用 UTC 算，不受瀏覽器時區影響。
 export function weekdayChar(date) {
   const day = new Date(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10)))).getUTCDay();

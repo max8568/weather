@@ -144,7 +144,7 @@ button { color: inherit; }
 /* 兩張圖共用的橫向捲動容器。y 軸刻度那一欄固定在右邊，「降雨機率」標題固定在左邊 */
 .chart-scroll { margin-top: 8px; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { .chart-scroll { scroll-behavior: auto; } }
-.chart { display: flex; width: max-content; user-select: none; -webkit-user-select: none; }
+.chart { display: flex; width: max-content; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .chart svg { display: block; flex: none; cursor: pointer; }
 .chart .grid { stroke: var(--line); stroke-width: 1; }
 .chart .grid.dash { stroke-dasharray: 3 3; }
