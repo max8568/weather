@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>天氣預報｜10 種手機排版</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="layouts/01-bento.css">
+</head>
+<body>
+<header class="switcher" aria-label="切換排版">
+  <button id="prev" type="button" aria-label="上一種排版">‹</button>
+  <select id="pick" aria-label="選擇排版"></select>
+  <button id="next" type="button" aria-label="下一種排版">›</button>
+</header>
+<div class="col">
+  <main id="app"></main>
+  <footer class="source">資料來源：中央氣象署</footer>
+</div>
+<script src="data.js"></script>
+<script src="parts.js"></script>
+<script src="layouts/01-bento.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

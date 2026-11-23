@@ -1,0 +1,37 @@
+/* 顏色照 site/css/style.css 的 :root，不加新的主色 */
+:root {
+  --bg: #fff; --outside: #eef0f3; --card: #f5f5f7; --text: #1a1a1a; --text-2: #4a4a4f; --muted: #8a8a8e; --line: #e6e6ea;
+  --pop: #1e6ccf; --sun: #f5a623; --max: #f08a3c; --min: #4a9ff5;
+  --sky-1: #a8daf6; --sky-2: #d4ecfb; --hero-panel: linear-gradient(180deg, var(--sky-1), var(--sky-2));
+  /* 白底上要到 4.5:1，比 --muted 深一點；跟網站的 .data-time 同色 */
+  --note: #6e6e73;
+  --col: 480px; --bar: 52px;
+  font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: var(--bar); }
+body { margin: 0; background: var(--outside); color: var(--text); font-variant-numeric: tabular-nums; -webkit-text-size-adjust: 100%; }
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+button { font: inherit; color: inherit; }
+img.wx { display: block; }
+.ui { display: block; }
+:focus-visible { outline: 2px solid var(--pop); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; scroll-behavior: auto !important; } }
+
+/* 切換列不是設計的一部分，用外側的灰色，跟排版本身分開 */
+.switcher { position: sticky; top: 0; z-index: 50; height: var(--bar); display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 0 12px; background: var(--outside); border-bottom: 1px solid #dfe2e7; }
+.switcher button, .switcher select { height: 36px; border: 1px solid #d5d8de; border-radius: 10px; background: #fff; }
+.switcher button { width: 40px; font-size: 22px; line-height: 1; cursor: pointer; }
+.switcher select { min-width: 0; flex: 0 1 260px; padding: 0 10px; font-size: 15px; }
+
+.col { max-width: var(--col); margin: 0 auto; min-height: calc(100vh - var(--bar)); background: var(--bg); display: flex; flex-direction: column; }
+#app { flex: 1; min-width: 0; }
+.source { padding: 20px 16px 28px; text-align: center; font-size: 12px; color: var(--note); }
+
+/* 可以橫向捲動的區域：不顯示捲軸 */
+.hscroll { display: flex; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+.hscroll::-webkit-scrollbar { display: none; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

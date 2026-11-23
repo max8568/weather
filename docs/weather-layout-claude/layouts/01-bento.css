@@ -1,0 +1,75 @@
+.v-bento { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px;
+  grid-template-areas: "hero hero" "rain feels" "rain uv" "hours hours" "advice advice" "week week" "cap cap" "wind hum" "press acc" "sun sun"; }
+.v-bento .t { position: relative; min-width: 0; padding: 14px 16px; border-radius: 18px; background: var(--card); }
+.v-bento .wide { border-radius: 22px; }
+/* 實測值：白底加淺藍框，跟預報的灰底分開 */
+.v-bento .obs { background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--sky-1); }
+.v-bento .obs-cap { margin: 8px 4px -2px; font-size: 13px; color: var(--note); }
+.v-bento .t-label { font-size: 13px; font-weight: 400; color: var(--text-2); }
+.v-bento .big { margin-top: 6px; font-size: clamp(24px, 7.5vw, 30px); font-weight: 700; line-height: 1.1; white-space: nowrap; }
+.v-bento .big small { margin-left: 4px; font-size: 13px; font-weight: 400; color: var(--text-2); }
+.v-bento .hint { margin-top: 6px; font-size: 13px; color: var(--text-2); }
+.v-bento .hint.wind { display: flex; align-items: center; gap: 4px; }
+.v-bento .hint.wind .ui { width: 18px; height: 18px; }
+
+.v-bento .hero { overflow: hidden; min-height: 236px; padding: 18px 20px; border-radius: 28px; background: var(--hero-panel); }
+.v-bento .hero-text { position: relative; z-index: 1; }
+.v-bento .place { font-size: 20px; }
+.v-bento .place span { margin-left: 8px; font-size: 14px; font-weight: 400; color: var(--text-2); }
+.v-bento .temp { margin-top: 10px; font-size: 80px; font-weight: 700; line-height: .95; letter-spacing: -3px; }
+.v-bento .hero .note { margin-top: 6px; font-size: 12px; color: var(--text-2); }
+.v-bento .cond { margin-top: 14px; font-size: 18px; }
+.v-bento .range { margin-top: 2px; font-size: 14px; color: var(--text-2); }
+/* 圖示寬度跟著方塊縮，320px 寬時才不會壓到左邊的文字 */
+.v-bento .hero-icon { position: absolute; right: -14px; top: 18px; width: min(170px, 44%); height: auto; }
+
+.v-bento .tall { display: flex; flex-direction: column; }
+.v-bento .bars { flex: 1; min-height: 64px; margin-top: 12px; display: flex; align-items: flex-end; gap: 3px; }
+.v-bento .bars i { flex: 1; height: calc(var(--v) * 1%); min-height: 3px; border-radius: 3px 3px 1px 1px; background: var(--pop); opacity: calc(.25 + var(--v) / 140); }
+.v-bento .bars-axis { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--note); }
+
+.v-bento .uv-scale { position: relative; height: 6px; margin-top: 12px; border-radius: 3px;
+  background: linear-gradient(90deg, #a9c79c, #f2c94c 40%, var(--max) 70%, #d9534f); }
+.v-bento .uv-scale i { position: absolute; top: 50%; width: 12px; height: 12px; border: 2px solid var(--bg); border-radius: 50%; background: var(--text); transform: translate(-50%, -50%); }
+
+.v-bento .strip { margin: 10px -16px -4px; padding: 0 8px 4px; }
+.v-bento .hour { flex: 0 0 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 0; }
+.v-bento .hour.day-start { border-left: 1px solid var(--line); }
+.v-bento .hour img { width: 36px; height: 36px; }
+.v-bento .h-time { font-size: 13px; color: var(--text-2); }
+.v-bento .h-temp { font-size: 16px; font-weight: 700; }
+.v-bento .h-pop { font-size: 12px; color: var(--pop); }
+
+.v-bento .advice > li { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.v-bento .advice > li:first-child { margin-top: 6px; }
+.v-bento .a-when strong { display: block; font-size: 16px; }
+.v-bento .a-when span { font-size: 12px; color: var(--note); }
+.v-bento .a-wx { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 16px; font-weight: 700; }
+.v-bento .a-wx img { width: 36px; height: 36px; }
+.v-bento .a-pop { min-width: 38px; text-align: right; font-size: 13px; font-weight: 400; color: var(--pop); }
+.v-bento .a-comfort { grid-column: 1 / -1; margin-top: 4px; font-size: 13px; color: var(--text-2); }
+.v-bento .a-items { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.v-bento .a-items li { display: flex; align-items: center; gap: 4px; padding: 4px 10px 4px 6px; border-radius: 999px; background: var(--bg); font-size: 13px; }
+.v-bento .a-items .ui { width: 18px; height: 18px; }
+
+.v-bento .week { margin-top: 4px; }
+.v-bento .week li { display: grid; grid-template-columns: 40px 34px 36px 32px 1fr 32px; align-items: center; gap: 6px; padding: 6px 0; }
+.v-bento .week li + li { border-top: 1px solid var(--line); }
+.v-bento .week img { width: 34px; height: 34px; }
+.v-bento .d-label { font-size: 15px; font-weight: 700; }
+.v-bento .d-pop { font-size: 12px; color: var(--pop); text-align: right; }
+.v-bento .d-min, .v-bento .d-max { font-size: 15px; font-weight: 700; text-align: right; }
+.v-bento .d-min { color: var(--text-2); }
+.v-bento .d-bar { position: relative; height: 5px; border-radius: 3px; background: var(--line); }
+.v-bento .d-bar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: linear-gradient(90deg, var(--min), var(--max)); }
+
+.v-bento .arc { display: block; width: 72%; margin: 8px auto 0; }
+.v-bento .arc-path { fill: none; stroke: var(--line); stroke-width: 2; stroke-dasharray: 4 5; }
+.v-bento .arc-done { fill: none; stroke: var(--sun); stroke-width: 2.5; }
+.v-bento .arc-horizon { stroke: #d6d6da; }
+.v-bento .arc-sun { fill: var(--sun); }
+.v-bento .sun-times { display: flex; justify-content: space-between; margin-top: 4px; }
+.v-bento .sun-times p { display: grid; grid-template-columns: auto auto; align-items: center; column-gap: 4px; font-size: 13px; color: var(--text-2); }
+.v-bento .sun-times p:last-child { justify-items: end; }
+.v-bento .sun-times img { grid-row: span 2; width: 36px; height: 36px; }
+.v-bento .sun-times strong { font-size: 20px; color: var(--text); }
