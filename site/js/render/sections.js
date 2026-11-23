@@ -1,6 +1,6 @@
 import { iconKey, isNight, iconUrl } from '../logic/icons.js';
 import { adviceItems } from '../logic/advice.js';
-import { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, heroStations, SHOW_WEEK_POP_AT } from '../logic/format.js';
+import { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, heroStations, obsItems, SHOW_WEEK_POP_AT } from '../logic/format.js';
 import * as ui from './ui-icons.js';
 
 export function h(tag, className, text) {
@@ -68,12 +68,6 @@ function scroller(className, label) {
   e.setAttribute('role', 'region');
   e.setAttribute('aria-label', label);
   return e;
-}
-
-function tile(label, value, extra) {
-  const t = h('div', 'tile');
-  t.append(h('div', 'tile-label', label), value, ...(extra || []));
-  return t;
 }
 
 export function renderUnavailable(el, title) {
@@ -208,17 +202,22 @@ export function renderWeekly(el, data, { onDetail }) {
   el.replaceChildren(sectionHead('7 日預報', onDetail), list);
 }
 
+// 目前觀測：五格實測值，每格數字下面寫它自己的測站（不同項目可能來自不同測站）；缺值的格子只寫 --。
 export function renderObsTiles(el, data) {
   const o = data.observation;
-  if (!o) return renderUnavailable(el, '觀測資料');
-  const grid = h('div', 'tiles');
-  for (const [label, obs, unit] of [['今天累積雨量', o.rainToday, 'mm'], ['風速', o.windSpeed, 'm/s'], ['氣壓', o.pressure, 'hPa']]) {
-    grid.append(tile(label, h('div', 'tile-value', num(obs?.value)), [
-      h('div', 'tile-unit', unit),
-      h('div', 'tile-station', obs ? `${obs.station}測站` : ''),
-    ]));
+  if (!o) return renderUnavailable(el, '目前觀測');
+  const dl = h('dl');
+  for (const it of obsItems(o)) {
+    const dd = h('dd', '', it.value);
+    if (it.unit) dd.append(h('small', '', it.unit));
+    if (it.station) dd.append(h('span', 'obs-station', `${it.station}測站`));
+    const box = h('div');
+    box.append(h('dt', '', it.label), dd);
+    dl.append(box);
   }
-  el.replaceChildren(grid);
+  const card = h('div', 'card obs-card');
+  card.append(dl);
+  el.replaceChildren(sectionHead('目前觀測', null, o.time ? `實測 ${hhmm(o.time)}` : ''), card);
 }
 
 // 弧線是一段餘弦曲線：兩端在地平線下，t = 0.25 和 0.75 跟地平線相交，中間是白天。
@@ -253,5 +252,5 @@ export function renderSun(el, data) {
   </svg>`;
   const card = h('div', 'card sun-card');
   card.append(times, wrap.firstElementChild);
-  el.replaceChildren(card);
+  el.replaceChildren(sectionHead('日出日落'), card);
 }

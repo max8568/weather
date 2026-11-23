@@ -1,6 +1,6 @@
 :root { --bg:#fff; --outside:#eef0f3; --card:#f6f7f9; --text:#1a1a1a; --text-2:#4a4a4f; --muted:#8a8a8e; --line:#e2e5ea;
   --pop:#1e6ccf; --sun:#f5a623; --max:#f08a3c; --min:#4a9ff5; --hero-panel:linear-gradient(180deg,#a8daf6,#d4ecfb);
-  --radius:20px; --card-radius:16px; --col:480px;
+  --radius:20px; --col:480px;
   font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--outside); color: var(--text); }
@@ -75,7 +75,6 @@ button { color: inherit; }
 .hourly-strip, .advice-row { display: flex; overflow-x: auto; scrollbar-width: none; }
 
 .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-#obs, #sun { margin-top: 16px; }
 .tile { min-width: 0; padding: 12px; border-radius: 14px; background: var(--card); }
 .tile-label { font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile-value { margin-top: 8px; font-size: 22px; font-weight: 700; white-space: nowrap; }
@@ -92,8 +91,9 @@ button { color: inherit; }
 .hour-temp { font-size: 16px; font-weight: 700; }
 .hour-pop { font-size: 12px; color: var(--pop); }
 
-.advice-row { gap: 12px; margin: 0 -16px; padding: 0 16px; scroll-snap-type: x mandatory; scroll-padding: 0 16px; }
-.advice-card { flex: 0 0 86%; scroll-snap-align: start; padding: 18px 20px; border-radius: var(--card-radius); background: var(--card); }
+/* 生活建議：外面沒有卡片，標題下面直接一排卡片，左右捲時可以捲到螢幕邊 */
+.advice-row { gap: 12px; margin: 0 -13px; padding: 0 13px; scroll-snap-type: x mandatory; scroll-padding: 0 13px; }
+.advice-card { flex: 0 0 86%; scroll-snap-align: start; padding: 18px 20px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
 .advice-top { display: grid; grid-template-columns: 1fr auto; column-gap: 12px; }
 /* 外層包裝不參與版面，標籤、溫度、圖示、降雨、舒適度直接排進同一個格線；最後一列文字以基準線對齊 */
 .advice-info, .advice-look { display: contents; }
@@ -129,7 +129,15 @@ button { color: inherit; }
   .advice-look img { width: 64px; height: 64px; margin-top: 0; }
 }
 
-.sun-card { padding: 18px 20px 8px; }
+/* 目前觀測：三欄，名稱、數字（單位小字）、測站 */
+.obs-card dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 10px; margin: 0; }
+.obs-card div { min-width: 0; }
+.obs-card dt { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.obs-card dd { margin: 0; font-size: 18px; font-weight: 700; white-space: nowrap; }
+.obs-card small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
+.obs-station { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: var(--muted); white-space: normal; }
+
+.sun-card { padding-bottom: 8px; }
 .sun-times { display: flex; justify-content: space-between; }
 .sun-end img { display: block; width: 32px; height: 32px; margin-left: -4px; }
 .sun-end.right { text-align: right; }
