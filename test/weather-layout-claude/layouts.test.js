@@ -84,6 +84,13 @@ test('combo advice cards say what to do, built from the advice items', () => {
   assert.ok(html.includes('穿長袖，帶傘，衣服不適合在外面曬。'));
 });
 
+test('combo gives the three stats only the width they need and the rest to the temperature card', () => {
+  const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
+  assert.match(css, /\.v-combo \.hero \{[^}]*grid-template-columns: minmax\(0, 1fr\) auto;/);
+  const icon = css.match(/\.v-combo \.big-icon \{[^}]*width: min\([^,]+, (\d+)px\)/);
+  assert.ok(icon && Number(icon[1]) >= 120, icon && icon[0]);
+});
+
 test('combo puts the short measured note on the same line as the high and low', () => {
   const range = byKey('combo').match(/<p class="range">([\s\S]*?)<\/p>/)[1];
   assert.ok(range.includes('最高') && range.includes('最低') && range.includes(`實測 ${W.WEATHER.obs.time}`), range);
