@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, dayExtremes, SHOW_WEEK_POP_AT } from '../../site/js/logic/format.js';
+import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, dayExtremes, beaufortText, heroStations, SHOW_WEEK_POP_AT } from '../../site/js/logic/format.js';
 
 const half = (o) => ({ weather: '多雲', maxT: null, minT: null, maxAT: null, minAT: null, pop: null, humidity: null, uv: null, ...o });
 
@@ -57,8 +57,8 @@ test('coversWholeDay: slots must start by 03:00 and end at 21:00 or later', () =
 const slot = (date, hour, o) => ({ time: `${date}T${String(hour).padStart(2, '0')}:00:00+08:00`, temperature: null, apparentTemperature: null, humidity: null, beaufort: null, ...o });
 const fullWeek = { days: [
   { date: '2026-11-24', label: '週二',
-    day: half({ maxT: 20, minT: 18, maxAT: 21, minAT: 17, humidity: 84 }),
-    night: half({ maxT: 18, minT: 16, maxAT: 17, minAT: 15, humidity: 74 }) },
+    day: half({ start: '2026-11-24T06:00:00+08:00', end: '2026-11-24T18:00:00+08:00', maxT: 20, minT: 18, maxAT: 21, minAT: 17, humidity: 84 }),
+    night: half({ start: '2026-11-24T18:00:00+08:00', end: '2026-11-25T06:00:00+08:00', maxT: 18, minT: 16, maxAT: 17, minAT: 15, humidity: 74 }) },
 ] };
 test('dayExtremes uses the weekly daily extremes when the day has both halves', () => {
   const hourly = [slot('2026-11-24', 21, { temperature: 19, apparentTemperature: 19, humidity: 80 }), slot('2026-11-24', 23, { temperature: 18, apparentTemperature: 18, humidity: 82 })];
@@ -84,7 +84,46 @@ test('dayExtremes widens the weekly range to include every hourly value of that 
   const hourly = [slot('2026-11-24', 0, { temperature: 21 }), slot('2026-11-24', 12, { temperature: 19 }), slot('2026-11-24', 23, { temperature: 15 }), slot('2026-11-25', 0, { temperature: 30 })];
   assert.deepEqual(dayExtremes('2026-11-24', hourly, fullWeek, 'temperature'), { min: 15, max: 21, partial: false });
   // 一週預報缺值時只用逐時的；兩邊都缺就是 null
-  const noTemps = { days: [{ ...fullWeek.days[0], day: half({}), night: half({}) }] };
+  const noT = { maxT: null, minT: null };
+  const noTemps = { days: [{ ...fullWeek.days[0], day: { ...fullWeek.days[0].day, ...noT }, night: { ...fullWeek.days[0].night, ...noT } }] };
   assert.deepEqual(dayExtremes('2026-11-24', hourly, noTemps, 'temperature'), { min: 15, max: 21, partial: false });
-  assert.deepEqual(dayExtremes('2026-11-24', [], noTemps, 'temperature'), { min: null, max: null, partial: false });
+  assert.deepEqual(dayExtremes('2026-11-24', [], noTemps, 'temperature'), { min: null, max: null, partial: true });
+});
+
+test('dayExtremes: a 12:00-18:00 day half is not a whole day, so the hourly rule applies', () => {
+  const week = { days: [{ date: '2026-11-24', label: '週二',
+    day: half({ start: '2026-11-24T12:00:00+08:00', end: '2026-11-24T18:00:00+08:00', maxT: 20, minT: 18, maxAT: 21, minAT: 17 }),
+    night: half({ start: '2026-11-24T18:00:00+08:00', end: '2026-11-25T06:00:00+08:00', maxT: 18, minT: 16, maxAT: 17, minAT: 15 }) }] };
+  const hourly = [slot('2026-11-24', 12, { temperature: 19 }), slot('2026-11-24', 15, { temperature: 19.5 }), slot('2026-11-24', 23, { temperature: 17 })];
+  assert.deepEqual(dayExtremes('2026-11-24', hourly, week, 'temperature'), { min: 17, max: 19.5, partial: true });
+});
+test('dayExtremes: a night half ending before 06:00 next day is not a whole day', () => {
+  const week = { days: [{ ...fullWeek.days[0], night: { ...fullWeek.days[0].night, end: '2026-11-25T00:00:00+08:00' } }] };
+  const hourly = [slot('2026-11-24', 21, { temperature: 19 })];
+  assert.deepEqual(dayExtremes('2026-11-24', hourly, week, 'temperature'), { min: 19, max: 19, partial: true });
+});
+test('dayExtremes: both halves but missing extrema keep the partial label', () => {
+  const week = { days: [{ ...fullWeek.days[0], night: { ...fullWeek.days[0].night, minT: null } }] };
+  const hourly = [slot('2026-11-24', 21, { temperature: 19 }), slot('2026-11-24', 23, { temperature: 18 })];
+  assert.deepEqual(dayExtremes('2026-11-24', hourly, week, 'temperature'), { min: 18, max: 19, partial: true });
+  // 體感溫度要的欄位都有，照樣用一週預報的整天數值
+  assert.deepEqual(dayExtremes('2026-11-24', hourly, week, 'apparentTemperature'), { min: 15, max: 21, partial: false });
+});
+
+test('beaufortText: 1 is shown as ≤1 級 (CWA reports 0-1 as "<= 1")', () => {
+  assert.equal(beaufortText(1), '≤1 級');
+  assert.equal(beaufortText(3), '3 級');
+  assert.equal(beaufortText(0), '0 級');
+  assert.equal(beaufortText(null), '--');
+  assert.equal(beaufortText(undefined), '--');
+});
+
+const obsAt = (station) => ({ value: 1, station, time: '2026-11-23T11:00:00+08:00' });
+test('heroStations: one station when all hero readings share it, grouped by station otherwise', () => {
+  assert.equal(heroStations({ temperature: obsAt('五股'), windDirection: obsAt('五股'), humidity: obsAt('五股') }), '五股測站');
+  assert.equal(heroStations({ temperature: obsAt('五股'), windDirection: obsAt('五股'), humidity: obsAt('新莊') }), '溫度、風向 五股測站・濕度 新莊測站');
+  assert.equal(heroStations({ temperature: obsAt('五股'), windDirection: obsAt('泰山'), humidity: obsAt('新莊') }), '溫度 五股測站・風向 泰山測站・濕度 新莊測站');
+  assert.equal(heroStations({ temperature: null, windDirection: obsAt('泰山'), humidity: obsAt('泰山') }), '泰山測站');
+  assert.equal(heroStations({ temperature: null, windDirection: null, humidity: null }), '');
+  assert.equal(heroStations(null), '');
 });

@@ -1,7 +1,7 @@
 import { openSheet } from './sheet.js';
-import { scalePoints, smoothPath, niceTicks } from '../chart.js';
+import { scalePoints, smoothSegments, bandSegments, niceTicks } from '../chart.js';
 import { iconKey, iconUrl } from '../logic/icons.js';
-import { weekSummary, dayRow, weekdayChar } from '../logic/format.js';
+import { weekSummary, dayRow, weekdayChar, beaufortText } from '../logic/format.js';
 import { h, img, deg, pct, choiceRow, dateRow } from './sections.js';
 
 const num = (v) => (typeof v === 'number' ? String(v) : '--');
@@ -26,7 +26,7 @@ function halfBlock(name, half, night) {
     h('div', 'half-name', name),
     h('div', 'half-temp', `${num(half.minT)} - ${num(half.maxT)}°`),
     h('div', 'half-line', `降雨 ${pct(half.pop)}・濕度 ${pct(half.humidity)}`),
-    h('div', 'half-line', `蒲福風級 ${num(half.beaufort)}`),
+    h('div', 'half-line', `蒲福風級 ${beaufortText(half.beaufort)}`),
   );
   const look = h('div', 'half-look');
   if (half.weather) look.append(img(iconUrl(iconKey(half.weather), { night }), half.weather), h('div', '', half.weather));
@@ -72,9 +72,9 @@ function weekChart(days) {
   const xs = days.map((_, i) => (days.length > 1 ? L + (i * (R - L)) / (days.length - 1) : L));
   const scale = { height: PLOT, min: ticks[0], max: ticks[ticks.length - 1], padTop: 30, padBottom: 22, xs };
   const yOf = (v) => scalePoints([v], { ...scale, xs: [0] })[0][1].toFixed(1);
-  const hi = scalePoints(maxs, scale), lo = scalePoints(mins, scale);
-  const area = hi.length === days.length && lo.length === days.length
-    ? `<path class="area" d="${smoothPath(hi)} ${smoothPath([...lo].reverse()).replace('M', 'L')} Z"/>` : '';
+  // 缺值的那天兩條線都斷開，填色也只填兩邊都有值的區段
+  const band = bandSegments(maxs, mins, scale);
+  const area = band ? `<path class="area" d="${band}"/>` : '';
   const grid = ticks.map((t) => `<line class="grid" x1="${L}" x2="${R}" y1="${yOf(t)}" y2="${yOf(t)}"/>
     <text class="y-label" x="${W - 2}" y="${yOf(t)}" dy="4" text-anchor="end">${t}°</text>`).join('');
   const labels = days.map((d, i) => (d.label === '今天'
@@ -85,7 +85,7 @@ function weekChart(days) {
        <text class="mark ${cls}" x="${xs[0] - 8}" y="${yOf(v)}" dy="${dy}">${v}°</text>` : '');
   const box = h('div');
   box.innerHTML = `<svg class="week-chart" viewBox="0 0 ${W} ${H}" aria-hidden="true">${grid}${area}
-    <path class="hi" d="${smoothPath(hi)}"/><path class="lo" d="${smoothPath(lo)}"/>${mark(maxs[0], 'hi', -15)}${mark(mins[0], 'lo', 26)}${labels}</svg>`;
+    <path class="hi" d="${smoothSegments(maxs, scale).line}"/><path class="lo" d="${smoothSegments(mins, scale).line}"/>${mark(maxs[0], 'hi', -15)}${mark(mins[0], 'lo', 26)}${labels}</svg>`;
   return box.firstElementChild;
 }
 

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { scalePoints, smoothPath, stepPath, stepSegments, niceTicks } from '../../site/js/chart.js';
+import { scalePoints, smoothPath, stepPath, stepSegments, smoothSegments, bandSegments, niceTicks } from '../../site/js/chart.js';
 
 // d 字串裡每一段 C 的六個數字
 const curves = (d) => [...d.matchAll(/C([^C]+)/g)].map((m) => m[1].trim().split(/\s+/).map(Number));
@@ -76,4 +76,27 @@ test('niceTicks picks the smallest step that fits', () => {
   assert.deepEqual(niceTicks(59, 96), [50, 60, 70, 80, 90, 100]);
   assert.deepEqual(niceTicks(16, 27, 3), [15, 20, 25, 30]);
   assert.deepEqual(niceTicks(20, 20), [20, 21]);
+});
+
+const SMOOTH_SCALE = { xs: [0, 10, 20, 30, 40], height: 100, min: 0, max: 100, padTop: 0, padBottom: 0 };
+test('smoothSegments starts a new line and fill after a missing value', () => {
+  const s = smoothSegments([20, 30, null, 70, 60], SMOOTH_SCALE);
+  const a = smoothPath([[0, 80], [10, 70]]), b = smoothPath([[30, 30], [40, 40]]);
+  assert.equal(s.line, `${a} ${b}`);
+  assert.equal(s.area, `${a} L10 100 L0 100 Z ${b} L40 100 L30 100 Z`);
+  assert.ok(!s.line.includes(' C20 '), 'nothing is drawn at the missing slot');
+});
+test('smoothSegments without gaps is one smoothPath closed to the bottom', () => {
+  const s = smoothSegments([20, 30, 50, 70, 60], SMOOTH_SCALE);
+  const d = smoothPath([[0, 80], [10, 70], [20, 50], [30, 30], [40, 40]]);
+  assert.equal(s.line, d);
+  assert.equal(s.area, `${d} L40 100 L0 100 Z`);
+  assert.deepEqual(smoothSegments([null, null], { ...SMOOTH_SCALE, xs: [0, 10] }), { line: '', area: '' });
+});
+test('bandSegments fills between two lines only where both have values', () => {
+  const hi = [30, 40, null, 50, 60], lo = [10, 20, 25, null, null];
+  const d = bandSegments(hi, lo, SMOOTH_SCALE);
+  const top = smoothPath([[0, 70], [10, 60]]), bottom = smoothPath([[10, 80], [0, 90]]).replace('M', 'L');
+  assert.equal(d, `${top} ${bottom} Z`);
+  assert.equal(bandSegments([30, 40], [10, 20], { ...SMOOTH_SCALE, xs: [0, 10] }), d);
 });

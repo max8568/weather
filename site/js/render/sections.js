@@ -1,6 +1,6 @@
 import { iconKey, isNight, iconUrl } from '../logic/icons.js';
 import { adviceItems } from '../logic/advice.js';
-import { tempBar, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, SHOW_WEEK_POP_AT } from '../logic/format.js';
+import { tempBar, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, heroStations, SHOW_WEEK_POP_AT } from '../logic/format.js';
 import * as ui from './ui-icons.js';
 
 export function h(tag, className, text) {
@@ -77,10 +77,16 @@ export function renderUnavailable(el, title) {
   el.replaceChildren(sectionHead(title), h('p', 'unavailable', '暫時無法取得'));
 }
 
+// 最上方的實測溫度、風向、濕度可能來自不同測站，測站名稱寫在這一行最前面。
+// 每一項各自不斷行，窄螢幕放不下時只在「・」之後換行。
 export function renderDataTime(el, data) {
   const obsTime = data.observation?.time;
-  const updated = `上次更新 ${hhmm(data.generatedAt)}`;
-  el.textContent = obsTime ? `觀測時間 ${hhmm(obsTime)}・${updated}` : updated;
+  const parts = [
+    heroStations(data.observation),
+    obsTime ? `觀測時間 ${hhmm(obsTime)}` : '',
+    `上次更新 ${hhmm(data.generatedAt)}`,
+  ].filter(Boolean);
+  el.replaceChildren(...parts.flatMap((text, i) => (i ? ['・', h('span', '', text)] : [h('span', '', text)])));
 }
 
 export function renderNowTiles(el, data) {
@@ -101,7 +107,7 @@ export function renderNowTiles(el, data) {
 
 export function renderHourly(el, data, { onDetail }) {
   const td = data.threeDay;
-  if (!td) return renderUnavailable(el, '逐小時預報');
+  if (!td?.hourly?.length) return renderUnavailable(el, '逐小時預報');
   const strip = scroller('hourly-strip', '逐小時預報');
   td.hourly.forEach((p, i) => {
     const cell = h('div', 'hour');
@@ -125,7 +131,7 @@ const ADVICE_ICONS = {
 
 export function renderAdvice(el, data) {
   const periods = data.county36h;
-  if (!periods) return renderUnavailable(el, '生活建議');
+  if (!periods?.length) return renderUnavailable(el, '生活建議');
   const row = scroller('advice-row', '生活建議');
   for (const p of periods) {
     const info = h('div', 'advice-info');
@@ -161,7 +167,7 @@ const monthDay = (date) => `${Number(date.slice(5, 7))}月${Number(date.slice(8,
 
 export function renderWeekly(el, data, { onDetail }) {
   const wk = data.weekly;
-  if (!wk) return renderUnavailable(el, '7 日預報');
+  if (!wk?.days?.length) return renderUnavailable(el, '7 日預報');
   const rows = wk.days.map((d) => ({ d, r: dayRow(d) }));
   const mins = rows.map(({ r }) => r.min).filter((v) => typeof v === 'number');
   const maxs = rows.map(({ r }) => r.max).filter((v) => typeof v === 'number');

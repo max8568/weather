@@ -74,6 +74,43 @@ export function stepSegments(values, { xs, endX, ...scale }) {
   return { line: lines.join(' '), area: areas.join(' ') };
 }
 
+// 連續有值的索引範圍 [start, end)。缺值的位置把資料切成好幾段。
+function numberRuns(values) {
+  const runs = [];
+  let start = -1;
+  values.forEach((v, i) => {
+    if (typeof v === 'number') { if (start < 0) start = i; }
+    else if (start >= 0) { runs.push([start, i]); start = -1; }
+  });
+  if (start >= 0) runs.push([start, values.length]);
+  return runs;
+}
+
+// 有缺值的平滑曲線：連續有值的部分各畫一段，各自往下填色到底部；缺值的地方不畫線也不填色，
+// 跟上方顯示的「--」一致。其餘參數和 scalePoints 一樣，xs 必填。
+export function smoothSegments(values, { xs, ...scale }) {
+  const bottom = r(scalePoints([scale.min], { ...scale, xs: [0] })[0][1]);
+  const lines = [], areas = [];
+  for (const [a, b] of numberRuns(values)) {
+    const pts = scalePoints(values.slice(a, b), { ...scale, xs: xs.slice(a, b) });
+    const line = smoothPath(pts);
+    lines.push(line);
+    areas.push(`${line} L${r(pts[pts.length - 1][0])} ${bottom} L${r(pts[0][0])} ${bottom} Z`);
+  }
+  return { line: lines.join(' '), area: areas.join(' ') };
+}
+
+// 兩條平滑曲線（7 日面板的最高溫、最低溫）中間的填色：兩邊都有值的連續區段各填一塊。
+export function bandSegments(hi, lo, { xs, ...scale }) {
+  const both = hi.map((v, i) => (typeof v === 'number' && typeof lo[i] === 'number' ? v : null));
+  return numberRuns(both).map(([a, b]) => {
+    const part = { ...scale, xs: xs.slice(a, b) };
+    const top = smoothPath(scalePoints(hi.slice(a, b), part));
+    const bottom = smoothPath(scalePoints(lo.slice(a, b), part).reverse()).replace('M', 'L');
+    return `${top} ${bottom} Z`;
+  }).join(' ');
+}
+
 const STEPS = [1, 2, 3, 5, 10, 20, 25, 50, 100];
 
 // 刻度：從小到大試間隔，取第一個能讓格數不超過 maxIntervals 的。
@@ -143,11 +180,7 @@ export function renderChart(container, {
   if (pts.length) {
     let line, area;
     if (kind === 'step') ({ line, area } = stepSegments(values, { ...scale, endX: width }));
-    else {
-      const first = r(pts[0][0]), last = r(pts[pts.length - 1][0]), b = r(bottom);
-      line = smoothPath(pts);
-      area = `${line} L${last} ${b} L${first} ${b} Z`;
-    }
+    else ({ line, area } = smoothSegments(values, scale));
     svg.append(svgEl('path', { d: area, fill: `url(#${id})` }));
     svg.append(svgEl('path', { d: line, fill: 'none', 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, { stroke: color }));
   }

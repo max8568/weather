@@ -1,5 +1,5 @@
 :root { --bg:#fff; --outside:#eef0f3; --card:#f5f5f7; --text:#1a1a1a; --text-2:#4a4a4f; --muted:#8a8a8e; --line:#e6e6ea;
-  --pop:#3d8bef; --sun:#f5a623; --max:#f08a3c; --min:#4a9ff5; --hero-panel:linear-gradient(180deg,#a8daf6,#d4ecfb);
+  --pop:#1e6ccf; --sun:#f5a623; --max:#f08a3c; --min:#4a9ff5; --hero-panel:linear-gradient(180deg,#a8daf6,#d4ecfb);
   --radius:20px; --card-radius:16px; --col:480px;
   font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; }
 * { box-sizing: border-box; }
@@ -34,7 +34,9 @@ button { color: inherit; }
 .compact-temp { font-size: 32px; font-weight: 700; line-height: 1.1; }
 .compact-weather { font-size: 16px; }
 
-.data-time { margin: 16px 0 12px; font-size: 13px; color: var(--muted); }
+/* 白底上要到 4.5:1，比 --muted 深一點 */
+.data-time { margin: 16px 0 12px; font-size: 13px; color: #6e6e73; }
+.data-time span { white-space: nowrap; }
 .card { background: var(--card); border-radius: var(--card-radius); }
 .sec-head { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 10px; }
 .sec-head h2 { margin: 0; font-size: 15px; font-weight: 400; }
@@ -89,6 +91,11 @@ button { color: inherit; }
 .week-bar span { position: absolute; inset: 0; border-radius: 2px; background: linear-gradient(90deg, #a9c79c, #f2c94c); }
 .week-extra { margin-top: 6px; font-size: 13px; color: var(--text-2); white-space: nowrap; }
 .week-extra span + span { margin-left: 10px; }
+/* 窄螢幕（320–379px）縮小左邊兩欄和溫度欄，溫度條在 320px 寬時還有約 60px */
+@media (max-width: 379px) {
+  .week-row { grid-template-columns: 64px 48px 1fr; }
+  .week-temps { grid-template-columns: 34px 1fr 34px; gap: 6px; }
+}
 
 .sun-card { padding: 18px 20px 8px; }
 .sun-times { display: flex; justify-content: space-between; }

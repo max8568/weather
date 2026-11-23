@@ -1,7 +1,7 @@
 import { openSheet } from './sheet.js';
 import { renderChart, niceTicks, PAD_X } from '../chart.js';
 import { iconKey, isNight, iconUrl } from '../logic/icons.js';
-import { weekdayChar, dayExtremes } from '../logic/format.js';
+import { weekdayChar, dayExtremes, beaufortText, hhmm } from '../logic/format.js';
 import { h, img, pct, choiceRow, dateRow } from './sections.js';
 import * as ui from './ui-icons.js';
 
@@ -10,13 +10,14 @@ const DAY_LEAD = 40;
 const TABS = [
   { label: '氣溫', key: 'temperature', unit: '°' },
   { label: '體感溫度', key: 'apparentTemperature', unit: '°' },
-  { label: '蒲福風級', key: 'beaufort', unit: ' 級', floor: 0 },
+  { label: '蒲福風級', key: 'beaufort', unit: ' 級', floor: 0, text: beaufortText },
   { label: '濕度', key: 'humidity', unit: '%', floor: 0, ceil: 100 },
 ];
 const POP_TICKS = [0, 20, 40, 60, 80, 100];
 
 const nums = (list) => list.filter((v) => typeof v === 'number');
 const fmt = (v, unit) => (typeof v === 'number' ? `${Math.round(v)}${unit}` : '--');
+const show = (t, v) => (t.text ? t.text(v) : fmt(v, t.unit));
 const dateOf = (iso) => iso.slice(0, 10);
 
 // 每 6 小時標一次時間，午夜那格改標日期。
@@ -103,14 +104,14 @@ export function open72hPanel(data) {
   function update() {
     const p = pts[sel], t = TABS[tab], date = dateOf(p.time);
     days.select(dates.indexOf(date));
-    dateLine.textContent = `${date.slice(0, 4)}年${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日 星期${weekdayChar(date)}`;
+    dateLine.textContent = `${date.slice(0, 4)}年${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日 星期${weekdayChar(date)} ${hhmm(p.time)}`;
     tabs.select(tab);
-    value.textContent = fmt(p[t.key], t.unit);
+    value.textContent = show(t, p[t.key]);
     icon.hidden = !p.weather;
     icon.src = iconUrl(iconKey(p.weather), { night: isNight(p.time) });
     icon.alt = p.weather || '';
     const ext = dayExtremes(date, pts, data.weekly, t.key);
-    range.replaceChildren(h('span', '', `最高 ${fmt(ext.max, t.unit)}`), h('span', '', `最低 ${fmt(ext.min, t.unit)}`));
+    range.replaceChildren(h('span', '', `最高 ${show(t, ext.max)}`), h('span', '', `最低 ${show(t, ext.min)}`));
     if (ext.partial) range.prepend(h('span', '', '預報時段內'));
     popValue.textContent = pct(p.pop);
     wind.textContent = p.windDirection || '--';

@@ -53,6 +53,14 @@ function renderError(err) {
   retry.textContent = '重試';
   retry.addEventListener('click', () => (towns.length && current ? load() : init()));
   hero.replaceChildren(msg, retry);
+  // 存起來的地點一直失敗時，重新整理也還是同一個地點；鄉鎮清單有載入就讓使用者換地點。
+  if (towns.length) {
+    const other = document.createElement('button');
+    other.type = 'button';
+    other.textContent = '選擇其他地點';
+    other.addEventListener('click', openLocationPicker);
+    hero.append(' ', other);
+  }
   clearSections();
 }
 
