@@ -100,3 +100,16 @@ test('combo puts the measured time beside the temperature and the 24-hour range 
   const cond = html.match(/<p class="cond">([\s\S]*?)<\/p>/)[1];
   assert.ok(cond.includes(w.now.weather) && cond.includes(`未來 24 小時 ${w.next24h.min}°–${w.next24h.max}°`), cond);
 });
+
+test('combo cards use the overview card style: grey, 1px border, 6px corners', () => {
+  const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
+  const rule = (sel) => (css.match(new RegExp(`${sel.replace(/\./g, '\.')} \{([^}]*)\}`)) || [])[1] || '';
+  for (const sel of ['.v-combo .card', '.v-combo .now']) {
+    assert.match(rule(sel), /background: var\(--card\);/, sel);
+    assert.match(rule(sel), /border: 1px solid var\(--line\);/, sel);
+    assert.match(rule(sel), /border-radius: 6px;/, sel);
+  }
+  // 三格那排跟原型一樣是白底
+  for (const p of [/background: var\(--bg\);/, /border: 1px solid var\(--line\);/, /border-radius: 6px;/]) assert.match(rule('.v-combo .stats'), p);
+  assert.match(rule('.v-combo'), /--card: #f6f7f9;[^]*--line: #e2e5ea;/);
+});

@@ -1,34 +1,35 @@
-/* 組合版：每一區都是同一種卡片（灰底、22px 圓角、15px 粗體標題），只有放實測值的溫度卡片和「目前觀測」是白底加淺藍框 */
-.v-combo { display: grid; gap: 10px; padding: 12px; }
-.v-combo .card { min-width: 0; padding: 14px 16px 16px; border-radius: 22px; background: var(--card); }
-.v-combo .card h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; margin-bottom: 10px; font-size: 15px; }
-.v-combo .card h2 span { font-size: 12px; font-weight: 400; color: var(--note); }
+/* 組合版：卡片照「即時總覽」原型的樣式：淺灰底、1px 灰框、6px 圓角、18px 標題，副標題靠右 */
+.v-combo { --card: #f6f7f9; --line: #e2e5ea; display: grid; gap: 13px; padding: 13px; }
+.v-combo .card { min-width: 0; padding: 15px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+.v-combo .card h2 { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 12px; font-size: 18px; line-height: 1.35; }
+.v-combo .card h2 span { font-size: 13px; font-weight: 400; color: var(--text-2); }
 
-/* 最上面：溫度卡片。左邊地點、日期、溫度、天氣；右邊隔一條線放天氣圖示。
-   溫度是實測值，所以跟「目前觀測」一樣是白底加淺藍框。 */
-.v-combo .now { display: grid; grid-template-columns: minmax(0, 1fr) 30%; border-radius: 22px; background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--sky-1); }
-.v-combo .now-text { min-width: 0; padding: 18px 16px 16px 18px; }
-.v-combo .place { font-size: 20px; }
-.v-combo .date { margin-top: 4px; font-size: 13px; color: var(--note); }
-.v-combo .temp { margin-top: 12px; font-size: 52px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
-.v-combo .temp .unit { margin-left: 2px; font-size: 20px; font-weight: 400; letter-spacing: 0; vertical-align: top; }
+/* 最上面：溫度卡片和下面一排三格，兩塊之間只隔 8px */
+.v-combo .lead { display: grid; gap: 8px; min-width: 0; }
+/* 溫度卡片：左邊地點、日期、溫度、天氣；右邊隔一條線放天氣圖示 */
+.v-combo .now { display: grid; grid-template-columns: minmax(0, 1fr) 30%; min-height: 200px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+.v-combo .now-text { min-width: 0; padding: 17px; }
+.v-combo .place { font-size: 22px; line-height: 1.35; letter-spacing: -.03em; }
+.v-combo .date { margin-top: 5px; font-size: 14px; color: var(--text-2); }
+.v-combo .temp { margin-top: 14px; font-size: 54px; font-weight: 700; line-height: 1; letter-spacing: -.065em; }
+.v-combo .temp .unit { margin-left: 5px; font-size: .44em; font-weight: 500; line-height: 1.45; letter-spacing: -.04em; vertical-align: top; }
 .v-combo .temp .note { margin-left: 8px; font-size: 12px; font-weight: 400; letter-spacing: 0; color: var(--text-2); }
 /* 天氣現象和「未來 24 小時」放同一行；寬度不夠時整段「未來 24 小時」換到下一行 */
-.v-combo .cond { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; margin-top: 10px; font-size: 16px; font-weight: 700; }
-.v-combo .cond span { font-size: 13px; font-weight: 400; color: var(--text-2); white-space: nowrap; }
-.v-combo .now-icon { display: grid; place-items: center; min-width: 0; border-left: 1px solid var(--sky-1); }
-.v-combo .now-icon img { width: min(100%, 140px); height: auto; }
+.v-combo .cond { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; margin-top: 6px; font-size: 17px; font-weight: 650; }
+.v-combo .cond span { font-size: 14px; font-weight: 400; color: var(--text-2); white-space: nowrap; }
+.v-combo .now-icon { display: grid; place-items: center; min-width: 0; border-left: 1px solid var(--line); }
+.v-combo .now-icon img { width: 100%; height: auto; }
 
-/* 溫度卡片下面一排三格，中間用直線隔開；名稱在上、數字在下 */
-.v-combo .stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 12px 0; border-radius: 22px; background: var(--card); }
-.v-combo .stats div { min-width: 0; padding: 2px 14px; }
+/* 三格：白底加灰框，中間用直線隔開；名稱在上、數字在下 */
+.v-combo .stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 10px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+.v-combo .stats div { min-width: 0; padding: 4px 10px; }
 .v-combo .stats div + div { border-left: 1px solid var(--line); }
 .v-combo .stats dt { font-size: 13px; color: var(--text-2); white-space: nowrap; }
-.v-combo .stats dd { margin-top: 4px; font-size: 20px; font-weight: 700; line-height: 1.2; white-space: nowrap; }
-.v-combo .stats small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
+.v-combo .stats dd { margin-top: 2px; font-size: 22px; font-weight: 650; line-height: 1.2; white-space: nowrap; }
+.v-combo .stats small { margin-left: 4px; font-size: 12px; font-weight: 400; color: var(--text-2); }
 
 /* 逐小時 */
-.v-combo .strip { margin: 0 -16px -4px; padding: 0 8px 4px; }
+.v-combo .strip { margin: 0 -12px -4px; padding: 0 8px 4px; }
 .v-combo .hour { flex: 0 0 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 2px 0; }
 .v-combo .hour.day-start { border-left: 1px solid var(--line); }
 .v-combo .hour time { font-size: 13px; color: var(--text-2); }
@@ -49,9 +50,9 @@
 .v-combo .w-range b:first-child { right: calc(100% + 4px); }
 .v-combo .w-range b:last-child { left: calc(100% + 4px); }
 
-/* 生活建議：灰底卡片裡放可以左右滑的白卡片 */
-.v-combo .advs { gap: 10px; margin: 0 -16px; padding: 0 16px; scroll-snap-type: x mandatory; scroll-padding: 0 16px; }
-.v-combo .advs article { flex: 0 0 80%; display: flex; flex-direction: column; scroll-snap-align: start; padding: 14px 16px; border-radius: 18px; background: var(--bg); }
+/* 生活建議：灰底卡片裡放可以左右滑的白底灰框卡片 */
+.v-combo .advs { gap: 10px; margin: 0 -12px; padding: 0 12px; scroll-snap-type: x mandatory; scroll-padding: 0 12px; }
+.v-combo .advs article { flex: 0 0 80%; display: flex; flex-direction: column; scroll-snap-align: start; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
 .v-combo .advs header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
 .v-combo .advs h3 { font-size: 16px; }
 .v-combo .advs header p { font-size: 12px; color: var(--note); }
@@ -61,8 +62,7 @@
 .v-combo .nums b { font-size: 18px; color: var(--text); }
 .v-combo .nums span:first-of-type { color: var(--pop); }
 
-/* 目前觀測：實測值，白底加淺藍框 */
-.v-combo .obs { background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--sky-1); }
+/* 目前觀測 */
 .v-combo .obs dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 10px; }
 .v-combo .obs dt { font-size: 12px; color: var(--text-2); white-space: nowrap; }
 .v-combo .obs dd { font-size: 18px; font-weight: 700; white-space: nowrap; }
@@ -74,9 +74,7 @@
 .v-combo .sun-row b { font-size: 20px; color: var(--text); }
 
 @media (max-width: 359px) {
-  .v-combo { padding: 10px; gap: 8px; }
-  .v-combo .card { padding: 12px 14px 14px; }
   .v-combo .advs article { flex-basis: 86%; }
-  .v-combo .now-text { padding: 16px 12px 14px 14px; }
-  .v-combo .stats div { padding: 2px 10px; }
+  .v-combo .place { font-size: 20px; }
+  .v-combo .stats small { margin-left: 2px; }
 }

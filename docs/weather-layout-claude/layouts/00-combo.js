@@ -1,6 +1,6 @@
 // 0. 組合版：使用者從各排版挑出來拼成的一頁，統一成同一套樣式。
 // 上面是溫度卡片（左邊地點、日期、溫度、天氣，右邊天氣圖示）和下面一排三個數字，接著是逐小時、7 日溫度範圍、
-// 可以左右滑的生活建議卡片、目前觀測、日出日落。預報的區塊是灰底；放實測溫度的溫度卡片和「目前觀測」是白底加淺藍框。
+// 可以左右滑的生活建議卡片、目前觀測、日出日落。每張卡片都照「即時總覽」原型的卡片樣式。
 (function () {
   const { icon, deg, pct, md, hh, obsNote } = window.P;
 
@@ -21,7 +21,7 @@
     // 日期用 UTC 算星期幾，不受瀏覽器時區影響
     const today = w.week[0].date;
     const date = `${Number(today.slice(5, 7))} 月 ${Number(today.slice(8, 10))} 日・星期${'日一二三四五六'[new Date(`${today}T00:00Z`).getUTCDay()]}`;
-    const hero = `<section class="now">
+    const hero = `<div class="lead"><section class="now">
         <div class="now-text">
           <h1 class="place">${w.county} ${w.town}</h1>
           <p class="date">${date}</p>
@@ -34,7 +34,7 @@
         <div><dt>降雨機率</dt><dd>${w.now.pop}<small>%</small></dd></div>
         <div><dt>體感溫度</dt><dd>${w.now.feels}<small>°C</small></dd></div>
         <div><dt>紫外線</dt><dd>${w.now.uv.value}<small>${w.now.uv.level}</small></dd></div>
-      </dl>`;
+      </dl></div>`;
 
     const hours = card('hours', '逐小時預報', '', `<div class="strip hscroll" tabindex="0" role="region" aria-label="逐小時預報，可以左右捲動" data-own-keys>${
       w.hourly.slice(0, 24).map((h, i) => {
