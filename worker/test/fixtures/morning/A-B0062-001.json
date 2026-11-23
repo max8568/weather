@@ -1,0 +1,72 @@
+{
+ "success": "true",
+ "result": {
+  "resource_id": "A-B0062-001",
+  "fields": [
+   {
+    "id": "CountyName",
+    "type": "String"
+   },
+   {
+    "id": "Date",
+    "type": "Date"
+   },
+   {
+    "id": "BeginCivilTwilightTime",
+    "type": "String"
+   },
+   {
+    "id": "SunRiseTime",
+    "type": "String"
+   },
+   {
+    "id": "SunRiseAZ",
+    "type": "String"
+   },
+   {
+    "id": "SunTransitTime",
+    "type": "String"
+   },
+   {
+    "id": "SunTransitAlt",
+    "type": "String"
+   },
+   {
+    "id": "SunSetTime",
+    "type": "String"
+   },
+   {
+    "id": "SunSetAZ",
+    "type": "String"
+   },
+   {
+    "id": "EndCivilTwilightTime",
+    "type": "String"
+   }
+  ]
+ },
+ "records": {
+  "dataid": "A-B0062-001",
+  "note": "全臺各縣市每天的日出、日沒及太陽過中天等時刻資料-含有日出日沒時之方位及過中天時之仰角資料",
+  "locations": {
+   "location": [
+    {
+     "time": [
+      {
+       "Date": "2026-11-23",
+       "BeginCivilTwilightTime": "05:51",
+       "SunRiseTime": "06:16",
+       "SunRiseAZ": "112",
+       "SunTransitTime": "11:40",
+       "SunTransitAlt": "45S",
+       "SunSetTime": "17:04",
+       "SunSetAZ": "248",
+       "EndCivilTwilightTime": "17:29"
+      }
+     ],
+     "CountyName": "新北市"
+    }
+   ]
+  }
+ }
+}

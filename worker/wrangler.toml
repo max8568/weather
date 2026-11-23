@@ -1,0 +1,8 @@
+name = "weather-api"
+main = "src/index.js"
+workers_dev = true
+preview_urls = false
+compatibility_date = "2026-11-01"
+
+[vars]
+ALLOWED_ORIGINS = "https://max8568.github.io,http://localhost:8000"

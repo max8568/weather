@@ -82,9 +82,9 @@ test/site/*.test.js             網頁純函式的測試
   county: "新北市", town: "五股區",
   generatedAt: "2026-11-23T09:27:00+08:00",
   sources: { county36h: {ok:true}, threeDay: {ok:true}, weekly: {ok:true}, observation: {ok:true}, sun: {ok:true} },
-  county36h: null | Period36[3],
-  threeDay:  null | { lat, lon, current: {weather, weatherCode, pop, apparentTemperature}, next24h: {max, min}, hourly: HourPoint[] },
-  weekly:    null | { days: Day[], uv: {value, level, label} | null },
+  county36h: null | Period36[1..3],   // 已經結束的時段不列（18:00 以後沒有「今日白天」）
+  threeDay:  null | { lat, lon, current: {weather, weatherCode, pop, apparentTemperature}, next24h: {max, min}, hourly: HourPoint[] },   // hourly 至少 1 筆，否則整區 null
+  weekly:    null | { days: Day[], uv: {value, level, label} | null },   // days 至少 1 天，否則整區 null；已經結束的半天不列
   observation: null | { time, temperature: Obs|null, humidity: Obs|null, windDirection: Obs|null, windSpeed: Obs|null, pressure: Obs|null, rainToday: Obs|null },
   sun:       null | { date: "2026-11-23", sunrise: "06:16", sunset: "17:04" }
 }
@@ -92,9 +92,13 @@ test/site/*.test.js             網頁純函式的測試
 // HourPoint = { time, temperature, apparentTemperature, humidity, beaufort, windDirection, comfort, weather, weatherCode, pop }
 // Day       = { date: "YYYY-MM-DD", label: "今天"|"週二"…, day: Half|null, night: Half|null }
 // Half      = { start, end, weather, weatherCode, maxT, minT, maxAT, minAT, pop, humidity, beaufort, windDirection, uv, uvLevel }
-// Obs       = { value, station, time }   windDirection 的 value 是文字（「東北風」）
+// Obs       = { value, station, time }   windDirection 的 value 是文字（「東北風」；氣象署的 990 是「風向不定」）
+//             rainToday 只用觀測時間在台北今天的測站
+// beaufort：氣象署的 "<= 1"（0 到 1 級）轉成數字 1，網頁顯示「≤1 級」
 // 所有時間是帶 +08:00 的 ISO 字串；數字缺值是 null。
 // 錯誤：{ error: "訊息" }，400 / 404 / 502 / 500
+// 縣市不在 DATASETS、或鄉鎮不在 site/data/towns.json 的該縣市清單 → 400（向氣象署要資料之前就判斷）。
+// 氣象署回應裡找不到這個鄉鎮 → 只有那一區是 null、sources[區].ok = false，不是 400。
 ```
 
 ---
