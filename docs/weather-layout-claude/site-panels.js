@@ -212,7 +212,7 @@ function dateLabel(iso) {
   return `${Number(iso.slice(5, 7))} 月 ${Number(iso.slice(8, 10))} 日・星期${weekdayChar(iso)}`;
 }
 
-// 「目前觀測」的五格，固定順序。每格帶自己的測站；缺值顯示 --，不寫單位和測站。
+// 「目前觀測」的五格，固定順序。每格帶自己的測站和觀測時間（HH:MM）；缺值顯示 --，不寫單位、測站和時間。
 const OBS_ITEMS = [
   ['濕度', 'humidity', '%'], ['風速', 'windSpeed', 'm/s'], ['風向', 'windDirection', ''],
   ['氣壓', 'pressure', 'hPa'], ['今天累積雨量', 'rainToday', 'mm'],
@@ -222,10 +222,35 @@ function obsItems(obs) {
     const o = obs?.[key];
     const v = o?.value;
     const ok = key === 'windDirection' ? typeof v === 'string' && v !== '' : typeof v === 'number';
-    return ok ? { label, value: String(v), unit, station: o.station || '' } : { label, value: '--', unit: '', station: '' };
+    return ok
+      ? { label, value: String(v), unit, station: o.station || '', time: o.time ? hhmm(o.time) : '' }
+      : { label, value: '--', unit: '', station: '', time: '' };
   });
 }
-return { SHOW_WEEK_POP_AT, tempBar, daylightFraction, weekSummary, dayRow, hhmm, hourLabel, coversWholeDay, dayExtremes, beaufortText, heroStations, weekdayChar, tempColor, tempGradient, dateLabel, obsItems };
+
+// 有值的格子都是同一個觀測時間時回傳那個時間，標在「目前觀測」標題旁；時間不一樣（不同測站）時回傳空字串，改成每格各寫自己的時間。
+function obsTime(items) {
+  const times = [...new Set(items.filter((x) => x.value !== '--').map((x) => x.time))];
+  return times.length === 1 ? times[0] : '';
+}
+
+// 7 日預報的降雨機率：30% 以上才寫出來，低於 30% 留空；沒有資料寫 --，跟「機率很低」分得出來。
+function weekPopText(pop) {
+  if (typeof pop !== 'number') return '--';
+  return pop >= SHOW_WEEK_POP_AT ? `${pop}%` : '';
+}
+
+// 頁尾資料時間那一行的每一段。不同測站各自一段，窄螢幕可以在段和段之間換行。
+function dataTimeParts(data) {
+  const stations = heroStations(data.observation);
+  const time = data.observation?.time;
+  return [
+    ...(stations ? stations.split('・') : []),
+    ...(time ? [`觀測時間 ${hhmm(time)}`] : []),
+    `上次更新 ${hhmm(data.generatedAt)}`,
+  ];
+}
+return { SHOW_WEEK_POP_AT, tempBar, daylightFraction, weekSummary, dayRow, hhmm, hourLabel, coversWholeDay, dayExtremes, beaufortText, heroStations, weekdayChar, tempColor, tempGradient, dateLabel, obsItems, obsTime, weekPopText, dataTimeParts };
 })();
 M['logic/advice.js'] = (function () {
 // 穿著、薄外套、帶傘、曬衣建議。缺值的項目不給。night：這個時段的開始時間是不是在晚上（18:00 到 06:00）。
@@ -503,7 +528,7 @@ return { scalePoints, smoothPath, stepPath, stepSegments, smoothSegments, bandSe
 M['render/sections.js'] = (function () {
 const { iconKey, isNight, iconUrl } = M['logic/icons.js'];
 const { adviceItems } = M['logic/advice.js'];
-const { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, heroStations, obsItems, SHOW_WEEK_POP_AT } = M['logic/format.js'];
+const { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, obsItems, obsTime, weekPopText, dataTimeParts } = M['logic/format.js'];
 const ui = M['render/ui-icons.js'];
 
 function h(tag, className, text) {
@@ -577,15 +602,10 @@ function renderUnavailable(el, title) {
   el.replaceChildren(sectionHead(title), h('p', 'unavailable', '暫時無法取得'));
 }
 
-// 最上方的實測溫度、風向、濕度可能來自不同測站，測站名稱寫在這一行最前面。
-// 每一項各自不斷行，窄螢幕放不下時只在「・」之後換行。
+// 頁尾的資料時間：實測溫度、風向、濕度的測站（可能不同站，各自一段）、觀測時間、上次更新。
+// 每一段各自不斷行，窄螢幕放不下時只在「・」之後換行。
 function renderDataTime(el, data) {
-  const obsTime = data.observation?.time;
-  const parts = [
-    heroStations(data.observation),
-    obsTime ? `觀測時間 ${hhmm(obsTime)}` : '',
-    `上次更新 ${hhmm(data.generatedAt)}`,
-  ].filter(Boolean);
+  const parts = dataTimeParts(data);
   el.replaceChildren(...parts.flatMap((text, i) => (i ? ['・', h('span', '', text)] : [h('span', '', text)])));
 }
 
@@ -697,7 +717,7 @@ function renderWeekly(el, data, { onDetail }) {
       h('div', 'week-label', d.label),
       // 沒有天氣現象時放一個空的位置，後面幾欄才不會往左移
       r.weather ? img(iconUrl(iconKey(r.weather), { night: r.night }), r.weather) : h('span'),
-      h('div', 'week-pop', typeof r.pop === 'number' && r.pop >= SHOW_WEEK_POP_AT ? `${r.pop}%` : ''),
+      h('div', 'week-pop', weekPopText(r.pop)),
       temps,
     );
     list.append(row);
@@ -706,21 +726,23 @@ function renderWeekly(el, data, { onDetail }) {
 }
 
 // 目前觀測：五格實測值，每格數字下面寫它自己的測站（不同項目可能來自不同測站）；缺值的格子只寫 --。
+// 每格觀測時間相同時，時間寫在標題旁；不同時每格在測站後面寫自己的時間。
 function renderObsTiles(el, data) {
   const o = data.observation;
   if (!o) return renderUnavailable(el, '目前觀測');
+  const items = obsItems(o), shared = obsTime(items);
   const dl = h('dl');
-  for (const it of obsItems(o)) {
+  for (const it of items) {
     const dd = h('dd', '', it.value);
     if (it.unit) dd.append(h('small', '', it.unit));
-    if (it.station) dd.append(h('span', 'obs-station', `${it.station}測站`));
+    if (it.station) dd.append(h('span', 'obs-station', `${it.station}測站${!shared && it.time ? ` ${it.time}` : ''}`));
     const box = h('div');
     box.append(h('dt', '', it.label), dd);
     dl.append(box);
   }
   const card = h('div', 'card obs-card');
   card.append(dl);
-  el.replaceChildren(sectionHead('目前觀測', null, o.time ? `實測 ${hhmm(o.time)}` : ''), card);
+  el.replaceChildren(sectionHead('目前觀測', null, shared ? `實測 ${shared}` : '實測'), card);
 }
 
 // 弧線是一段餘弦曲線：兩端在地平線下，t = 0.25 和 0.75 跟地平線相交，中間是白天。

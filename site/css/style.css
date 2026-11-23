@@ -117,7 +117,7 @@ button { color: inherit; }
    中間灰色底線是整週最低溫到最高溫，彩色段落在底線上的位置就是當天在整週的位置 */
 .week-row { display: grid; grid-template-columns: 32px 32px 30px 1fr; align-items: center; gap: 8px; padding: 6px 0; }
 .week-row + .week-row { border-top: 1px solid var(--line); }
-.week-label { font-size: 15px; }
+.week-label { font-size: 15px; font-weight: 700; }
 .week-row img { width: 32px; height: 32px; }
 .week-pop { font-size: 12px; color: var(--pop); text-align: right; }
 /* 左邊空 16px，最低溫跟降雨機率才不會黏在一起 */
@@ -135,7 +135,8 @@ button { color: inherit; }
 .obs-card dt { font-size: 12px; color: var(--text-2); white-space: nowrap; }
 .obs-card dd { margin: 0; font-size: 18px; font-weight: 700; white-space: nowrap; }
 .obs-card small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
-.obs-station { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: var(--muted); white-space: normal; }
+/* 測站是必要資訊，11px 的小字用 #6e6e73，在灰底上才到 4.5:1 */
+.obs-station { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: #6e6e73; white-space: normal; }
 
 .sun-card { padding-bottom: 8px; }
 .sun-times { display: flex; justify-content: space-between; }

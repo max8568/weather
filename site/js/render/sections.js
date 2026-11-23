@@ -1,6 +1,6 @@
 import { iconKey, isNight, iconUrl } from '../logic/icons.js';
 import { adviceItems } from '../logic/advice.js';
-import { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, heroStations, obsItems, SHOW_WEEK_POP_AT } from '../logic/format.js';
+import { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, obsItems, obsTime, weekPopText, dataTimeParts } from '../logic/format.js';
 import * as ui from './ui-icons.js';
 
 export function h(tag, className, text) {
@@ -74,15 +74,10 @@ export function renderUnavailable(el, title) {
   el.replaceChildren(sectionHead(title), h('p', 'unavailable', '暫時無法取得'));
 }
 
-// 最上方的實測溫度、風向、濕度可能來自不同測站，測站名稱寫在這一行最前面。
-// 每一項各自不斷行，窄螢幕放不下時只在「・」之後換行。
+// 頁尾的資料時間：實測溫度、風向、濕度的測站（可能不同站，各自一段）、觀測時間、上次更新。
+// 每一段各自不斷行，窄螢幕放不下時只在「・」之後換行。
 export function renderDataTime(el, data) {
-  const obsTime = data.observation?.time;
-  const parts = [
-    heroStations(data.observation),
-    obsTime ? `觀測時間 ${hhmm(obsTime)}` : '',
-    `上次更新 ${hhmm(data.generatedAt)}`,
-  ].filter(Boolean);
+  const parts = dataTimeParts(data);
   el.replaceChildren(...parts.flatMap((text, i) => (i ? ['・', h('span', '', text)] : [h('span', '', text)])));
 }
 
@@ -194,7 +189,7 @@ export function renderWeekly(el, data, { onDetail }) {
       h('div', 'week-label', d.label),
       // 沒有天氣現象時放一個空的位置，後面幾欄才不會往左移
       r.weather ? img(iconUrl(iconKey(r.weather), { night: r.night }), r.weather) : h('span'),
-      h('div', 'week-pop', typeof r.pop === 'number' && r.pop >= SHOW_WEEK_POP_AT ? `${r.pop}%` : ''),
+      h('div', 'week-pop', weekPopText(r.pop)),
       temps,
     );
     list.append(row);
@@ -203,21 +198,23 @@ export function renderWeekly(el, data, { onDetail }) {
 }
 
 // 目前觀測：五格實測值，每格數字下面寫它自己的測站（不同項目可能來自不同測站）；缺值的格子只寫 --。
+// 每格觀測時間相同時，時間寫在標題旁；不同時每格在測站後面寫自己的時間。
 export function renderObsTiles(el, data) {
   const o = data.observation;
   if (!o) return renderUnavailable(el, '目前觀測');
+  const items = obsItems(o), shared = obsTime(items);
   const dl = h('dl');
-  for (const it of obsItems(o)) {
+  for (const it of items) {
     const dd = h('dd', '', it.value);
     if (it.unit) dd.append(h('small', '', it.unit));
-    if (it.station) dd.append(h('span', 'obs-station', `${it.station}測站`));
+    if (it.station) dd.append(h('span', 'obs-station', `${it.station}測站${!shared && it.time ? ` ${it.time}` : ''}`));
     const box = h('div');
     box.append(h('dt', '', it.label), dd);
     dl.append(box);
   }
   const card = h('div', 'card obs-card');
   card.append(dl);
-  el.replaceChildren(sectionHead('目前觀測', null, o.time ? `實測 ${hhmm(o.time)}` : ''), card);
+  el.replaceChildren(sectionHead('目前觀測', null, shared ? `實測 ${shared}` : '實測'), card);
 }
 
 // 弧線是一段餘弦曲線：兩端在地平線下，t = 0.25 和 0.75 跟地平線相交，中間是白天。

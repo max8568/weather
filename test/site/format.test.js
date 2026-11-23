@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, dayExtremes, beaufortText, heroStations, SHOW_WEEK_POP_AT, tempColor, tempGradient, dateLabel, obsItems } from '../../site/js/logic/format.js';
+import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, dayExtremes, beaufortText, heroStations, SHOW_WEEK_POP_AT, tempColor, tempGradient, dateLabel, obsItems, obsTime, weekPopText, dataTimeParts } from '../../site/js/logic/format.js';
 
 const half = (o) => ({ weather: '多雲', maxT: null, minT: null, maxAT: null, minAT: null, pop: null, humidity: null, uv: null, ...o });
 
@@ -163,10 +163,36 @@ test('obsItems: each item keeps its own station; missing values show -- with no 
   const items = obsItems({ time: '2026-11-23T16:00:00+08:00', humidity: o(68, '臺北'), windSpeed: o(2.5, '五股'),
     windDirection: o('東北風', '五股'), pressure: o(null, '臺北'), rainToday: null });
   assert.deepEqual(items.map((x) => x.label), ['濕度', '風速', '風向', '氣壓', '今天累積雨量']);
-  assert.deepEqual(items[0], { label: '濕度', value: '68', unit: '%', station: '臺北' });
-  assert.deepEqual(items[1], { label: '風速', value: '2.5', unit: 'm/s', station: '五股' });
-  assert.deepEqual(items[2], { label: '風向', value: '東北風', unit: '', station: '五股' });
-  assert.deepEqual(items[3], { label: '氣壓', value: '--', unit: '', station: '' });
-  assert.deepEqual(items[4], { label: '今天累積雨量', value: '--', unit: '', station: '' });
+  assert.deepEqual(items[0], { label: '濕度', value: '68', unit: '%', station: '臺北', time: '16:00' });
+  assert.deepEqual(items[1], { label: '風速', value: '2.5', unit: 'm/s', station: '五股', time: '16:00' });
+  assert.deepEqual(items[2], { label: '風向', value: '東北風', unit: '', station: '五股', time: '16:00' });
+  assert.deepEqual(items[3], { label: '氣壓', value: '--', unit: '', station: '', time: '' });
+  assert.deepEqual(items[4], { label: '今天累積雨量', value: '--', unit: '', station: '', time: '' });
   assert.ok(obsItems(null).every((x) => x.value === '--' && x.station === ''));
+});
+
+test('obsTime: one shared time when every shown reading has it, empty when the readings differ', () => {
+  const at = (value, time) => ({ value, station: '臺北', time });
+  const same = obsItems({ humidity: at(68, '2026-11-23T11:00:00+08:00'), windSpeed: at(2.5, '2026-11-23T11:00:00+08:00') });
+  assert.equal(obsTime(same), '11:00');
+  // Worker 的混合測站測試：濕度 11:00、風速 10:50，不能都標成同一個時間
+  const mixed = obsItems({ humidity: at(68, '2026-11-23T11:00:00+08:00'), windSpeed: at(2.5, '2026-11-23T10:50:00+08:00') });
+  assert.equal(obsTime(mixed), '');
+  assert.equal(obsTime(obsItems(null)), '');
+});
+
+test('weekPopText: 30% and up is shown, below 30% is blank, missing is --', () => {
+  assert.equal(weekPopText(70), '70%');
+  assert.equal(weekPopText(30), '30%');
+  assert.equal(weekPopText(20), '');
+  assert.equal(weekPopText(0), '');
+  assert.equal(weekPopText(null), '--');
+  assert.equal(weekPopText(undefined), '--');
+});
+
+test('dataTimeParts: each station group is its own part, so the footer can wrap between them', () => {
+  const obs = { time: '2026-11-23T10:50:00+08:00', temperature: obsAt('五股'), windDirection: obsAt('泰山'), humidity: obsAt('新莊') };
+  assert.deepEqual(dataTimeParts({ observation: obs, generatedAt: '2026-11-23T11:05:00+08:00' }),
+    ['溫度 五股測站', '風向 泰山測站', '濕度 新莊測站', '觀測時間 10:50', '上次更新 11:05']);
+  assert.deepEqual(dataTimeParts({ observation: null, generatedAt: '2026-11-23T11:05:00+08:00' }), ['上次更新 11:05']);
 });

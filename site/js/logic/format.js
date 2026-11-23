@@ -148,7 +148,7 @@ export function dateLabel(iso) {
   return `${Number(iso.slice(5, 7))} 月 ${Number(iso.slice(8, 10))} 日・星期${weekdayChar(iso)}`;
 }
 
-// 「目前觀測」的五格，固定順序。每格帶自己的測站；缺值顯示 --，不寫單位和測站。
+// 「目前觀測」的五格，固定順序。每格帶自己的測站和觀測時間（HH:MM）；缺值顯示 --，不寫單位、測站和時間。
 const OBS_ITEMS = [
   ['濕度', 'humidity', '%'], ['風速', 'windSpeed', 'm/s'], ['風向', 'windDirection', ''],
   ['氣壓', 'pressure', 'hPa'], ['今天累積雨量', 'rainToday', 'mm'],
@@ -158,6 +158,31 @@ export function obsItems(obs) {
     const o = obs?.[key];
     const v = o?.value;
     const ok = key === 'windDirection' ? typeof v === 'string' && v !== '' : typeof v === 'number';
-    return ok ? { label, value: String(v), unit, station: o.station || '' } : { label, value: '--', unit: '', station: '' };
+    return ok
+      ? { label, value: String(v), unit, station: o.station || '', time: o.time ? hhmm(o.time) : '' }
+      : { label, value: '--', unit: '', station: '', time: '' };
   });
+}
+
+// 有值的格子都是同一個觀測時間時回傳那個時間，標在「目前觀測」標題旁；時間不一樣（不同測站）時回傳空字串，改成每格各寫自己的時間。
+export function obsTime(items) {
+  const times = [...new Set(items.filter((x) => x.value !== '--').map((x) => x.time))];
+  return times.length === 1 ? times[0] : '';
+}
+
+// 7 日預報的降雨機率：30% 以上才寫出來，低於 30% 留空；沒有資料寫 --，跟「機率很低」分得出來。
+export function weekPopText(pop) {
+  if (typeof pop !== 'number') return '--';
+  return pop >= SHOW_WEEK_POP_AT ? `${pop}%` : '';
+}
+
+// 頁尾資料時間那一行的每一段。不同測站各自一段，窄螢幕可以在段和段之間換行。
+export function dataTimeParts(data) {
+  const stations = heroStations(data.observation);
+  const time = data.observation?.time;
+  return [
+    ...(stations ? stations.split('・') : []),
+    ...(time ? [`觀測時間 ${hhmm(time)}`] : []),
+    `上次更新 ${hhmm(data.generatedAt)}`,
+  ];
 }
