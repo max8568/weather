@@ -54,6 +54,6 @@ export function setupCompactHeader(heroEl, compactEl, data) {
   compactEl.classList.remove('show');
   observer = new IntersectionObserver(([entry]) => {
     compactEl.classList.toggle('show', !entry.isIntersecting);
-  }, { rootMargin: '-80px 0px 0px 0px' });
+  });
   observer.observe(heroEl);
 }
