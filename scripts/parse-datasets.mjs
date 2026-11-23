@@ -7,7 +7,7 @@ export function collectDatasets(text) {
   const doc = yaml.load(text);
   const datasets = {};
   for (const [path, item] of Object.entries(doc?.paths ?? {})) {
-    const m = path.match(/\/v1\/rest\/datastore\/(F-D0047-\d{3})$/);
+    const m = path.match(/^\/v1\/rest\/datastore\/(F-D0047-\d{3})$/);
     const s = String(item?.get?.summary ?? '').match(/鄉鎮天氣預報-(.+?)未來(3天|1週)天氣預報/);
     if (!m || !s || s[1] === '臺灣') continue;
     (datasets[s[1]] ??= {})[s[2] === '3天' ? 'threeDay' : 'weekly'] = m[1];

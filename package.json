@@ -1,1 +1,1 @@
-{"private":true,"type":"module","scripts":{"test":"node --test"},"devDependencies":{"js-yaml":"4.1.0"}}
+{"private":true,"type":"module","scripts":{"test":"node --test"},"devDependencies":{"js-yaml":"4.3.2"}}

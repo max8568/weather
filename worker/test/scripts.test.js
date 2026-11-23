@@ -32,6 +32,14 @@ test('collectDatasets pairs ids and skips 臺灣', () => {
   assert.deepEqual(collectDatasets(text), { 宜蘭縣: { threeDay: 'F-D0047-001', weekly: 'F-D0047-003' } });
 });
 
+test('a path with a prefix before /v1/rest/datastore/ does not replace the canonical ID', () => {
+  const text = yamlDoc(
+    endpoint('F-D0047-001', sum('宜蘭縣', '3天')),
+    `  /archive/v1/rest/datastore/F-D0047-045:\n    get:\n      summary: ${sum('宜蘭縣', '3天')}（舊版）\n`,
+  );
+  assert.deepEqual(collectDatasets(text), { 宜蘭縣: { threeDay: 'F-D0047-001' } });
+});
+
 test('parseDatasets throws on an incomplete set', () => {
   const text = yamlDoc(endpoint('F-D0047-001', sum('宜蘭縣', '3天')));
   assert.throws(() => parseDatasets(text), /不完整/);
