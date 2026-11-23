@@ -38,7 +38,8 @@ test('hourLabel and hhmm', () => {
   assert.equal(hourLabel('2026-11-23T09:00:00+08:00', 0), '現在'); assert.equal(hourLabel('2026-11-23T15:00:00+08:00', 3), '15時');
   assert.equal(hhmm('2026-11-23T09:27:00+08:00'), '09:27');
   assert.equal(hourLabel('2026-11-24T00:00:00+08:00', 5), '11/24');
-  assert.equal(hourLabel('2026-12-01T00:00:00+08:00', 2), '12/1');
+  assert.equal(hourLabel('2026-12-01T00:00:00+08:00', 2), '12/01');
+  assert.equal(hourLabel('2027-01-02T00:00:00+08:00', 4), '01/02');
   assert.equal(hourLabel('2026-11-24T00:00:00+08:00', 0), '現在');
   assert.equal(hourLabel('2026-11-24T03:00:00+08:00', 6), '03時');
 });
