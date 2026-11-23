@@ -130,8 +130,8 @@ test('7-day rows leave room between the rain chance and the lowest temperature',
   const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
   const left = Number(css.match(/[.]v-combo [.]w-range [{][^}]*margin: 0 26px 0 (\d+)px;/)[1]);
   assert.ok(left >= 48, left);
-  // 灰色底線只畫在整週最低溫到最高溫那一段，不再從降雨機率旁邊開始
-  assert.match(css, /[.]v-combo [.]w-range::before [{][^}]*left: 0; right: 0;/);
+  // 溫度條下面不畫灰色底線
+  assert.doesNotMatch(css, /[.]w-range::before/);
 });
 
 test('7-day title has no subtitle', () => {
