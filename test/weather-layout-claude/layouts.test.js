@@ -126,12 +126,15 @@ test('7-day bars are colored on a fixed scale: blue up to 18°, red above, blend
   });
 });
 
-test('7-day rows leave room between the rain chance and the lowest temperature', () => {
+test('7-day temperatures sit in fixed columns on both sides of a grey track, like the live site, clear of the rain chance', () => {
+  const rows = [...byKey('combo').matchAll(/<span class="w-temps"><b>(\d+)°<\/b><span class="w-bar"><i [^>]*><\/i><\/span><b>(\d+)°<\/b><\/span>/g)];
+  assert.equal(rows.length, W.WEATHER.week.length);
+  rows.forEach((m, i) => assert.deepEqual([Number(m[1]), Number(m[2])], [W.WEATHER.week[i].min, W.WEATHER.week[i].max]));
   const css = readFileSync(DIR + 'layouts/00-combo.css', 'utf8');
-  const left = Number(css.match(/[.]v-combo [.]w-range [{][^}]*margin: 0 26px 0 (\d+)px;/)[1]);
-  assert.ok(left >= 48, left);
-  // 溫度條下面不畫灰色底線
-  assert.doesNotMatch(css, /[.]w-range::before/);
+  assert.match(css, /[.]v-combo [.]w-temps [{][^}]*grid-template-columns: (\d+)px 1fr \1px;/);
+  assert.match(css, /[.]v-combo [.]w-bar [{][^}]*background: var[(]--line[)];/);
+  const gap = Number(css.match(/[.]v-combo [.]w-temps [{][^}]*margin-left: (\d+)px;/)[1]);
+  assert.ok(gap >= 16, gap);
 });
 
 test('7-day title has no subtitle', () => {

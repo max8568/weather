@@ -46,7 +46,7 @@
 
     const week = card('week', '7 日預報', '', `<ul>${w.week.map((d) => `<li>
         <b class="w-day">${d.label}</b>${icon(d.icon, d.weather)}<span class="w-pop">${pct(d.pop)}</span>
-        <span class="w-range"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%;background:${tempGradient(d.min, d.max)}"><b>${deg(d.min)}</b><b>${deg(d.max)}</b></i></span></li>`).join('')}</ul>`, 'weekly');
+        <span class="w-temps"><b>${deg(d.min)}</b><span class="w-bar"><i style="left:${at(d.min)}%;right:${100 - at(d.max)}%;background:${tempGradient(d.min, d.max)}"></i></span><b>${deg(d.max)}</b></span></li>`).join('')}</ul>`, 'weekly');
 
     // 生活建議照網站現在的排版：上半時段、溫度、降雨，右邊圖示和舒適度；下半一排建議圖示。
     // 外面沒有卡片，標題下面直接是一排可以左右滑的卡片
