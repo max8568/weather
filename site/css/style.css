@@ -113,33 +113,19 @@ button { color: inherit; }
 .advice-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
 .advice-item svg { width: 32px; height: 32px; }
 
-.week-list { padding-left: 16px; }
-.week-row { display: grid; grid-template-columns: 56px 80px 1fr; align-items: center; row-gap: 6px; padding: 16px 16px 16px 0; border-bottom: 1px solid var(--line); }
-.week-row:last-child { border-bottom: 0; }
-.week-label { font-size: 17px; font-weight: 700; }
-/* 三個外層包裝不參與版面：第一行是標籤、圖示、溫度條，第二行是日期、降雨機率、紫外線和體感，第二行以基準線對齊 */
-.week-day, .week-look, .week-right { display: contents; }
-.week-label { grid-area: 1 / 1; }
-.week-look img { grid-area: 1 / 2; justify-self: center; }
-.week-temps { grid-area: 1 / 3; }
-.week-date { grid-area: 2 / 1; align-self: baseline; font-size: 13px; color: var(--muted); white-space: nowrap; }
-.week-look img { width: 48px; height: 48px; }
-.week-pop { grid-area: 2 / 2; align-self: baseline; text-align: center; font-size: 12px; color: var(--pop); }
-.week-pop:empty { align-self: start; }
-/* 最低、最高溫的欄寬固定，每一列的溫度條才會在同一個位置、同樣長 */
-.week-temps { display: grid; grid-template-columns: 42px 1fr 42px; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; }
+/* 7 日：每天一行，名稱、圖示、降雨機率、溫度。最低溫、最高溫固定在左右兩欄，七天的數字上下對齊；
+   中間灰色底線是整週最低溫到最高溫，彩色段落在底線上的位置就是當天在整週的位置 */
+.week-row { display: grid; grid-template-columns: 32px 32px 30px 1fr; align-items: center; gap: 8px; padding: 6px 0; }
+.week-row + .week-row { border-top: 1px solid var(--line); }
+.week-label { font-size: 15px; }
+.week-row img { width: 32px; height: 32px; }
+.week-pop { font-size: 12px; color: var(--pop); text-align: right; }
+/* 左邊空 16px，最低溫跟降雨機率才不會黏在一起 */
+.week-temps { display: grid; grid-template-columns: 30px 1fr 30px; align-items: center; gap: 8px; margin-left: 16px; font-size: 15px; font-weight: 700; }
 .week-temps > span:last-child { text-align: right; }
-.week-bar { position: relative; height: 4px; border-radius: 2px; background: var(--line); }
-.week-bar span { position: absolute; inset: 0; border-radius: 2px; background: linear-gradient(90deg, #a9c79c, #f2c94c); }
-.week-extra { grid-area: 2 / 3; align-self: baseline; min-width: 0; font-size: 13px; color: var(--text-2); white-space: nowrap; }
-.week-extra span + span { margin-left: 10px; }
-/* 第一欄寬度剛好等於最寬的文字（日期「11月23日」13px 約 56px），圖示欄兩側各留 16px，
-   所以圖示在日期右緣和最低溫文字左緣的正中間；欄寬固定，7 列圖示在同一條垂直線上 */
-/* 窄螢幕（320–379px）圖示縮成 40px、兩側各留 12px，溫度欄也縮小，溫度條在 320px 寬時還有約 56px */
+.week-bar { position: relative; height: 6px; border-radius: 3px; background: var(--line); }
+.week-bar span { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
 @media (max-width: 379px) {
-  .week-row { grid-template-columns: 56px 64px 1fr; }
-  .week-look img { width: 40px; height: 40px; }
-  .week-temps { grid-template-columns: 34px 1fr 34px; gap: 6px; }
   .advice-look img { width: 64px; height: 64px; margin-top: 0; }
 }
 

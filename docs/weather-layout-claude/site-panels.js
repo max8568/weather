@@ -503,7 +503,7 @@ return { scalePoints, smoothPath, stepPath, stepSegments, smoothSegments, bandSe
 M['render/sections.js'] = (function () {
 const { iconKey, isNight, iconUrl } = M['logic/icons.js'];
 const { adviceItems } = M['logic/advice.js'];
-const { tempBar, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, heroStations, SHOW_WEEK_POP_AT } = M['logic/format.js'];
+const { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, heroStations, SHOW_WEEK_POP_AT } = M['logic/format.js'];
 const ui = M['render/ui-icons.js'];
 
 function h(tag, className, text) {
@@ -676,8 +676,6 @@ function renderAdvice(el, data) {
   el.replaceChildren(sectionHead('生活建議'), row);
 }
 
-const monthDay = (date) => `${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日`;
-
 function renderWeekly(el, data, { onDetail }) {
   const wk = data.weekly;
   if (!wk?.days?.length) return renderUnavailable(el, '7 日預報');
@@ -686,27 +684,28 @@ function renderWeekly(el, data, { onDetail }) {
   const maxs = rows.map(({ r }) => r.max).filter((v) => typeof v === 'number');
   const weekMin = Math.min(...mins), weekMax = Math.max(...maxs);
   const list = h('div', 'card week-list');
+  // 每天一行：名稱、圖示、降雨機率（30% 以上才寫）、最低溫、溫度條、最高溫。
+  // 彩色段的位置照整週範圍換算，顏色照固定色階（18° 以下藍、以上紅）。
   for (const { d, r } of rows) {
-    const day = h('div', 'week-day');
-    day.append(h('div', 'week-label', d.label), h('div', 'week-date', monthDay(d.date)));
-    const look = h('div', 'week-look');
-    if (r.weather) look.append(img(iconUrl(iconKey(r.weather), { night: r.night }), r.weather));
-    look.append(h('div', 'week-pop', typeof r.pop === 'number' && r.pop >= SHOW_WEEK_POP_AT ? `${r.pop}%` : ''));
     const bar = h('div', 'week-bar');
     if (typeof r.min === 'number' && typeof r.max === 'number') {
       const b = tempBar(r.min, r.max, weekMin, weekMax);
       const fill = h('span');
-      fill.style.clipPath = `inset(0 ${100 - b.left - b.width}% 0 ${b.left}% round 2px)`;
+      fill.style.left = `${b.left}%`;
+      fill.style.width = `${b.width}%`;
+      fill.style.background = tempGradient(r.min, r.max);
       bar.append(fill);
     }
     const temps = h('div', 'week-temps');
     temps.append(h('span', '', deg(r.min)), bar, h('span', '', deg(r.max)));
-    const extra = h('div', 'week-extra');
-    extra.append(h('span', '', `紫外線 ${num(r.uv)}`), h('span', '', `體感 ${deg(r.minAT)}/${deg(r.maxAT)}`));
-    const right = h('div', 'week-right');
-    right.append(temps, extra);
     const row = h('div', 'week-row');
-    row.append(day, look, right);
+    row.append(
+      h('div', 'week-label', d.label),
+      // 沒有天氣現象時放一個空的位置，後面幾欄才不會往左移
+      r.weather ? img(iconUrl(iconKey(r.weather), { night: r.night }), r.weather) : h('span'),
+      h('div', 'week-pop', typeof r.pop === 'number' && r.pop >= SHOW_WEEK_POP_AT ? `${r.pop}%` : ''),
+      temps,
+    );
     list.append(row);
   }
   el.replaceChildren(sectionHead('7 日預報', onDetail), list);
