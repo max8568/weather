@@ -61,3 +61,8 @@ test('parseCounty36h throws when Wx is missing or not 3 periods', () => {
   assert.throws(() => parseCounty36h(withEl('Wx', e => ({ ...e, time: e.time.slice(0, 2) })), '新北市', now), /3/);
   assert.throws(() => parseCounty36h({ records: { location: [{ locationName: '新北市', weatherElement: [] }] } }, '新北市', now), /3/);
 });
+
+test('parseCounty36h treats a null entry in a secondary element as missing', () => {
+  const j = withEl('PoP', e => ({ ...e, time: [null, e.time[1], e.time[2]] }));
+  assert.deepEqual(parseCounty36h(j, '新北市', now).map(p => p.pop), [null, 70, 100]);
+});

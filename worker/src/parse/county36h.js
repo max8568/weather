@@ -10,7 +10,7 @@ export function parseCounty36h(json, county, now) {
   if (wx.length !== 3) throw new Error(`${county} 的 36 小時預報有 ${wx.length} 個時段，預期 3 個`);
   // 其他欄位用起訖時間對到天氣現象的時段，對不到就是缺值
   const slot = t => `${parseCwaTime(t.startTime).getTime()}|${parseCwaTime(t.endTime).getTime()}`;
-  const param = (name, t) => el(name).find(x => slot(x) === slot(t))?.parameter?.parameterName;
+  const param = (name, t) => el(name).find(x => x && typeof x === 'object' && slot(x) === slot(t))?.parameter?.parameterName;
   return wx.map(t => {
     const start = parseCwaTime(t.startTime);
     return {
