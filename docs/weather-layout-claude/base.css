@@ -34,4 +34,3 @@ img.wx { display: block; }
 /* 可以橫向捲動的區域：不顯示捲軸 */
 .hscroll { display: flex; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
 .hscroll::-webkit-scrollbar { display: none; }
-.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
