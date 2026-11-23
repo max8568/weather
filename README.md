@@ -8,7 +8,7 @@
 
 只改網頁（`site/`）時，不用等 GitHub Pages：
 
-1. 在專案根目錄執行 `npm run preview`，瀏覽器會打開 http://localhost:8000 。
+1. 在專案根目錄執行 `npm run preview`，瀏覽器會打開 http://localhost:8000 。第一次執行會先從 npm 下載 http-server，要多等幾秒。
 2. 改完檔案後按重新整理就看得到。資料來自線上的 Worker，不需要授權碼。
 3. 看手機版面：Chrome 按 F12，再按「切換裝置」圖示，選手機尺寸。
 
@@ -21,7 +21,7 @@
 1. 安裝套件：在專案根目錄和 `worker/` 各執行一次 `npm ci`（根目錄的套件給測試和腳本用，`worker/` 的是 wrangler）。
 2. 建立 `worker/.dev.vars`，內容一行：`CWA_API_KEY=你的授權碼`（這個檔案不會進 git）。
 3. 在 `worker/` 啟動 Worker：`npx wrangler dev --port 8787`
-4. 在專案根目錄執行 `npm run preview`。
+4. Worker 會一直佔著那個終端機。另開一個終端機，在專案根目錄執行 `npm run preview`。
 5. 打開 http://localhost:8000/?api=local 。網址有 `?api=local` 時，網頁會連 http://localhost:8787 ；沒有的話連線上的 Worker。
 
 ## 測試
