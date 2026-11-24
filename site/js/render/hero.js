@@ -1,8 +1,9 @@
 import { iconKey, isNight, iconUrl } from '../logic/icons.js';
+import { dateLabel } from '../logic/format.js';
 import { h, img, deg } from './sections.js';
 import { menu } from './ui-icons.js';
 
-// 右側淺藍區塊加放大的天氣圖示；沒有天氣現象就不放圖示。
+// 精簡列右側的淺藍區塊加天氣圖示；沒有天氣現象就不放圖示。
 function panel(data) {
   const parts = [h('div', 'hero-panel')];
   const weather = data.threeDay?.current.weather;
@@ -10,32 +11,36 @@ function panel(data) {
   return parts;
 }
 
+// 溫度卡片：左欄地點、日期、實測溫度、未來 24 小時最高最低溫；右欄天氣圖示，正下方是天氣現象。
+// 右上角是選單圖示，點了打開地點選單（地點文字本身不是按鈕）。
 export function renderHero(el, data, { onOpenPicker }) {
-  const obs = data.observation;
   const next = data.threeDay?.next24h;
+  const weather = data.threeDay?.current.weather;
 
   const menuBtn = h('button', 'menu-btn');
   menuBtn.type = 'button';
+  menuBtn.id = 'menu';
   menuBtn.setAttribute('aria-label', '選擇地點');
   menuBtn.innerHTML = menu;
   menuBtn.addEventListener('click', onOpenPicker);
 
-  const place = h('button', 'place', `${data.county} ${data.town}`);
-  place.type = 'button';
-  place.id = 'place';
-  place.addEventListener('click', onOpenPicker);
+  const t = data.observation?.temperature?.value;
+  const temp = h('div', 'temp', typeof t === 'number' ? String(Math.round(t)) : '--');
+  temp.append(h('span', 'unit', '°C'));
 
-  const humidity = obs?.humidity?.value;
   const text = h('div', 'hero-text');
   text.append(
-    menuBtn,
-    place,
-    h('div', 'temp', deg(obs?.temperature?.value)),
-    h('div', 'hero-range', `未來 24 小時 最高 ${deg(next?.max)}・最低 ${deg(next?.min)}`),
-    h('div', 'hero-weather', data.threeDay?.current.weather || '--'),
-    h('div', 'hero-wind', `${obs?.windDirection?.value || '--'}・濕度 ${typeof humidity === 'number' ? `${humidity}%` : '--'}`),
+    h('div', 'place', `${data.county} ${data.town}`),
+    h('div', 'hero-date', dateLabel(data.generatedAt)),
+    temp,
+    h('div', 'hero-range', `未來 24 小時 ${deg(next?.min)}–${deg(next?.max)}`),
   );
-  el.replaceChildren(...panel(data), text);
+  const look = h('div', 'hero-look');
+  if (weather) look.append(img(iconUrl(iconKey(weather), { night: isNight(data.generatedAt) }), '', 'hero-look-icon'));
+  look.append(h('div', 'hero-weather', weather || '--'));
+  const card = h('div', 'hero-card');
+  card.append(text, look);
+  el.replaceChildren(card, menuBtn);
 }
 
 let observer = null;

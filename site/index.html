@@ -9,15 +9,19 @@
 <body>
 <main class="col">
   <div id="compact" class="compact" aria-hidden="true"></div>
-  <section id="hero" class="hero">載入中…</section>
-  <p id="data-time" class="data-time"></p>
-  <section id="now"></section>
+  <div class="lead">
+    <section id="hero" class="hero">載入中…</section>
+    <section id="now"></section>
+  </div>
   <section id="hourly"></section>
-  <section id="advice"></section>
   <section id="weekly"></section>
+  <section id="advice"></section>
   <section id="obs"></section>
   <section id="sun"></section>
-  <footer class="footer">資料來源：中央氣象署</footer>
+  <footer class="footer">
+    <p id="data-time" class="data-time"></p>
+    <p>資料來源：中央氣象署</p>
+  </footer>
 </main>
 <script type="module" src="js/main.js"></script>
 </body>

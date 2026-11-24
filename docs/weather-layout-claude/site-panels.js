@@ -186,7 +186,71 @@ function weekdayChar(date) {
   const day = new Date(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10)))).getUTCDay();
   return '日一二三四五六'[day];
 }
-return { SHOW_WEEK_POP_AT, tempBar, daylightFraction, weekSummary, dayRow, hhmm, hourLabel, coversWholeDay, dayExtremes, beaufortText, heroStations, weekdayChar };
+
+// 7 日預報溫度條的固定色階：18° 以下是藍色（越冷越深），18° 以上是紅色（越熱越深）。
+// 16° 到 20° 之間由淺藍漸變到淺紅，18° 剛好落在中間的淺灰紫色。顏色都偏淺（相對亮度 0.2 以上）。
+const TEMP_SCALE = [[0, '#5f84ba'], [16, '#8cc1f2'], [20, '#f3aa94'], [40, '#ca6360']];
+const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+function tempColor(t) {
+  const v = Math.min(40, Math.max(0, t));
+  const k = TEMP_SCALE.findIndex(([at], i) => i && v <= at);
+  const [a0, c0] = TEMP_SCALE[k - 1], [a1, c1] = TEMP_SCALE[k];
+  const f = (v - a0) / (a1 - a0), x = hexRgb(c0), y = hexRgb(c1);
+  return `#${x.map((n, i) => Math.round(n + (y[i] - n) * f).toString(16).padStart(2, '0')).join('')}`;
+}
+
+// 一天最低溫到最高溫那一段的漸層：兩端和中間經過的色階點都標上顏色。
+function tempGradient(min, max) {
+  const pts = [min, ...TEMP_SCALE.map(([at]) => at).filter((at) => at > min && at < max), max];
+  const at = (t) => (max === min ? 0 : ((t - min) / (max - min)) * 100);
+  return `linear-gradient(90deg, ${pts.map((t, i) => `${tempColor(t)} ${i === pts.length - 1 ? 100 : +at(t).toFixed(2)}%`).join(', ')})`;
+}
+
+// 溫度卡片上的日期：「11 月 23 日・星期一」。iso 是台北時間字串，直接讀日期，不用瀏覽器的時鐘。
+function dateLabel(iso) {
+  return `${Number(iso.slice(5, 7))} 月 ${Number(iso.slice(8, 10))} 日・星期${weekdayChar(iso)}`;
+}
+
+// 「目前觀測」的五格，固定順序。每格帶自己的測站和觀測時間（HH:MM）；缺值顯示 --，不寫單位、測站和時間。
+const OBS_ITEMS = [
+  ['濕度', 'humidity', '%'], ['風速', 'windSpeed', 'm/s'], ['風向', 'windDirection', ''],
+  ['氣壓', 'pressure', 'hPa'], ['今天累積雨量', 'rainToday', 'mm'],
+];
+function obsItems(obs) {
+  return OBS_ITEMS.map(([label, key, unit]) => {
+    const o = obs?.[key];
+    const v = o?.value;
+    const ok = key === 'windDirection' ? typeof v === 'string' && v !== '' : typeof v === 'number';
+    return ok
+      ? { label, value: String(v), unit, station: o.station || '', time: o.time ? hhmm(o.time) : '' }
+      : { label, value: '--', unit: '', station: '', time: '' };
+  });
+}
+
+// 有值的格子都是同一個觀測時間時回傳那個時間，標在「目前觀測」標題旁；時間不一樣（不同測站）時回傳空字串，改成每格各寫自己的時間。
+function obsTime(items) {
+  const times = [...new Set(items.filter((x) => x.value !== '--').map((x) => x.time))];
+  return times.length === 1 ? times[0] : '';
+}
+
+// 7 日預報的降雨機率：30% 以上才寫出來，低於 30% 留空；沒有資料寫 --，跟「機率很低」分得出來。
+function weekPopText(pop) {
+  if (typeof pop !== 'number') return '--';
+  return pop >= SHOW_WEEK_POP_AT ? `${pop}%` : '';
+}
+
+// 頁尾資料時間那一行的每一段。不同測站各自一段，窄螢幕可以在段和段之間換行。
+function dataTimeParts(data) {
+  const stations = heroStations(data.observation);
+  const time = data.observation?.time;
+  return [
+    ...(stations ? stations.split('・') : []),
+    ...(time ? [`觀測時間 ${hhmm(time)}`] : []),
+    `上次更新 ${hhmm(data.generatedAt)}`,
+  ];
+}
+return { SHOW_WEEK_POP_AT, tempBar, daylightFraction, weekSummary, dayRow, hhmm, hourLabel, coversWholeDay, dayExtremes, beaufortText, heroStations, weekdayChar, tempColor, tempGradient, dateLabel, obsItems, obsTime, weekPopText, dataTimeParts };
 })();
 M['logic/advice.js'] = (function () {
 // 穿著、薄外套、帶傘、曬衣建議。缺值的項目不給。night：這個時段的開始時間是不是在晚上（18:00 到 06:00）。
@@ -464,7 +528,7 @@ return { scalePoints, smoothPath, stepPath, stepSegments, smoothSegments, bandSe
 M['render/sections.js'] = (function () {
 const { iconKey, isNight, iconUrl } = M['logic/icons.js'];
 const { adviceItems } = M['logic/advice.js'];
-const { tempBar, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, heroStations, SHOW_WEEK_POP_AT } = M['logic/format.js'];
+const { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, obsItems, obsTime, weekPopText, dataTimeParts } = M['logic/format.js'];
 const ui = M['render/ui-icons.js'];
 
 function h(tag, className, text) {
@@ -509,9 +573,12 @@ const deg = (v) => (typeof v === 'number' ? `${Math.round(v)}°` : '--°');
 const pct = (v) => (typeof v === 'number' ? `${v}%` : '--');
 const num = (v) => (typeof v === 'number' ? String(v) : '--');
 
-function sectionHead(title, onDetail) {
+// 區塊標題放在卡片外面；sub 是標題後面的小字副標題，onDetail 有值時右邊加「詳細預報」。
+function sectionHead(title, onDetail, sub) {
   const head = h('div', 'sec-head');
-  head.append(h('h2', '', title));
+  const h2 = h('h2', '', title);
+  if (sub) h2.append(h('span', '', sub));
+  head.append(h2);
   if (onDetail) {
     const more = h('button', 'more', '詳細預報');
     more.type = 'button';
@@ -531,42 +598,37 @@ function scroller(className, label) {
   return e;
 }
 
-function tile(label, value, extra) {
-  const t = h('div', 'tile');
-  t.append(h('div', 'tile-label', label), value, ...(extra || []));
-  return t;
-}
-
 function renderUnavailable(el, title) {
   el.replaceChildren(sectionHead(title), h('p', 'unavailable', '暫時無法取得'));
 }
 
-// 最上方的實測溫度、風向、濕度可能來自不同測站，測站名稱寫在這一行最前面。
-// 每一項各自不斷行，窄螢幕放不下時只在「・」之後換行。
+// 頁尾的資料時間：實測溫度、風向、濕度的測站（可能不同站，各自一段）、觀測時間、上次更新。
+// 每一段各自不斷行，窄螢幕放不下時只在「・」之後換行。
 function renderDataTime(el, data) {
-  const obsTime = data.observation?.time;
-  const parts = [
-    heroStations(data.observation),
-    obsTime ? `觀測時間 ${hhmm(obsTime)}` : '',
-    `上次更新 ${hhmm(data.generatedAt)}`,
-  ].filter(Boolean);
+  const parts = dataTimeParts(data);
   el.replaceChildren(...parts.flatMap((text, i) => (i ? ['・', h('span', '', text)] : [h('span', '', text)])));
+}
+
+// 溫度卡片下面一排三格：名稱在上、數字在下，單位用小字；缺值只寫 --，不寫單位。
+function stat(label, value, unit) {
+  const dd = h('dd', '', value);
+  if (value !== '--' && unit) dd.append(h('small', '', unit));
+  const box = h('div');
+  box.append(h('dt', '', label), dd);
+  return box;
 }
 
 function renderNowTiles(el, data) {
   const td = data.threeDay, wk = data.weekly;
   if (!td && !wk) return renderUnavailable(el, '目前天氣');
-  const uv = wk?.uv;
-  const uvValue = h('div', 'tile-value');
-  if (uv) uvValue.append(String(uv.value), h('small', '', uv.level));
-  else uvValue.textContent = '--';
-  const grid = h('div', 'tiles');
-  grid.append(
-    tile('降雨機率', h('div', 'tile-value', pct(td?.current.pop))),
-    tile(uv?.label || '紫外線', uvValue),
-    tile('體感溫度', h('div', 'tile-value', deg(td?.current.apparentTemperature))),
+  const uv = wk?.uv, pop = td?.current.pop, feels = td?.current.apparentTemperature;
+  const stats = h('dl', 'stats');
+  stats.append(
+    stat('降雨機率', typeof pop === 'number' ? String(pop) : '--', '%'),
+    stat('體感溫度', typeof feels === 'number' ? String(Math.round(feels)) : '--', '°C'),
+    stat(uv?.label || '紫外線', uv ? String(uv.value) : '--', uv?.level || ''),
   );
-  el.replaceChildren(grid);
+  el.replaceChildren(stats);
 }
 
 function renderHourly(el, data, { onDetail }) {
@@ -574,12 +636,13 @@ function renderHourly(el, data, { onDetail }) {
   if (!td?.hourly?.length) return renderUnavailable(el, '逐小時預報');
   const strip = scroller('hourly-strip', '逐小時預報');
   td.hourly.forEach((p, i) => {
-    const cell = h('div', 'hour');
+    // 午夜那格（不是第一格）左邊畫一條直線，分開兩天
+    const cell = h('div', i && p.time.slice(11, 13) === '00' ? 'hour day-start' : 'hour');
     cell.append(
       h('div', 'hour-time', hourLabel(p.time, i)),
-      img(iconUrl(iconKey(p.weather), { night: isNight(p.time), style: 'line' }), p.weather || '', 'hour-icon'),
-      h('div', 'hour-pop', pct(p.pop)),
+      img(iconUrl(iconKey(p.weather), { night: isNight(p.time) }), p.weather || '', 'hour-icon'),
       h('div', 'hour-temp', deg(p.temperature)),
+      h('div', 'hour-pop', pct(p.pop)),
     );
     strip.append(cell);
   });
@@ -627,8 +690,6 @@ function renderAdvice(el, data) {
   el.replaceChildren(sectionHead('生活建議'), row);
 }
 
-const monthDay = (date) => `${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日`;
-
 function renderWeekly(el, data, { onDetail }) {
   const wk = data.weekly;
   if (!wk?.days?.length) return renderUnavailable(el, '7 日預報');
@@ -637,43 +698,51 @@ function renderWeekly(el, data, { onDetail }) {
   const maxs = rows.map(({ r }) => r.max).filter((v) => typeof v === 'number');
   const weekMin = Math.min(...mins), weekMax = Math.max(...maxs);
   const list = h('div', 'card week-list');
+  // 每天一行：名稱、圖示、降雨機率（30% 以上才寫）、最低溫、溫度條、最高溫。
+  // 彩色段的位置照整週範圍換算，顏色照固定色階（18° 以下藍、以上紅）。
   for (const { d, r } of rows) {
-    const day = h('div', 'week-day');
-    day.append(h('div', 'week-label', d.label), h('div', 'week-date', monthDay(d.date)));
-    const look = h('div', 'week-look');
-    if (r.weather) look.append(img(iconUrl(iconKey(r.weather), { night: r.night }), r.weather));
-    look.append(h('div', 'week-pop', typeof r.pop === 'number' && r.pop >= SHOW_WEEK_POP_AT ? `${r.pop}%` : ''));
     const bar = h('div', 'week-bar');
     if (typeof r.min === 'number' && typeof r.max === 'number') {
       const b = tempBar(r.min, r.max, weekMin, weekMax);
       const fill = h('span');
-      fill.style.clipPath = `inset(0 ${100 - b.left - b.width}% 0 ${b.left}% round 2px)`;
+      fill.style.left = `${b.left}%`;
+      fill.style.width = `${b.width}%`;
+      fill.style.background = tempGradient(r.min, r.max);
       bar.append(fill);
     }
     const temps = h('div', 'week-temps');
     temps.append(h('span', '', deg(r.min)), bar, h('span', '', deg(r.max)));
-    const extra = h('div', 'week-extra');
-    extra.append(h('span', '', `紫外線 ${num(r.uv)}`), h('span', '', `體感 ${deg(r.minAT)}/${deg(r.maxAT)}`));
-    const right = h('div', 'week-right');
-    right.append(temps, extra);
     const row = h('div', 'week-row');
-    row.append(day, look, right);
+    row.append(
+      h('div', 'week-label', d.label),
+      // 沒有天氣現象時放一個空的位置，後面幾欄才不會往左移
+      r.weather ? img(iconUrl(iconKey(r.weather), { night: r.night }), r.weather) : h('span'),
+      h('div', 'week-pop', weekPopText(r.pop)),
+      temps,
+    );
     list.append(row);
   }
   el.replaceChildren(sectionHead('7 日預報', onDetail), list);
 }
 
+// 目前觀測：五格實測值，每格數字下面寫它自己的測站（不同項目可能來自不同測站）；缺值的格子只寫 --。
+// 每格觀測時間相同時，時間寫在標題旁；不同時每格在測站後面寫自己的時間。
 function renderObsTiles(el, data) {
   const o = data.observation;
-  if (!o) return renderUnavailable(el, '觀測資料');
-  const grid = h('div', 'tiles');
-  for (const [label, obs, unit] of [['今天累積雨量', o.rainToday, 'mm'], ['風速', o.windSpeed, 'm/s'], ['氣壓', o.pressure, 'hPa']]) {
-    grid.append(tile(label, h('div', 'tile-value', num(obs?.value)), [
-      h('div', 'tile-unit', unit),
-      h('div', 'tile-station', obs ? `${obs.station}測站` : ''),
-    ]));
+  if (!o) return renderUnavailable(el, '目前觀測');
+  const items = obsItems(o), shared = obsTime(items);
+  const dl = h('dl');
+  for (const it of items) {
+    const dd = h('dd', '', it.value);
+    if (it.unit) dd.append(h('small', '', it.unit));
+    if (it.station) dd.append(h('span', 'obs-station', `${it.station}測站${!shared && it.time ? ` ${it.time}` : ''}`));
+    const box = h('div');
+    box.append(h('dt', '', it.label), dd);
+    dl.append(box);
   }
-  el.replaceChildren(grid);
+  const card = h('div', 'card obs-card');
+  card.append(dl);
+  el.replaceChildren(sectionHead('目前觀測', null, shared ? `實測 ${shared}` : '實測'), card);
 }
 
 // 弧線是一段餘弦曲線：兩端在地平線下，t = 0.25 和 0.75 跟地平線相交，中間是白天。
@@ -708,7 +777,7 @@ function renderSun(el, data) {
   </svg>`;
   const card = h('div', 'card sun-card');
   card.append(times, wrap.firstElementChild);
-  el.replaceChildren(card);
+  el.replaceChildren(sectionHead('日出日落'), card);
 }
 return { h, img, choiceRow, dateRow, deg, pct, renderUnavailable, renderDataTime, renderNowTiles, renderHourly, renderAdvice, renderWeekly, renderObsTiles, renderSun };
 })();
