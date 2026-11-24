@@ -160,6 +160,8 @@ button { color: inherit; }
 .sheet-head h2 { margin: 0; font-size: 17px; }
 .sheet-close { position: absolute; left: 12px; top: 10px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--card); font-size: 20px; line-height: 1; cursor: pointer; }
 .sheet-body { overflow-y: auto; padding: 0 16px 24px; }
+/* 面板打開時，後面的主頁面不能捲動；捲軸的位置保留著，電腦上頁面才不會左右跳一下 */
+html.sheet-open { overflow: hidden; scrollbar-gutter: stable; }
 .pick-item, .pick-back { display: block; width: 100%; text-align: left; font: inherit; padding: 14px 4px; border: 0; border-bottom: 1px solid var(--card); background: none; cursor: pointer; }
 .pick-item.selected { color: var(--pop); font-weight: 600; }
 .pick-back { color: var(--pop); }

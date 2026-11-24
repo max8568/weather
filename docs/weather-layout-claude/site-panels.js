@@ -842,6 +842,8 @@ function openSheet({ title, content, onClose }) {
   const trigger = document.activeElement;
   const page = document.querySelector('main');
   if (page) page.inert = true;
+  // inert 只擋點擊和焦點，擋不住捲動；面板打開時把主頁面的捲動關掉（見 style.css 的 html.sheet-open）
+  document.documentElement.classList.add('sheet-open');
   closeBtn.focus();
 
   let closed = false;
@@ -852,6 +854,7 @@ function openSheet({ title, content, onClose }) {
     backdrop.classList.add('closing');
     sheet.inert = true;
     if (page) page.inert = false;
+    document.documentElement.classList.remove('sheet-open');
     if (trigger && trigger.isConnected) trigger.focus();
     setTimeout(() => backdrop.remove(), 250);
     if (onClose) onClose();

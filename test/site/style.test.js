@@ -31,3 +31,15 @@ test('temperature card gives the number and the icon the spare room: 68px number
 test('the 生活建議 period label stays on one line (only about 5px to spare at 320px)', () => {
   assert.match(css, /\n\.advice-label \{[^}]*white-space: nowrap;/);
 });
+
+test('while a sheet is open the page behind it cannot scroll, and the scrollbar keeps its space', () => {
+  // sheet.js 打開面板時在 <html> 加 sheet-open；沒鎖的話，手指在面板上不能捲的地方滑，會捲到後面的主頁面
+  assert.match(rule('html.sheet-open'), /overflow: hidden;/);
+  assert.match(rule('html.sheet-open'), /scrollbar-gutter: stable;/);
+});
+
+test('sheet.js marks <html> while a sheet is open and clears it on close', () => {
+  const js = readFileSync('site/js/render/sheet.js', 'utf8');
+  assert.match(js, /document\.documentElement\.classList\.add\('sheet-open'\)/);
+  assert.match(js, /document\.documentElement\.classList\.remove\('sheet-open'\)/);
+});
