@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>天氣預報｜版型原型</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <strong>天氣預報</strong>
+      <span>版型原型 · 2026/11/23 資料快照</span>
+    </div>
+  </header>
+  <main id="weather"></main>
+  <footer class="source">資料來源：中央氣象署 · 臺北測站 16:00 觀測</footer>
+  <nav class="switcher" aria-label="切換原型版型">
+    <button id="previous" type="button" aria-label="上一個版型" title="上一個版型（←）">←</button>
+    <select id="variant" aria-label="原型版型"></select>
+    <button id="next" type="button" aria-label="下一個版型" title="下一個版型（→）">→</button>
+  </nav>
+</body>
+</html>
