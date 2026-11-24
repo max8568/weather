@@ -1,5 +1,5 @@
 import { fetchForecast } from './api.js';
-import { resolveLocation, isTownList } from './logic/location.js';
+import { resolveLocation, isTownList, locateTown } from './logic/location.js';
 import { openPicker } from './render/picker.js';
 import { renderHero, setupCompactHeader } from './render/hero.js';
 import { renderDataTime, renderNowTiles, renderHourly, renderAdvice, renderWeekly, renderObsTiles, renderSun } from './render/sections.js';
@@ -22,8 +22,20 @@ const compact = document.getElementById('compact');
 const $ = (id) => document.getElementById(id);
 const sections = ['data-time', 'now', 'hourly', 'advice', 'weekly', 'obs', 'sun'].map($);
 
+// 鄉鎮只要大概的位置，不用開高精度（比較快也比較省電）；一分鐘內定位過的位置直接沿用。
+function getPosition() {
+  return new Promise((resolve, reject) =>
+    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 15000, maximumAge: 60000 }));
+}
+async function loadCoords() {
+  const res = await fetch('data/town-coords.json');
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 function openLocationPicker() {
-  openPicker(towns, current, (loc) => { current = loc; save(loc); load(true); });
+  const locate = navigator.geolocation ? () => locateTown(getPosition, loadCoords) : null;
+  openPicker(towns, current, (loc) => { current = loc; save(loc); load(true); }, locate);
 }
 
 function render(data) {

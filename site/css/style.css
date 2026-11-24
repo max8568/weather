@@ -164,6 +164,10 @@ button { color: inherit; }
 .pick-item.selected { color: var(--pop); font-weight: 600; }
 .pick-back { color: var(--pop); }
 .pick-county { font-size: 20px; font-weight: 600; padding: 8px 4px; }
+.pick-locate { display: flex; align-items: center; gap: 8px; width: 100%; font: inherit; padding: 14px 4px; border: 0; border-bottom: 1px solid var(--card); background: none; color: var(--pop); cursor: pointer; }
+/* 定位失敗的說明；跟觀測時間同色，白底上約 5:1 */
+.pick-status { margin: 10px 4px; font-size: 14px; line-height: 1.5; color: #6e6e73; }
+.pick-status:empty { display: none; }
 
 /* 72 小時、7 日面板共用：日期列和分頁 */
 .date-row { display: grid; grid-template-columns: repeat(7, 1fr); margin: 0 -8px; }

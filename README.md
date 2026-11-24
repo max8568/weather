@@ -48,7 +48,7 @@ npx wrangler deploy
 ## 重新產生資料檔
 
 - 縣市對應的預報資料集代碼（`worker/src/datasets.js`）：`node scripts/build-datasets.mjs`
-- 鄉鎮清單（`site/data/towns.json`，需要 `worker/.dev.vars` 裡的授權碼）：`node scripts/build-towns.mjs`
+- 鄉鎮清單（`site/data/towns.json`）和「使用目前位置」用的鄉鎮經緯度（`site/data/town-coords.json`），需要 `worker/.dev.vars` 裡的授權碼：`node scripts/build-towns.mjs`
 
 ## 抓測試資料
 

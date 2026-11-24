@@ -1,5 +1,6 @@
 // 用法：node scripts/build-towns.mjs
 // 對每個縣市抓 3 天預報（只要溫度），整理出鄉鎮清單，寫到 site/data/towns.json。授權碼從 worker/.dev.vars 讀。
+// 同時把每個鄉鎮的經緯度（大約是鄉鎮公所的位置）寫到 site/data/town-coords.json，給「使用目前位置」找最近的鄉鎮。
 import { readFileSync, writeFileSync } from 'node:fs';
 import { DATASETS } from '../worker/src/datasets.js';
 
@@ -12,6 +13,7 @@ if (!key) throw new Error('worker/.dev.vars 裡沒有 CWA_API_KEY');
 
 const BASE = 'https://opendata.cwa.gov.tw/api/v1/rest/datastore/';
 const result = [];
+const coords = [];
 for (const county of ORDER) {
   const ds = DATASETS[county];
   if (!ds) throw new Error(`DATASETS 沒有 ${county}`);
@@ -24,8 +26,15 @@ for (const county of ORDER) {
   const body = await res.json();
   const locs = body?.records?.Locations?.[0]?.Location;
   if (!Array.isArray(locs) || !locs.length) throw new Error(`${county}: 沒有鄉鎮資料`);
-  const towns = locs.slice().sort((a, b) => String(a.Geocode).localeCompare(String(b.Geocode))).map((l) => l.LocationName);
+  const sorted = locs.slice().sort((a, b) => String(a.Geocode).localeCompare(String(b.Geocode)));
+  const towns = sorted.map((l) => l.LocationName);
   result.push({ county, towns });
+  for (const l of sorted) {
+    const lat = Number(l.Latitude), lon = Number(l.Longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error(`${county}${l.LocationName}: 沒有經緯度`);
+    coords.push({ county, town: l.LocationName, lat, lon });
+  }
   console.log(county, towns.length);
 }
 writeFileSync(new URL('../site/data/towns.json', import.meta.url), JSON.stringify(result, null, 1) + '\n');
+writeFileSync(new URL('../site/data/town-coords.json', import.meta.url), '[\n' + coords.map((c) => JSON.stringify(c)).join(',\n') + '\n]\n');

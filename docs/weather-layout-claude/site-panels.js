@@ -13,6 +13,8 @@ const clothesline = 'M3 7h18M8.5 5v4.5M15.5 5v4.5M6 17v-5a2.5 2.5 0 0 1 5 0v5zM1
 const menu = svg('M5 9h14M5 15h14');
 const chevronRight = svg('M9 6l6 6-6 6');
 const close = svg('M6 6l12 12M18 6L6 18');
+// 地圖上的定位針，中間一個圓。
+const pin = svg('M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11zM12 12.2a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4z');
 const shortSleeve = svg('M8 4c1 1.5 2.3 2 4 2s3-.5 4-2l4 3-2 3-2-1v11H8V9l-2 1-2-3z');
 // 毛衣：圓領、袖口和下擺的羅紋。
 const longSleeve = svg(`${sleeves}M9 4c.7 1.3 1.7 2 3 2s2.3-.7 3-2M3 15.3l2.4 1.2M21 15.3l-2.4 1.2M7 18h10`);
@@ -26,7 +28,7 @@ const laundry = svg(clothesline);
 const noLaundry = svg(`${clothesline}M5 20L19 4`);
 const wind = svg('M3 9h10.5a2.5 2.5 0 1 0-2.5-2.5M3 13h15.5a2.5 2.5 0 1 1-2.5 2.5M3 17h8');
 const heart = svg('M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z');
-return { menu, chevronRight, close, shortSleeve, longSleeve, lightJacket, heavyCoat, umbrella, laundry, noLaundry, wind, heart };
+return { menu, chevronRight, close, pin, shortSleeve, longSleeve, lightJacket, heavyCoat, umbrella, laundry, noLaundry, wind, heart };
 })();
 M['logic/icons.js'] = (function () {
 // 天氣文字 → 圖示。規則依序比對，先符合的先用。
