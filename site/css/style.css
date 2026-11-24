@@ -18,12 +18,12 @@ button { color: inherit; }
 .hero > button:not(.menu-btn) { justify-self: start; font: inherit; margin-top: 12px; padding: 6px 16px; border-radius: 999px; border: 1px solid var(--muted); background: #fff; cursor: pointer; }
 /* 左欄地點、日期、溫度、未來 24 小時；右欄隔一條線放天氣圖示，天氣現象在圖示正下方。
    未來 24 小時和天氣現象在同一列、對齊同一條基線；第三列放卡片多出來的高度，分隔線從頂到底 */
-.hero-card { display: grid; grid-template-columns: minmax(0, 1fr) 30%; grid-template-rows: auto auto 1fr; }
+.hero-card { display: grid; grid-template-columns: minmax(0, 1fr) 38%; grid-template-rows: auto auto 1fr; }
 .hero-card::after { content: ''; grid-area: 1 / 2 / -1; border-left: 1px solid var(--line); pointer-events: none; }
 .hero-text { grid-area: 1 / 1; min-width: 0; padding: 17px 17px 0; }
 .place { font-size: 22px; font-weight: 700; line-height: 1.35; letter-spacing: -.03em; }
 .hero-date { margin-top: 5px; font-size: 14px; color: var(--text-2); }
-.temp { margin-top: 14px; font-size: 54px; font-weight: 700; line-height: 1; letter-spacing: -.065em; }
+.temp { margin-top: 14px; font-size: 68px; font-weight: 700; line-height: 1; letter-spacing: -.065em; }
 .temp .unit { margin-left: 5px; font-size: .44em; font-weight: 500; line-height: 1.45; letter-spacing: -.04em; vertical-align: top; }
 .hero-range { grid-area: 2 / 1; align-self: baseline; min-width: 0; margin-top: 6px; padding: 0 17px 17px; font-size: 14px; color: var(--text-2); }
 .hero-look { grid-area: 1 / 2; align-self: end; min-width: 0; }

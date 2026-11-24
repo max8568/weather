@@ -21,3 +21,9 @@ test('the 24-hour range and the weather description share a row and line up on o
   assert.match(rule('.hero-weather'), /grid-area: 2 \/ 2;/);
   for (const sel of ['.hero-range', '.hero-weather']) assert.match(rule(sel), /align-self: baseline;/, sel);
 });
+
+test('temperature card gives the number and the icon the spare room: 68px number, 62/38 split', () => {
+  // 左欄最寬的是「未來 24 小時 18°–22°」（134px）；320 寬時左欄 62% 還剩 12px
+  assert.match(rule('.temp'), /font-size: 68px;/);
+  assert.match(rule('.hero-card'), /grid-template-columns: minmax\(0, 1fr\) 38%;/);
+});
