@@ -206,22 +206,55 @@ function weekdayChar(date) {
   return '日一二三四五六'[day];
 }
 
-// 7 日預報溫度條的固定色階：18° 以下是藍色（越冷越深），18° 以上是紅色（越熱越深）。
-// 16° 到 20° 之間由淺藍漸變到淺紅，18° 剛好落在中間的淺灰紫色。顏色都偏淺（相對亮度 0.2 以上）。
-const TEMP_SCALE = [[0, '#5f84ba'], [16, '#8cc1f2'], [20, '#f3aa94'], [40, '#ca6360']];
+// 7 日預報溫度條的固定色階：18° 以下是藍色（越冷越深），18° 以上是紅色（越熱越深），18° 是淺黃色。
+// 兩個色階點之間照色相轉過去（OKLCH），藍到黃經過淺綠、黃到紅經過淺橘；直接混合 RGB 會在中間混出灰色。
+// 顏色都偏淺（相對亮度 0.2 以上）。
+const TEMP_SCALE = [[0, '#5f84ba'], [16, '#8cc1f2'], [18, '#fad46b'], [20, '#f3aa94'], [40, '#ca6360']];
 const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+// sRGB 和 OKLCH 互換，公式出自 OKLab 的作者 Björn Ottosson（https://bottosson.github.io/posts/oklab/）
+const toLinear = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const toGamma = (c) => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+function hexToOklch(hex) {
+  const [r, g, b] = hexRgb(hex).map((n) => toLinear(n / 255));
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s;
+  const A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s;
+  const B = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s;
+  return [L, Math.hypot(A, B), Math.atan2(B, A)];
+}
+function oklchToHex([L, C, H]) {
+  const A = C * Math.cos(H), B = C * Math.sin(H);
+  const l = (L + 0.3963377774 * A + 0.2158037573 * B) ** 3;
+  const m = (L - 0.1055613458 * A - 0.0638541728 * B) ** 3;
+  const s = (L - 0.0894841775 * A - 1.2914855480 * B) ** 3;
+  const rgb = [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
+  ];
+  return `#${rgb.map((c) => Math.round(Math.min(1, Math.max(0, toGamma(c))) * 255).toString(16).padStart(2, '0')).join('')}`;
+}
 
 function tempColor(t) {
   const v = Math.min(40, Math.max(0, t));
   const k = TEMP_SCALE.findIndex(([at], i) => i && v <= at);
   const [a0, c0] = TEMP_SCALE[k - 1], [a1, c1] = TEMP_SCALE[k];
-  const f = (v - a0) / (a1 - a0), x = hexRgb(c0), y = hexRgb(c1);
-  return `#${x.map((n, i) => Math.round(n + (y[i] - n) * f).toString(16).padStart(2, '0')).join('')}`;
+  const f = (v - a0) / (a1 - a0), x = hexToOklch(c0), y = hexToOklch(c1);
+  // 色相走比較近的那一邊
+  let dh = y[2] - x[2];
+  if (dh > Math.PI) dh -= 2 * Math.PI;
+  else if (dh < -Math.PI) dh += 2 * Math.PI;
+  return oklchToHex([x[0] + (y[0] - x[0]) * f, x[1] + (y[1] - x[1]) * f, x[2] + dh * f]);
 }
 
-// 一天最低溫到最高溫那一段的漸層：兩端和中間經過的色階點都標上顏色。
+// 一天最低溫到最高溫那一段的漸層。每一度標一個顏色：瀏覽器在兩個顏色之間是直接混合 RGB，間隔拉長就會混出灰色。
 function tempGradient(min, max) {
-  const pts = [min, ...TEMP_SCALE.map(([at]) => at).filter((at) => at > min && at < max), max];
+  const pts = [min];
+  for (let t = Math.floor(min) + 1; t < max; t++) pts.push(t);
+  pts.push(max);
   const at = (t) => (max === min ? 0 : ((t - min) / (max - min)) * 100);
   return `linear-gradient(90deg, ${pts.map((t, i) => `${tempColor(t)} ${i === pts.length - 1 ? 100 : +at(t).toFixed(2)}%`).join(', ')})`;
 }
