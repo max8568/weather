@@ -151,22 +151,11 @@ test('tempGradient: every stop is that temperature on the scale', () => {
       rgb(color).forEach((c, k) => assert.ok(Math.abs(c - want[k]) <= 1, `${min}-${max} ${at}`));
     }
   }
-  assert.match(tempGradient(16, 21), /#f3aa94 80%/);
+  assert.match(tempGradient(16, 21), /#ffa66b 80%/);
 });
-test('tempColor: 18° is the light yellow where blue turns to red', () => {
-  assert.equal(tempColor(18), '#fad46b');
-});
-test('tempColor: no grey between blue and red (16° to 20°)', () => {
-  // 灰色的 R、G、B 三個值很接近，原本 18° 的 #c0b6c3 只差 13
-  for (let t = 16; t <= 20; t += 0.25) {
-    const c = rgb(tempColor(t));
-    assert.ok(Math.max(...c) - Math.min(...c) >= 40, `${t} ${tempColor(t)}`);
-  }
-});
-test('tempGradient: a stop at every whole degree, so the browser never blends two far-apart colours into grey', () => {
-  const at = (g) => g.match(/linear-gradient\(90deg, (.*)\)/)[1].split(', ').map((x) => parseFloat(x.split(' ')[1]));
-  assert.deepEqual(at(tempGradient(15, 21)).map((p) => +(15 + p * 6 / 100).toFixed(2)), [15, 16, 17, 18, 19, 20, 21]);
-  assert.deepEqual(at(tempGradient(17.5, 19)).map((p) => +(17.5 + p * 1.5 / 100).toFixed(2)), [17.5, 18, 19]);
+test('tempColor: the scale is option 10 — ice blue, near-white at 17°, apricot at 18°, orange-red', () => {
+  const want = { 0: '#5b8fd9', 16: '#9cc9f5', 17: '#e6f0fa', 18: '#ffe2bf', 20: '#ffa66b', 40: '#e0522f' };
+  for (const [t, c] of Object.entries(want)) assert.equal(tempColor(Number(t)), c, t);
 });
 test('dateLabel', () => {
   assert.equal(dateLabel('2026-11-23T16:10:00+08:00'), '11/23, Monday');
