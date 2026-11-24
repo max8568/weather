@@ -14,3 +14,10 @@ test('station names under the observations reach 4.5:1 contrast on the grey card
   // #6e6e73 在 #f6f7f9 上約 4.7:1；--muted（#8a8a8e）只有約 3.2:1
   assert.match(rule('.obs-station'), /color: #6e6e73;/);
 });
+
+test('the 24-hour range and the weather description share a row and line up on one baseline', () => {
+  // 左欄和右欄的高度各自不同（圖示大小跟著卡片寬度變），放在同一列對齊基線，兩行字才會一樣高
+  assert.match(rule('.hero-range'), /grid-area: 2 \/ 1;/);
+  assert.match(rule('.hero-weather'), /grid-area: 2 \/ 2;/);
+  for (const sel of ['.hero-range', '.hero-weather']) assert.match(rule(sel), /align-self: baseline;/, sel);
+});

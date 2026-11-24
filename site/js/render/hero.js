@@ -33,19 +33,19 @@ export function renderHero(el, data, { onOpenPicker }) {
     h('div', 'place', `${data.county} ${data.town}`),
     h('div', 'hero-date', dateLabel(data.generatedAt)),
     temp,
-    h('div', 'hero-range', `未來 24 小時 ${deg(next?.min)}–${deg(next?.max)}`),
   );
-  const look = h('div', 'hero-look');
-  const caption = h('div', 'hero-weather', weather || '--');
+  // 未來 24 小時和天氣現象是卡片格線的同一列，兩行字對齊同一條基線；圖示在天氣現象正上方
+  const card = h('div', 'hero-card');
+  card.append(text, h('div', 'hero-range', `未來 24 小時 ${deg(next?.min)}–${deg(next?.max)}`));
   if (weather) {
     const key = iconKey(weather), night = isNight(data.generatedAt);
+    const look = h('div', 'hero-look');
     look.append(img(iconUrl(key, { night }), '', 'hero-look-icon'));
-    // 天氣現象往上拉到圖示畫到的最低點下方；每個圖示畫到的高度不同，雨滴、雪花不會被字蓋到
-    caption.style.marginTop = `${captionMargin(key, { night })}%`;
+    // 天氣現象往上疊到圖示畫到的最低點下方；每個圖示畫到的高度不同，雨滴、雪花不會被字蓋到
+    look.style.marginBottom = `${captionMargin(key, { night })}%`;
+    card.append(look);
   }
-  look.append(caption);
-  const card = h('div', 'hero-card');
-  card.append(text, look);
+  card.append(h('div', 'hero-weather', weather || '--'));
   el.replaceChildren(card, menuBtn);
 }
 
