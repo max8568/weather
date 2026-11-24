@@ -1,4 +1,4 @@
-import { iconKey, isNight, iconUrl } from '../logic/icons.js';
+import { iconKey, isNight, iconUrl, captionMargin } from '../logic/icons.js';
 import { dateLabel } from '../logic/format.js';
 import { h, img, deg } from './sections.js';
 import { menu } from './ui-icons.js';
@@ -36,8 +36,14 @@ export function renderHero(el, data, { onOpenPicker }) {
     h('div', 'hero-range', `未來 24 小時 ${deg(next?.min)}–${deg(next?.max)}`),
   );
   const look = h('div', 'hero-look');
-  if (weather) look.append(img(iconUrl(iconKey(weather), { night: isNight(data.generatedAt) }), '', 'hero-look-icon'));
-  look.append(h('div', 'hero-weather', weather || '--'));
+  const caption = h('div', 'hero-weather', weather || '--');
+  if (weather) {
+    const key = iconKey(weather), night = isNight(data.generatedAt);
+    look.append(img(iconUrl(key, { night }), '', 'hero-look-icon'));
+    // 天氣現象往上拉到圖示畫到的最低點下方；每個圖示畫到的高度不同，雨滴、雪花不會被字蓋到
+    caption.style.marginTop = `${captionMargin(key, { night })}%`;
+  }
+  look.append(caption);
   const card = h('div', 'hero-card');
   card.append(text, look);
   el.replaceChildren(card, menuBtn);

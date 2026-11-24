@@ -27,8 +27,6 @@ button { color: inherit; }
 .hero-look { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; border-left: 1px solid var(--line); }
 .hero-look-icon { display: block; width: 100%; height: auto; }
 .hero-weather { padding: 0 4px; font-size: 17px; font-weight: 650; line-height: 1.3; text-align: center; }
-/* 圖示檔下緣有約 29% 的留白，負的上緣間距（以圖示寬度計算）讓天氣現象貼近圖示 */
-.hero-look-icon + .hero-weather { margin-top: -18%; }
 /* 選單圖示在溫度卡片右上角 */
 .menu-btn { position: absolute; top: 4px; right: 4px; width: 40px; height: 40px; padding: 8px; border: 0; background: none; cursor: pointer; }
 .menu-btn svg { display: block; width: 24px; height: 24px; stroke-width: 2.2; }
