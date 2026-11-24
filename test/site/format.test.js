@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, dayExtremes, beaufortText, heroStations, SHOW_WEEK_POP_AT, tempColor, tempGradient, dateLabel, obsItems, obsTime, weekPopText, dataTimeParts } from '../../site/js/logic/format.js';
+import { tempBar, daylightFraction, weekSummary, dayRow, hourLabel, hhmm, weekdayChar, coversWholeDay, dayExtremes, beaufortText, heroStations, SHOW_WEEK_POP_AT, tempColor, tempGradient, dateLabel, obsItems, obsTime, weekPopText, dataTimeParts, timeRange } from '../../site/js/logic/format.js';
 
 const half = (o) => ({ weather: '多雲', maxT: null, minT: null, maxAT: null, minAT: null, pop: null, humidity: null, uv: null, ...o });
 
@@ -157,23 +157,27 @@ test('tempColor: the scale is option 10 — ice blue, near-white at 17°, aprico
   const want = { 0: '#5b8fd9', 16: '#9cc9f5', 17: '#e6f0fa', 18: '#ffe2bf', 20: '#ffa66b', 40: '#e0522f' };
   for (const [t, c] of Object.entries(want)) assert.equal(tempColor(Number(t)), c, t);
 });
+test('timeRange: the period of a 生活建議 card, HH:MM–HH:MM', () => {
+  assert.equal(timeRange('2026-11-24T18:00:00+08:00', '2026-11-25T06:00:00+08:00'), '18:00–06:00');
+  assert.equal(timeRange('2026-11-24T12:00:00+08:00', '2026-11-24T18:00:00+08:00'), '12:00–18:00');
+});
 test('dateLabel', () => {
   assert.equal(dateLabel('2026-11-23T16:10:00+08:00'), '11/23, Monday');
   assert.equal(dateLabel('2026-12-01T06:00:00+08:00'), '12/01, Tuesday');
   assert.equal(dateLabel('2027-01-01T00:30:00+08:00'), '01/01, Friday');
   assert.equal(dateLabel('2026-11-25T09:00:00+08:00'), '11/25, Wednesday');
 });
-test('obsItems: each item keeps its own station; missing values show -- with no station', () => {
+test('obsItems: no station names, each item keeps its own time; missing values show -- with no time', () => {
   const o = (value, station) => ({ value, station, time: '2026-11-23T16:00:00+08:00' });
   const items = obsItems({ time: '2026-11-23T16:00:00+08:00', humidity: o(68, '臺北'), windSpeed: o(2.5, '五股'),
     windDirection: o('東北風', '五股'), pressure: o(null, '臺北'), rainToday: null });
   assert.deepEqual(items.map((x) => x.label), ['濕度', '風速', '風向', '氣壓', '今天累積雨量']);
-  assert.deepEqual(items[0], { label: '濕度', value: '68', unit: '%', station: '臺北', time: '16:00' });
-  assert.deepEqual(items[1], { label: '風速', value: '2.5', unit: 'm/s', station: '五股', time: '16:00' });
-  assert.deepEqual(items[2], { label: '風向', value: '東北風', unit: '', station: '五股', time: '16:00' });
-  assert.deepEqual(items[3], { label: '氣壓', value: '--', unit: '', station: '', time: '' });
-  assert.deepEqual(items[4], { label: '今天累積雨量', value: '--', unit: '', station: '', time: '' });
-  assert.ok(obsItems(null).every((x) => x.value === '--' && x.station === ''));
+  assert.deepEqual(items[0], { label: '濕度', value: '68', unit: '%', time: '16:00' });
+  assert.deepEqual(items[1], { label: '風速', value: '2.5', unit: 'm/s', time: '16:00' });
+  assert.deepEqual(items[2], { label: '風向', value: '東北風', unit: '', time: '16:00' });
+  assert.deepEqual(items[3], { label: '氣壓', value: '--', unit: '', time: '' });
+  assert.deepEqual(items[4], { label: '今天累積雨量', value: '--', unit: '', time: '' });
+  assert.ok(obsItems(null).every((x) => x.value === '--' && x.time === ''));
 });
 
 test('obsTime: one shared time when every shown reading has it, empty when the readings differ', () => {

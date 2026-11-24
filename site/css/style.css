@@ -102,7 +102,7 @@ button { color: inherit; }
 .advice-look img { grid-area: 1 / 2 / 3 / 3; justify-self: center; align-self: end; }
 .advice-pop { grid-area: 3 / 1; align-self: baseline; }
 .advice-comfort { grid-area: 3 / 2; align-self: baseline; text-align: center; }
-.advice-label { font-size: 13px; color: var(--text-2); }
+.advice-label { font-size: 13px; color: var(--text-2); white-space: nowrap; }
 .advice-temp { margin-top: 6px; font-size: 22px; font-weight: 700; }
 .advice-pop { margin-top: 6px; font-size: 14px; color: var(--text-2); }
 /* Meteocons 圖示四周有透明留白，80px 時雲實際約 54px；負的上緣間距讓留白和標題列重疊，卡片只高 6px */
@@ -135,8 +135,8 @@ button { color: inherit; }
 .obs-card dt { font-size: 12px; color: var(--text-2); white-space: nowrap; }
 .obs-card dd { margin: 0; font-size: 18px; font-weight: 700; white-space: nowrap; }
 .obs-card small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--text-2); }
-/* 測站是必要資訊，11px 的小字用 #6e6e73，在灰底上才到 4.5:1 */
-.obs-station { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: #6e6e73; white-space: normal; }
+/* 各格觀測時間不同時寫在數字下面；11px 的小字用 #6e6e73，在灰底上才到 4.5:1 */
+.obs-time { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: #6e6e73; white-space: normal; }
 
 .sun-card { padding-bottom: 8px; }
 .sun-times { display: flex; justify-content: space-between; }

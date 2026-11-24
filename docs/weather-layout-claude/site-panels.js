@@ -235,7 +235,7 @@ function dateLabel(iso) {
   return `${iso.slice(5, 7)}/${iso.slice(8, 10)}, ${WEEKDAYS_EN[weekday(iso)]}`;
 }
 
-// 「目前觀測」的五格，固定順序。每格帶自己的測站和觀測時間（HH:MM）；缺值顯示 --，不寫單位、測站和時間。
+// 「目前觀測」的五格，固定順序。每格帶自己的觀測時間（HH:MM），不寫測站；缺值顯示 --，不寫單位和時間。
 const OBS_ITEMS = [
   ['濕度', 'humidity', '%'], ['風速', 'windSpeed', 'm/s'], ['風向', 'windDirection', ''],
   ['氣壓', 'pressure', 'hPa'], ['今天累積雨量', 'rainToday', 'mm'],
@@ -246,15 +246,20 @@ function obsItems(obs) {
     const v = o?.value;
     const ok = key === 'windDirection' ? typeof v === 'string' && v !== '' : typeof v === 'number';
     return ok
-      ? { label, value: String(v), unit, station: o.station || '', time: o.time ? hhmm(o.time) : '' }
-      : { label, value: '--', unit: '', station: '', time: '' };
+      ? { label, value: String(v), unit, time: o.time ? hhmm(o.time) : '' }
+      : { label, value: '--', unit: '', time: '' };
   });
 }
 
-// 有值的格子都是同一個觀測時間時回傳那個時間，標在「目前觀測」標題旁；時間不一樣（不同測站）時回傳空字串，改成每格各寫自己的時間。
+// 有值的格子都是同一個觀測時間時回傳那個時間，標在「目前觀測」標題旁；時間不一樣時回傳空字串，改成每格各寫自己的時間。
 function obsTime(items) {
   const times = [...new Set(items.filter((x) => x.value !== '--').map((x) => x.time))];
   return times.length === 1 ? times[0] : '';
+}
+
+// 生活建議卡片的時段：「18:00–06:00」
+function timeRange(start, end) {
+  return `${hhmm(start)}–${hhmm(end)}`;
 }
 
 // 7 日預報的降雨機率：30% 以上才寫出來，低於 30% 留空；沒有資料寫 --，跟「機率很低」分得出來。
@@ -273,7 +278,7 @@ function dataTimeParts(data) {
     `上次更新 ${hhmm(data.generatedAt)}`,
   ];
 }
-return { SHOW_WEEK_POP_AT, tempBar, daylightFraction, weekSummary, dayRow, hhmm, hourLabel, coversWholeDay, dayExtremes, beaufortText, heroStations, weekdayChar, tempColor, tempGradient, dateLabel, obsItems, obsTime, weekPopText, dataTimeParts };
+return { SHOW_WEEK_POP_AT, tempBar, daylightFraction, weekSummary, dayRow, hhmm, hourLabel, coversWholeDay, dayExtremes, beaufortText, heroStations, weekdayChar, tempColor, tempGradient, dateLabel, obsItems, obsTime, timeRange, weekPopText, dataTimeParts };
 })();
 M['logic/advice.js'] = (function () {
 // 穿著、薄外套、帶傘、曬衣建議。缺值的項目不給。night：這個時段的開始時間是不是在晚上（18:00 到 06:00）。
@@ -551,7 +556,7 @@ return { scalePoints, smoothPath, stepPath, stepSegments, smoothSegments, bandSe
 M['render/sections.js'] = (function () {
 const { iconKey, isNight, iconUrl } = M['logic/icons.js'];
 const { adviceItems } = M['logic/advice.js'];
-const { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, obsItems, obsTime, weekPopText, dataTimeParts } = M['logic/format.js'];
+const { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, obsItems, obsTime, weekPopText, dataTimeParts, timeRange } = M['logic/format.js'];
 const ui = M['render/ui-icons.js'];
 
 function h(tag, className, text) {
@@ -686,7 +691,7 @@ function renderAdvice(el, data) {
   for (const p of periods) {
     const info = h('div', 'advice-info');
     info.append(
-      h('div', 'advice-label', p.label),
+      h('div', 'advice-label', `${p.label} ${timeRange(p.start, p.end)}`),
       h('div', 'advice-temp', `${num(p.minT)} - ${num(p.maxT)}°`),
       h('div', 'advice-pop', `降雨 ${pct(p.pop)}`),
     );
@@ -748,8 +753,8 @@ function renderWeekly(el, data, { onDetail }) {
   el.replaceChildren(sectionHead('7 日預報', onDetail), list);
 }
 
-// 目前觀測：五格實測值，每格數字下面寫它自己的測站（不同項目可能來自不同測站）；缺值的格子只寫 --。
-// 每格觀測時間相同時，時間寫在標題旁；不同時每格在測站後面寫自己的時間。
+// 目前觀測：五格實測值，不寫測站；缺值的格子只寫 --。
+// 每格觀測時間相同時，時間寫在標題旁；不同時每格數字下面寫自己的時間。
 function renderObsTiles(el, data) {
   const o = data.observation;
   if (!o) return renderUnavailable(el, '目前觀測');
@@ -758,7 +763,7 @@ function renderObsTiles(el, data) {
   for (const it of items) {
     const dd = h('dd', '', it.value);
     if (it.unit) dd.append(h('small', '', it.unit));
-    if (it.station) dd.append(h('span', 'obs-station', `${it.station}測站${!shared && it.time ? ` ${it.time}` : ''}`));
+    if (!shared && it.time) dd.append(h('span', 'obs-time', it.time));
     const box = h('div');
     box.append(h('dt', '', it.label), dd);
     dl.append(box);

@@ -1,6 +1,6 @@
 import { iconKey, isNight, iconUrl } from '../logic/icons.js';
 import { adviceItems } from '../logic/advice.js';
-import { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, obsItems, obsTime, weekPopText, dataTimeParts } from '../logic/format.js';
+import { tempBar, tempGradient, daylightFraction, dayRow, hourLabel, hhmm, weekdayChar, obsItems, obsTime, weekPopText, dataTimeParts, timeRange } from '../logic/format.js';
 import * as ui from './ui-icons.js';
 
 export function h(tag, className, text) {
@@ -135,7 +135,7 @@ export function renderAdvice(el, data) {
   for (const p of periods) {
     const info = h('div', 'advice-info');
     info.append(
-      h('div', 'advice-label', p.label),
+      h('div', 'advice-label', `${p.label} ${timeRange(p.start, p.end)}`),
       h('div', 'advice-temp', `${num(p.minT)} - ${num(p.maxT)}°`),
       h('div', 'advice-pop', `降雨 ${pct(p.pop)}`),
     );
@@ -197,8 +197,8 @@ export function renderWeekly(el, data, { onDetail }) {
   el.replaceChildren(sectionHead('7 日預報', onDetail), list);
 }
 
-// 目前觀測：五格實測值，每格數字下面寫它自己的測站（不同項目可能來自不同測站）；缺值的格子只寫 --。
-// 每格觀測時間相同時，時間寫在標題旁；不同時每格在測站後面寫自己的時間。
+// 目前觀測：五格實測值，不寫測站；缺值的格子只寫 --。
+// 每格觀測時間相同時，時間寫在標題旁；不同時每格數字下面寫自己的時間。
 export function renderObsTiles(el, data) {
   const o = data.observation;
   if (!o) return renderUnavailable(el, '目前觀測');
@@ -207,7 +207,7 @@ export function renderObsTiles(el, data) {
   for (const it of items) {
     const dd = h('dd', '', it.value);
     if (it.unit) dd.append(h('small', '', it.unit));
-    if (it.station) dd.append(h('span', 'obs-station', `${it.station}測站${!shared && it.time ? ` ${it.time}` : ''}`));
+    if (!shared && it.time) dd.append(h('span', 'obs-time', it.time));
     const box = h('div');
     box.append(h('dt', '', it.label), dd);
     dl.append(box);
