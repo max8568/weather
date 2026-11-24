@@ -169,9 +169,10 @@ test('tempGradient: a stop at every whole degree, so the browser never blends tw
   assert.deepEqual(at(tempGradient(17.5, 19)).map((p) => +(17.5 + p * 1.5 / 100).toFixed(2)), [17.5, 18, 19]);
 });
 test('dateLabel', () => {
-  assert.equal(dateLabel('2026-11-23T16:10:00+08:00'), '11 月 23 日・星期一');
-  assert.equal(dateLabel('2026-12-01T06:00:00+08:00'), '12 月 1 日・星期二');
-  assert.equal(dateLabel('2027-01-01T00:30:00+08:00'), '1 月 1 日・星期五');
+  assert.equal(dateLabel('2026-11-23T16:10:00+08:00'), '11/23, Monday');
+  assert.equal(dateLabel('2026-12-01T06:00:00+08:00'), '12/01, Tuesday');
+  assert.equal(dateLabel('2027-01-01T00:30:00+08:00'), '01/01, Friday');
+  assert.equal(dateLabel('2026-11-25T09:00:00+08:00'), '11/25, Wednesday');
 });
 test('obsItems: each item keeps its own station; missing values show -- with no station', () => {
   const o = (value, station) => ({ value, station, time: '2026-11-23T16:00:00+08:00' });

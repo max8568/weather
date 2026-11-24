@@ -201,9 +201,11 @@ function heroStations(obs) {
 }
 
 // 日期字串（或台北時間 ISO 的前 10 碼）是星期幾，用 UTC 算，不受瀏覽器時區影響。
+// 星期幾（0 是星期日）
+const weekday = (date) => new Date(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10)))).getUTCDay();
+
 function weekdayChar(date) {
-  const day = new Date(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10)))).getUTCDay();
-  return '日一二三四五六'[day];
+  return '日一二三四五六'[weekday(date)];
 }
 
 // 7 日預報溫度條的固定色階：18° 以下是藍色（越冷越深），18° 以上是紅色（越熱越深），18° 是淺黃色。
@@ -259,9 +261,10 @@ function tempGradient(min, max) {
   return `linear-gradient(90deg, ${pts.map((t, i) => `${tempColor(t)} ${i === pts.length - 1 ? 100 : +at(t).toFixed(2)}%`).join(', ')})`;
 }
 
-// 溫度卡片上的日期：「11 月 23 日・星期一」。iso 是台北時間字串，直接讀日期，不用瀏覽器的時鐘。
+// 溫度卡片上的日期，用英文：「11/23, Monday」。iso 是台北時間字串，直接讀日期，不用瀏覽器的時鐘。
+const WEEKDAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 function dateLabel(iso) {
-  return `${Number(iso.slice(5, 7))} 月 ${Number(iso.slice(8, 10))} 日・星期${weekdayChar(iso)}`;
+  return `${iso.slice(5, 7)}/${iso.slice(8, 10)}, ${WEEKDAYS_EN[weekday(iso)]}`;
 }
 
 // 「目前觀測」的五格，固定順序。每格帶自己的測站和觀測時間（HH:MM）；缺值顯示 --，不寫單位、測站和時間。
