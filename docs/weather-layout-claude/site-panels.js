@@ -55,11 +55,30 @@ const FILES = {
   thunderstorm: ['thunderstorms-rain'], snow: ['snow'], fog: ['fog'],
 };
 
-function iconUrl(key, { night = false, style = 'fill' } = {}) {
+function fileName(key, night) {
   const [dayFile, nightFile] = FILES[key] || FILES.cloudy;
-  return `../../site/icons/weather/${style}/${night && nightFile ? nightFile : dayFile}.svg`;
+  return night && nightFile ? nightFile : dayFile;
 }
-return { iconKey, isNight, iconUrl };
+
+function iconUrl(key, { night = false, style = 'fill' } = {}) {
+  return `../../site/icons/weather/${style}/${fileName(key, night)}.svg`;
+}
+
+// fill 圖示在 64×64 的畫布裡畫到的最低點（y 座標），算進線條粗細、線頭，和動畫移到最低時的位置。
+// 雲只畫到 45.5；太陽的光芒、雨滴、雪花、霧會畫到接近底部。
+const DRAWN_BOTTOM = {
+  cloudy: 45.5, overcast: 45.5, 'partly-cloudy-day': 45.5, 'partly-cloudy-night': 45.5,
+  'clear-night': 49, 'clear-day': 56, rain: 59, 'thunderstorms-rain': 59.1, fog: 59.5, snow: 60,
+};
+
+// 溫度卡片右邊的天氣說明要往上疊進圖示多少（圖示寬度的 %，負的），讓字停在圖示畫到的最低點下方 7/64。
+// 7/64 是組合版設計稿的距離：多雲時晴的雲畫到 45.5，字往上拉 18%。
+// 最多拉到圖片底部，不往下推：雨滴和雪花落到最低時已經淡出。
+function captionMargin(key, { night = false } = {}) {
+  const pull = (DRAWN_BOTTOM[fileName(key, night)] + 7 - 64) / 64;
+  return Math.min(0, Math.round(pull * 1000) / 10);
+}
+return { iconKey, isNight, iconUrl, captionMargin };
 })();
 M['logic/format.js'] = (function () {
 const SHOW_WEEK_POP_AT = 30;

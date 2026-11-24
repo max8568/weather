@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { iconKey, isNight, iconUrl } from '../../site/js/logic/icons.js';
+import { iconKey, isNight, iconUrl, captionMargin } from '../../site/js/logic/icons.js';
 
 const cases = { '晴':'clear', '晴時多雲':'partly-cloudy', '多雲時晴':'partly-cloudy', '多雲':'cloudy', '多雲時陰':'cloudy',
   '陰時多雲':'overcast', '陰':'overcast', '多雲短暫陣雨':'rain', '晴午後短暫雷陣雨':'thunderstorm', '晴有霧':'fog', '有雨或雪':'snow' };
@@ -21,4 +21,20 @@ test('iconUrl file names and style', () => {
   assert.equal(iconUrl('thunderstorm'), 'icons/weather/fill/thunderstorms-rain.svg');
   assert.equal(iconUrl('rain', {night:true}), 'icons/weather/fill/rain.svg');
   for (const k of ['cloudy', 'overcast', 'snow', 'fog']) assert.equal(iconUrl(k), `icons/weather/fill/${k}.svg`);
+});
+
+// 溫度卡片右邊，天氣說明往上拉到圖示下方的距離（圖示寬度的 %）
+test('weather caption under a cloud icon keeps the combo design pull-up of 18%', () => {
+  assert.equal(captionMargin('cloudy'), -18);
+  assert.equal(captionMargin('partly-cloudy', { night: true }), -18);
+  assert.equal(captionMargin('overcast'), -18);
+});
+
+test('weather caption is not pulled up into rain drops, snowflakes or fog lines', () => {
+  for (const key of ['rain', 'thunderstorm', 'snow', 'fog']) assert.equal(captionMargin(key), 0, key);
+});
+
+test('weather caption under the sun and moon is pulled up only as far as the rays and moon allow', () => {
+  assert.equal(captionMargin('clear'), -1.6);
+  assert.equal(captionMargin('clear', { night: true }), -12.5);
 });
